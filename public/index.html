@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Input Perjadin - KPU Tubaba</title>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        body {
+            font-family: sans-serif;
+            background: #f4f4f4;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: auto;
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        h2 {
+            color: #800000;
+            border-bottom: 2px solid #800000;
+            padding-bottom: 10px;
+        }
+
+        .form-group-title {
+            background: #eee;
+            padding: 10px;
+            font-weight: bold;
+            margin: 20px 0 10px 0;
+            border-left: 5px solid #800000;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        input,
+        select,
+        textarea {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        button {
+            background: #800000;
+            color: white;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            margin-top: 20px;
+            width: 100%;
+            font-size: 16px;
+        }
+
+        button:hover {
+            background: #a52a2a;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <h2>Form Perjalanan Dinas (SPPD)</h2>
+        <div style="margin-bottom: 20px;">
+            <a href="/daftar.html"
+                style="color: #800000; font-weight: bold; text-decoration: none;">📂
+                Lihat Daftar Perjadin >></a>
+        </div>
+        <form action="/api/save-perjadin" method="POST">
+
+            <div class="form-group-title">I. Administrasi Surat Tugas</div>
+            <div class="grid">
+                <div>
+                    <label>No. Surat Tugas</label>
+                    <input type="text" name="no_surat_tugas" placeholder="Contoh: 001/ST/KPU..."
+                        required>
+                </div>
+                <div>
+                    <label>Tanggal Surat Tugas</label>
+                    <input type="date" name="tgl_surat_tugas" required>
+                </div>
+            </div>
+
+            <div class="form-group-title">II. Data Pegawai</div>
+            <div id="pegawai-container">
+                <div class="grid pegawai-row"
+                    style="margin-bottom: 10px; border-bottom: 1px dashed #ccc; padding-bottom: 10px;">
+                    <div>
+                        <label>Nama Pegawai</label>
+                        <input type="text" name="nama_pegawai[]" required>
+                    </div>
+                    <div>
+                        <label>Golongan</label>
+                        <input type="text" name="golongan[]" placeholder="Contoh: IV/a">
+                    </div>
+                    <div>
+                        <label>Jabatan</label>
+                        <input type="text" name="jabatan[]" required>
+                    </div>
+                    <div style="display: flex; align-items: flex-end;">
+                        <button type="button" class="btn-remove" onclick="hapusBaris(this)"
+                            style="background:#e74c3c; width:auto; margin:0; padding: 8px 15px; display:none;">Hapus</button>
+                    </div>
+                </div>
+            </div>
+
+            <button type="button" onclick="tambahPegawai()"
+                style="background: #27ae60; width: auto; margin-top: 10px; font-size: 14px;">+
+                Tambah Pegawai
+                Lain</button>
+
+            <div class="form-group-title">III. Detail Perjalanan</div>
+            <label>Maksud Perjalanan Dinas</label>
+            <textarea name="maksud_dinas" rows="2" required></textarea>
+            <div class="grid">
+                <div>
+                    <label>Daerah Tujuan</label>
+                    <input type="text" name="tujuan" required>
+                </div>
+                <div>
+                    <label>Transportasi</label>
+                    <select name="jenis_transportasi">
+                        <option value="Kendaraan Dinas/Pribadi">Kendaraan Dinas/Pribadi (BBM)
+                        </option>
+                        <option value="Angkutan Umum">Angkutan Umum (Tiket)</option>
+                    </select>
+                </div>
+                <div>
+                    <label>Tanggal Berangkat</label>
+                    <input type="date" name="tgl_berangkat" id="tgl_berangkat" required>
+                </div>
+                <div>
+                    <label>Tanggal Pulang</label>
+                    <input type="date" name="tgl_pulang" id="tgl_pulang" required>
+                </div>
+            </div>
+
+            <div class="form-group-title">IV. Biaya & Akomodasi</div>
+            <div class="grid">
+                <div>
+                    <label>Uang Harian (Per Hari)</label>
+                    <input type="number" name="uang_harian" placeholder="Rp" required>
+                </div>
+                <div>
+                    <label>Biaya Transport (BBM/Tiket)</label>
+                    <input type="number" name="biaya_transportasi" placeholder="Rp" value="0">
+                </div>
+            </div>
+            <p style="margin-top:15px; font-weight:bold; color:#800000;">Data Hotel (Jika Menginap):
+            </p>
+            <div class="grid">
+                <div style="grid-column: span 2;">
+                    <label>Nama Hotel</label>
+                    <input type="text" name="nama_hotel" placeholder="Nama Hotel">
+                </div>
+                <div>
+                    <label>Tarif Per Malam</label>
+                    <input type="number" name="tarif_hotel" placeholder="Rp" value="0">
+                </div>
+                <div>
+                    <label>Check-in</label>
+                    <input type="date" name="tgl_checkin">
+                </div>
+                <div style="grid-column: start 2;">
+                    <label>Check-out</label>
+                    <input type="date" name="tgl_checkout">
+                </div>
+            </div>
+            <div
+                style="background: #fff8e1; padding: 15px; border-radius: 8px; margin-top: 20px; border: 1px solid #ffda44;">
+                <p style="margin: 0; font-size: 14px; color: #555;">Estimasi Total Biaya:</p>
+                <h3 id="preview-total" style="margin: 5px 0 0 0; color: #800000;">Rp 0</h3>
+            </div>
+            <button type="submit">Simpan Data Perjadin</button>
+        </form>
+    </div>
+    <script>
+        const inputs = document.querySelectorAll('input');
+
+        function hitungOtomatis() {
+            try {
+                // 1. Hitung jumlah orang
+                const jumlahPegawai = document.querySelectorAll('.pegawai-row').length;
+
+                // 2. Ambil elemen input
+                const tglBerangkatEl = document.querySelector('[name="tgl_berangkat"]');
+                const tglPulangEl = document.querySelector('[name="tgl_pulang"]');
+                const uangHarian = parseFloat(document.querySelector('[name="uang_harian"]').value) || 0;
+                const biayaTrans = parseFloat(document.querySelector('[name="biaya_transportasi"]').value) || 0;
+                const tarifHotel = parseFloat(document.querySelector('[name="tarif_hotel"]').value) || 0;
+                const tglCinEl = document.querySelector('[name="tgl_checkin"]');
+                const tglCoutEl = document.querySelector('[name="tgl_checkout"]');
+
+                // 3. Hitung Durasi Perjadin
+                let durasiPerjadin = 0;
+                if (tglBerangkatEl.value && tglPulangEl.value) {
+                    const t1 = new Date(tglBerangkatEl.value);
+                    const t2 = new Date(tglPulangEl.value);
+                    if (t2 >= t1) {
+                        durasiPerjadin = Math.ceil((t2 - t1) / (1000 * 60 * 60 * 24)) + 1;
+                    }
+                }
+
+                // 4. Hitung Malam Hotel
+                let malamInap = 0;
+                if (tglCinEl.value && tglCoutEl.value) {
+                    const c1 = new Date(tglCinEl.value);
+                    const c2 = new Date(tglCoutEl.value);
+                    if (c2 >= c1) {
+                        malamInap = Math.ceil((c2 - c1) / (1000 * 60 * 60 * 24));
+                    }
+                }
+
+                // 5. Kalkulasi Final
+                const totalUangHarian = (uangHarian * durasiPerjadin) * jumlahPegawai;
+                const totalHotel = tarifHotel * malamInap;
+                const grandTotal = totalUangHarian + biayaTrans + totalHotel;
+
+                // 6. Update Tampilan
+                const display = document.getElementById('preview-total');
+                if (display) {
+                    display.innerText = 'Rp ' + grandTotal.toLocaleString('id-ID');
+                }
+            } catch (err) {
+                console.error("Gagal menghitung:", err);
+            }
+        }
+
+        // Pantau semua input di form secara otomatis
+        document.addEventListener('input', (e) => {
+            hitungOtomatis();
+        });
+
+        // Jalankan fungsi setiap kali ada input yang berubah
+        // Gunakan ini untuk menggantikan inputs.forEach sebelumnya
+        document.addEventListener('input', function (e) {
+            // Jalankan hitungan setiap kali ada input, select, atau perubahan apapun di form
+            if (e.target.matches('input') || e.target.matches('select')) {
+                hitungOtomatis();
+            }
+        });
+
+        function tambahPegawai() {
+            const container = document.getElementById('pegawai-container');
+            const rows = document.getElementsByClassName('pegawai-row');
+            const newRow = rows[0].cloneNode(true);
+
+            // Kosongkan input di baris baru
+            newRow.querySelectorAll('input').forEach(input => input.value = '');
+
+            // Tampilkan tombol hapus
+            newRow.querySelector('.btn-remove').style.display = 'block';
+
+            container.appendChild(newRow);
+            hitungOtomatis(); // <--- PENTING: Hitung ulang saat tambah orang
+        }
+
+        function hapusBaris(btn) {
+            btn.closest('.pegawai-row').remove();
+            hitungOtomatis(); // <--- PENTING: Hitung ulang saat kurangi orang
+        }
+    </script>
+</body>
+
+</html>
