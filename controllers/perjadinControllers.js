@@ -14,7 +14,6 @@ exports.save = (req, res) => {
     const rawGol = d['golongan[]'] || d.golongan || [];
     const rawJab = d['jabatan[]'] || d.jabatan || [];
 
-    console.log('ISI BODY DARI FRONTEND:', d); // Cek terminal Node.js Mas!
     try {
         // 1. DATA PEGAWAI (Gunakan pembersihan array yang konsisten)
         const getArrayData = (val) => {
@@ -100,9 +99,6 @@ exports.save = (req, res) => {
             fixCheckout, // 17
             grandTotal, // 18
         ];
-
-        // Log untuk memastikan data siap kirim ke DB
-        console.log('Data Pegawai siap simpan:', namaPegawaiAll);
 
         // 8. EKSEKUSI SQL
         if (editId && editId !== '') {

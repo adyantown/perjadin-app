@@ -2,10 +2,10 @@ const mysql = require('mysql2');
 
 // KONEKSI MYSQL (XAMPP)
 const db = mysql.createConnection({
-    host: 'localhost',
-    user: 'root',
-    password: '',
-    database: 'db_kpu',
+    host: process.env.DB_HOST || 'localhost',
+    user: process.env.DB_USER || 'root',
+    password: process.env.DB_PASS || '',
+    database: process.env.DB_NAME || 'db_kpu',
 });
 
 db.connect((err) => {
