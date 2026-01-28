@@ -1,3 +1,4 @@
+require('dotenv').config();
 const mysql = require('mysql2');
 
 // KONEKSI MYSQL (XAMPP)
@@ -6,6 +7,7 @@ const db = mysql.createConnection({
     user: process.env.DB_USER || 'root',
     password: process.env.DB_PASS || '',
     database: process.env.DB_NAME || 'db_kpu',
+    port: process.env.DB_PORT || 3306,
 });
 
 db.connect((err) => {

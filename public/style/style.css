@@ -1,16 +1,10 @@
+/* --- 1. GLOBAL & RESET --- */
 body {
-    font-family: sans-serif;
+    font-family: 'Segoe UI', Arial, sans-serif;
     background: #f4f4f4;
     padding: 20px;
-}
-
-.container {
-    max-width: 900px;
-    margin: auto;
-    background: white;
-    padding: 30px;
-    border-radius: 12px;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    margin: 0;
+    color: #333;
 }
 
 h2 {
@@ -19,12 +13,32 @@ h2 {
     padding-bottom: 10px;
 }
 
+/* --- 2. LAYOUT CONTAINER --- */
+.container {
+    max-width: 950px;
+    margin: auto;
+    background: white;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+/* --- 3. FORM COMPONENTS --- */
 .form-group-title {
     background: #eee;
     padding: 10px;
     font-weight: bold;
-    margin: 20px 0 10px 0;
+    margin: 25px 0 15px 0;
     border-left: 5px solid #800000;
+    text-transform: uppercase;
+    font-size: 13px;
 }
 
 .grid {
@@ -36,7 +50,7 @@ h2 {
 label {
     display: block;
     margin-bottom: 5px;
-    font-size: 14px;
+    font-size: 13px;
     font-weight: bold;
 }
 
@@ -44,24 +58,158 @@ input,
 select,
 textarea {
     width: 100%;
-    padding: 8px;
+    padding: 10px;
     border: 1px solid #ccc;
     border-radius: 4px;
     box-sizing: border-box;
+    font-size: 14px;
 }
 
-button {
-    background: #800000;
-    color: white;
-    padding: 12px 25px;
-    border: none;
+input:focus {
+    border-color: #800000;
+    outline: none;
+    box-shadow: 0 0 5px rgba(128, 0, 0, 0.2);
+}
+
+/* --- 4. BUTTON SYSTEM --- */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 10px 18px;
+    text-decoration: none;
     border-radius: 6px;
+    color: white;
+    font-weight: bold;
+    font-size: 14px;
     cursor: pointer;
-    margin-top: 20px;
+    border: none;
+    transition: all 0.2s;
+}
+
+.btn:hover {
+    opacity: 0.9;
+    transform: translateY(-1px);
+}
+
+.btn-submit {
+    background: #800000;
     width: 100%;
+    margin-top: 20px;
     font-size: 16px;
 }
+.btn-back {
+    background: #555;
+}
+.btn-add {
+    background: #27ae60;
+    width: auto;
+    font-size: 13px;
+    margin-top: 10px;
+}
+.btn-excel {
+    background: #1d6f42;
+}
+.btn-print {
+    background: #2980b9;
+}
+.btn-edit {
+    background: #f39c12;
+    padding: 6px 10px;
+    font-size: 11px;
+}
+.btn-delete {
+    background: #e74c3c;
+    border: 1px solid #c0392b;
+    padding: 6px 12px;
+    font-size: 11px;
+}
 
-button:hover {
-    background: #a52a2a;
+/* --- 5. TABLE STYLE --- */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+    font-size: 12px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    margin-top: 10px;
+}
+
+th {
+    background: #800000;
+    color: white;
+    padding: 12px;
+    text-align: left;
+}
+
+td {
+    padding: 12px 10px;
+    border-bottom: 1px solid #ddd;
+    vertical-align: top;
+}
+
+tr:nth-child(even) {
+    background: #f9f9f9;
+}
+tr:hover {
+    background: #f1f1f1;
+}
+
+.total-row {
+    font-weight: bold;
+    color: #800000;
+    background: #fff8e1;
+}
+
+/* --- 6. PRINT RULES --- */
+.print-only {
+    display: none;
+}
+
+@media print {
+    .no-print,
+    .btn,
+    #searchInput {
+        display: none !important;
+    }
+    .print-only {
+        display: block !important;
+    }
+
+    /* TAMBAHKAN INI: Hilangkan garis merah h2 saat print */
+    h2 {
+        border-bottom: none !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
+    body {
+        background: white;
+        padding: 0;
+    }
+    .container {
+        box-shadow: none;
+        width: 100%;
+        max-width: 100%;
+        padding: 0;
+    }
+
+    /* Garis hitam Kop Surat tetap aman karena Mas pakai inline-style di HTML */
+    table {
+        width: 100%;
+        border: 1px solid #000 !important;
+        font-size: 10px;
+        margin-top: 10px;
+    }
+    th,
+    td {
+        border: 1px solid #000 !important;
+        color: black;
+        padding: 5px;
+    }
+    th {
+        background: #eee !important;
+        color: black;
+    }
 }
