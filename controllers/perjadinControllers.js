@@ -1,27 +1,5 @@
-const express = require('express');
-const mysql = require('mysql2');
-const path = require('path');
-const app = express();
-
-// KONEKSI MYSQL (XAMPP)
-const db = mysql.createConnection({
-    host: 'localhost',
-    user: 'root',
-    password: '',
-    database: 'db_kpu',
-});
-
-db.connect((err) => {
-    if (err) {
-        console.error('Gagal koneksi MySQL: ' + err.message);
-        return;
-    }
-    console.log('Mantap! Terhubung ke MySQL XAMPP.');
-});
-
-app.use(express.urlencoded({ extended: true }));
-app.use(express.json());
-app.use(express.static(path.join(__dirname, 'public')));
+// --- ENDPOINT SIMPAN & UPDATE ---
+const db = require('../config/db');
 
 const cleanMoney = (val) => {
     if (!val) return 0;
@@ -29,8 +7,7 @@ const cleanMoney = (val) => {
     return parseFloat(val.toString().replace(/\./g, '')) || 0;
 };
 
-// --- ENDPOINT SIMPAN & UPDATE ---
-app.post('/api/save-perjadin', (req, res) => {
+exports.save = (req, res) => {
     const d = req.body;
     const editId = d.id_edit;
     const rawNama = d['nama_pegawai[]'] || d.nama_pegawai || [];
@@ -165,28 +142,28 @@ app.post('/api/save-perjadin', (req, res) => {
         console.error('SERVER CRASH ERROR:', error);
         res.status(500).json({ success: false, message: error.message });
     }
-});
+};
 
-app.get('/api/get-perjadin', (req, res) => {
+exports.getAll = (req, res) => {
     db.query('SELECT * FROM perjadin ORDER BY id DESC', (err, rows) => {
         if (err) return res.status(500).json({ error: err.message });
         res.json(rows);
     });
-});
+};
 
-app.get('/api/get-perjadin/:id', (req, res) => {
+exports.getById = (req, res) => {
     db.query('SELECT * FROM perjadin WHERE id = ?', [req.params.id], (err, rows) => {
         if (err) return res.status(500).json({ error: err.message });
         res.json(rows[0]);
     });
-});
+};
 
-app.get('/api/delete/:id', (req, res) => {
+exports.delete = (req, res) => {
     db.query('DELETE FROM perjadin WHERE id = ?', [req.params.id], (err) => {
         if (err) return res.status(500).json({ error: err.message });
         // GANTI res.sendStatus(200) JADI INI:
         res.json({ success: true, message: 'Data Berhasil Dihapus!' });
     });
-});
+};
 
-app.listen(3000, () => console.log('Aplikasi Perjadin (MySQL) on port 3000'));
+// --- AKHIR ENDPOINT SIMPAN & UPDATE ---
