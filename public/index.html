@@ -5,76 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Input Perjadin - KPU Tubaba</title>
-    <link rel="stylesheet" href="css/style.css">
-    <style>
-        body {
-            font-family: sans-serif;
-            background: #f4f4f4;
-            padding: 20px;
-        }
-
-        .container {
-            max-width: 900px;
-            margin: auto;
-            background: white;
-            padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-        }
-
-        h2 {
-            color: #800000;
-            border-bottom: 2px solid #800000;
-            padding-bottom: 10px;
-        }
-
-        .form-group-title {
-            background: #eee;
-            padding: 10px;
-            font-weight: bold;
-            margin: 20px 0 10px 0;
-            border-left: 5px solid #800000;
-        }
-
-        .grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-        }
-
-        label {
-            display: block;
-            margin-bottom: 5px;
-            font-size: 14px;
-            font-weight: bold;
-        }
-
-        input,
-        select,
-        textarea {
-            width: 100%;
-            padding: 8px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            box-sizing: border-box;
-        }
-
-        button {
-            background: #800000;
-            color: white;
-            padding: 12px 25px;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            margin-top: 20px;
-            width: 100%;
-            font-size: 16px;
-        }
-
-        button:hover {
-            background: #a52a2a;
-        }
-    </style>
+    <link rel="stylesheet" href="style/style.css">
 </head>
 
 <body>
@@ -86,8 +17,8 @@
                 style="color: #800000; font-weight: bold; text-decoration: none;">📂
                 Lihat Daftar Perjadin >></a>
         </div>
-        <form action="/api/save-perjadin" method="POST">
-
+        <form id="perjadinForm">
+            <input type="hidden" name="id_edit" id="id_edit">
             <div class="form-group-title">I. Administrasi Surat Tugas</div>
             <div class="grid">
                 <div>
@@ -195,91 +126,182 @@
         </form>
     </div>
     <script>
-        const inputs = document.querySelectorAll('input');
-
-        function hitungOtomatis() {
-            try {
-                // 1. Hitung jumlah orang
-                const jumlahPegawai = document.querySelectorAll('.pegawai-row').length;
-
-                // 2. Ambil elemen input
-                const tglBerangkatEl = document.querySelector('[name="tgl_berangkat"]');
-                const tglPulangEl = document.querySelector('[name="tgl_pulang"]');
-                const uangHarian = parseFloat(document.querySelector('[name="uang_harian"]').value) || 0;
-                const biayaTrans = parseFloat(document.querySelector('[name="biaya_transportasi"]').value) || 0;
-                const tarifHotel = parseFloat(document.querySelector('[name="tarif_hotel"]').value) || 0;
-                const tglCinEl = document.querySelector('[name="tgl_checkin"]');
-                const tglCoutEl = document.querySelector('[name="tgl_checkout"]');
-
-                // 3. Hitung Durasi Perjadin
-                let durasiPerjadin = 0;
-                if (tglBerangkatEl.value && tglPulangEl.value) {
-                    const t1 = new Date(tglBerangkatEl.value);
-                    const t2 = new Date(tglPulangEl.value);
-                    if (t2 >= t1) {
-                        durasiPerjadin = Math.ceil((t2 - t1) / (1000 * 60 * 60 * 24)) + 1;
-                    }
-                }
-
-                // 4. Hitung Malam Hotel
-                let malamInap = 0;
-                if (tglCinEl.value && tglCoutEl.value) {
-                    const c1 = new Date(tglCinEl.value);
-                    const c2 = new Date(tglCoutEl.value);
-                    if (c2 >= c1) {
-                        malamInap = Math.ceil((c2 - c1) / (1000 * 60 * 60 * 24));
-                    }
-                }
-
-                // 5. Kalkulasi Final
-                const totalUangHarian = (uangHarian * durasiPerjadin) * jumlahPegawai;
-                const totalHotel = tarifHotel * malamInap;
-                const grandTotal = totalUangHarian + biayaTrans + totalHotel;
-
-                // 6. Update Tampilan
-                const display = document.getElementById('preview-total');
-                if (display) {
-                    display.innerText = 'Rp ' + grandTotal.toLocaleString('id-ID');
-                }
-            } catch (err) {
-                console.error("Gagal menghitung:", err);
-            }
+        // --- 1. FUNGSI HELPER & FORMATTING ---
+        function bersihAngka(str) {
+            if (!str) return 0;
+            return parseFloat(str.replace(/\./g, '').replace(/[^0-9.-]+/g, "")) || 0;
         }
 
-        // Pantau semua input di form secara otomatis
-        document.addEventListener('input', (e) => {
-            hitungOtomatis();
-        });
+        function formatRupiah(angka) {
+            let number_string = angka.replace(/[^,\d]/g, '').toString(),
+                split = number_string.split(','),
+                sisa = split[0].length % 3,
+                rupiah = split[0].substr(0, sisa),
+                ribuan = split[0].substr(sisa).match(/\d{3}/gi);
 
-        // Jalankan fungsi setiap kali ada input yang berubah
-        // Gunakan ini untuk menggantikan inputs.forEach sebelumnya
-        document.addEventListener('input', function (e) {
-            // Jalankan hitungan setiap kali ada input, select, atau perubahan apapun di form
-            if (e.target.matches('input') || e.target.matches('select')) {
-                hitungOtomatis();
+            if (ribuan) {
+                let separator = sisa ? '.' : '';
+                rupiah += separator + ribuan.join('.');
             }
-        });
+            return rupiah;
+        }
 
-        function tambahPegawai() {
+        // --- 2. LOGIKA HITUNG OTOMATIS ---
+        function hitungOtomatis() {
+            try {
+                const rows = document.querySelectorAll('.pegawai-row');
+                const jumlahPegawai = rows.length;
+
+                const uangHarian = bersihAngka(document.querySelector('[name="uang_harian"]').value);
+                const biayaTrans = bersihAngka(document.querySelector('[name="biaya_transportasi"]').value);
+                const tarifHotel = bersihAngka(document.querySelector('[name="tarif_hotel"]').value);
+
+                const tglB = document.querySelector('[name="tgl_berangkat"]').value;
+                const tglP = document.querySelector('[name="tgl_pulang"]').value;
+                const tglIn = document.querySelector('[name="tgl_checkin"]').value;
+                const tglOut = document.querySelector('[name="tgl_checkout"]').value;
+
+                let durasiPerjadin = 0;
+                if (tglB && tglP) {
+                    const d1 = new Date(tglB);
+                    const d2 = new Date(tglP);
+                    if (d2 >= d1) durasiPerjadin = Math.ceil((d2 - d1) / (1000 * 60 * 60 * 24)) + 1;
+                }
+
+                let malamInap = 0;
+                if (tglIn && tglOut) {
+                    const c1 = new Date(tglIn);
+                    const c2 = new Date(tglOut);
+                    if (c2 >= c1) malamInap = Math.ceil((c2 - c1) / (1000 * 60 * 60 * 24));
+                }
+
+                const totalHarian = (uangHarian * durasiPerjadin) * jumlahPegawai;
+                const totalHotel = tarifHotel * malamInap;
+                const grandTotal = totalHarian + biayaTrans + totalHotel;
+
+                document.getElementById('preview-total').innerText = 'Rp ' + grandTotal.toLocaleString('id-ID');
+            } catch (err) { console.error("Hitung error:", err); }
+        }
+
+        // --- 3. MANIPULASI BARIS PEGAWAI ---
+        function tambahPegawai(nama = '', gol = '', jab = '') {
             const container = document.getElementById('pegawai-container');
-            const rows = document.getElementsByClassName('pegawai-row');
-            const newRow = rows[0].cloneNode(true);
-
-            // Kosongkan input di baris baru
-            newRow.querySelectorAll('input').forEach(input => input.value = '');
-
-            // Tampilkan tombol hapus
-            newRow.querySelector('.btn-remove').style.display = 'block';
-
-            container.appendChild(newRow);
-            hitungOtomatis(); // <--- PENTING: Hitung ulang saat tambah orang
+            const htmlBaris = `
+                <div class="grid pegawai-row" style="margin-bottom: 10px; border-bottom: 1px dashed #ccc; padding-bottom: 10px;">
+                    <div>
+                        <label>Nama Pegawai</label>
+                        <input type="text" name="nama_pegawai[]" value="${nama}" required>
+                    </div>
+                    <div>
+                        <label>Golongan</label>
+                        <input type="text" name="golongan[]" value="${gol}" placeholder="Contoh: IV/a">
+                    </div>
+                    <div>
+                        <label>Jabatan</label>
+                        <input type="text" name="jabatan[]" value="${jab}" required>
+                    </div>
+                    <div style="display: flex; align-items: flex-end;">
+                        <button type="button" class="btn-remove" onclick="hapusBaris(this)" 
+                            style="background:#e74c3c; width:auto; margin:0; padding: 8px 15px;">Hapus</button>
+                    </div>
+                </div>`;
+            container.insertAdjacentHTML('beforeend', htmlBaris);
+            updateTombolHapus();
+            hitungOtomatis();
         }
 
         function hapusBaris(btn) {
             btn.closest('.pegawai-row').remove();
-            hitungOtomatis(); // <--- PENTING: Hitung ulang saat kurangi orang
+            updateTombolHapus();
+            hitungOtomatis();
         }
+
+        function updateTombolHapus() {
+            const rows = document.querySelectorAll('.pegawai-row');
+            rows.forEach(row => {
+                row.querySelector('.btn-remove').style.display = rows.length === 1 ? 'none' : 'block';
+            });
+        }
+
+        // --- 4. MODE EDIT ---
+        const urlParams = new URLSearchParams(window.location.search);
+        const editId = urlParams.get('edit');
+
+        const formatDate = (d) => (d && d !== "null" && !d.startsWith("0000") && !d.startsWith("1899")) ? d.split('T')[0] : '';
+
+        if (editId) {
+            document.querySelector('h2').innerText = "Edit Data Perjalanan Dinas";
+            fetch(`/api/get-perjadin/${editId}`)
+                .then(res => res.json())
+                .then(data => {
+                    document.getElementById('id_edit').value = editId;
+                    document.getElementsByName('no_surat_tugas')[0].value = data.no_surat_tugas;
+                    document.getElementsByName('tgl_surat_tugas')[0].value = formatDate(data.tgl_surat_tugas);
+                    document.getElementsByName('maksud_dinas')[0].value = data.maksud_dinas;
+                    document.getElementsByName('tujuan')[0].value = data.tujuan;
+                    document.getElementsByName('jenis_transportasi')[0].value = data.jenis_transportasi;
+                    document.getElementsByName('tgl_berangkat')[0].value = formatDate(data.tgl_berangkat);
+                    document.getElementsByName('tgl_pulang')[0].value = formatDate(data.tgl_pulang);
+
+                    // Format angka saat load
+                    document.getElementsByName('uang_harian')[0].value = formatRupiah((data.uang_harian || 0).toString());
+                    document.getElementsByName('biaya_transportasi')[0].value = formatRupiah((data.biaya_transportasi || 0).toString());
+                    document.getElementsByName('tarif_hotel')[0].value = formatRupiah((data.tarif_hotel || 0).toString());
+
+                    document.getElementsByName('nama_hotel')[0].value = data.nama_hotel || '';
+                    document.getElementsByName('tgl_checkin')[0].value = formatDate(data.tgl_checkin);
+                    document.getElementsByName('tgl_checkout')[0].value = formatDate(data.tgl_checkout);
+
+                    const container = document.getElementById('pegawai-container');
+                    container.innerHTML = '';
+                    const namaArr = data.nama_pegawai ? data.nama_pegawai.split(', ') : [''];
+                    const golArr = data.golongan ? data.golongan.split(', ') : [''];
+                    const jabArr = data.jabatan ? data.jabatan.split(', ') : [''];
+
+                    namaArr.forEach((n, i) => tambahPegawai(n, golArr[i] || '', jabArr[i] || ''));
+                    setTimeout(hitungOtomatis, 300);
+                });
+        }
+
+        // --- 5. EVENT LISTENERS ---
+        document.addEventListener('input', (e) => {
+            if (e.target.name === 'uang_harian' || e.target.name === 'biaya_transportasi' || e.target.name === 'tarif_hotel') {
+                e.target.value = formatRupiah(e.target.value);
+            }
+            hitungOtomatis();
+        });
+
+        // --- 6. PROSES SIMPAN (SOLUSI NAMA HILANG) ---
+        document.getElementById('perjadinForm').onsubmit = async function (e) {
+            e.preventDefault();
+
+            // Gunakan URLSearchParams secara manual agar array [] terkirim dengan benar
+            const formData = new FormData(this);
+            const searchParams = new URLSearchParams();
+
+            for (const pair of formData.entries()) {
+                searchParams.append(pair[0], pair[1]);
+            }
+
+            try {
+                const response = await fetch('/api/save-perjadin', {
+                    method: 'POST',
+                    body: searchParams // Mengirim data yang sudah mendukung multiple values
+                });
+                const result = await response.json();
+                if (result.success) {
+                    alert(result.message);
+                    window.location.href = '/daftar.html';
+                } else {
+                    alert("Gagal: " + result.message);
+                }
+            } catch (err) {
+                console.error(err);
+                alert("Koneksi ke server terputus.");
+            }
+        };
     </script>
+
 </body>
 
 </html>

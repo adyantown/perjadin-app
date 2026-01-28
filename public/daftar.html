@@ -22,25 +22,51 @@
             color: #800000;
         }
 
+        /* Container & Gaya Tombol Seragam */
+        .button-group {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
         .btn {
-            padding: 10px 15px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 0 15px;
             text-decoration: none;
             border-radius: 5px;
             color: white;
             font-weight: bold;
-            font-size: 14px;
+            font-size: 13px;
+            cursor: pointer;
+            height: 40px;
+            /* Tinggi seragam */
+            min-width: 130px;
+            /* Lebar minimal seragam */
+            border: none;
+            transition: 0.2s;
+        }
+
+        .btn:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
         }
 
         .btn-back {
             background: #555;
         }
 
-        .btn-print {
-            background: #27ae60;
-            border: none;
-            cursor: pointer;
+        .btn-excel {
+            background: #1d6f42;
         }
 
+        .btn-print {
+            background: #27ae60;
+        }
+
+        /* Tabel Style */
         table {
             width: 100%;
             border-collapse: collapse;
@@ -61,8 +87,18 @@
             border-bottom: 1px solid #ddd;
         }
 
-        tr:hover {
-            background: #f9f9f9;
+        .btn-delete {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            background-color: #ff4d4d;
+            color: white;
+            padding: 6px 12px;
+            border-radius: 4px;
+            border: 1px solid #cc0000;
+            font-size: 11px;
+            font-weight: bold;
+            cursor: pointer;
         }
 
         .total-row {
@@ -70,17 +106,41 @@
             background: #eee;
         }
 
+        /* --- PENGATURAN CETAK (PRINT) --- */
+        .print-only {
+            display: none;
+        }
+
         @media print {
             .no-print {
-                display: none;
+                display: none !important;
+            }
+
+            .print-only {
+                display: block !important;
             }
 
             body {
                 margin: 0;
+                background: white;
             }
 
             table {
+                width: 100%;
+                border: 1px solid #000 !important;
                 font-size: 10px;
+            }
+
+            th,
+            td {
+                border: 1px solid #000 !important;
+                padding: 5px;
+                color: black;
+            }
+
+            th {
+                background: #eee !important;
+                color: black;
             }
         }
     </style>
@@ -88,12 +148,39 @@
 
 <body>
 
+    <div id="kop-surat" class="print-only">
+        <div
+            style="display: flex; align-items: center; border-bottom: 3px double #000; padding-bottom: 10px; margin-bottom: 20px;">
+            <img src="img/kpu_logo.png" alt="Logo KPU"
+                style="width: 70px; height: auto; margin-right: 20px;">
+            <div style="text-align: center; flex-grow: 1;">
+                <h1 style="margin: 0; font-size: 16px; text-transform: uppercase;">Komisi Pemilihan
+                    Umum</h1>
+                <h2 style="margin: 0; font-size: 18px; text-transform: uppercase;">Kabupaten Tulang
+                    Bawang Barat</h2>
+                <p style="margin: 5px 0 0 0; font-size: 11px;">Jalan KH Ahmad Dahlan, Candra Mukti,
+                    Kec. Tulang Bawang Tengah, Kab. Tulang Bawang Barat</p>
+            </div>
+        </div>
+        <h3 style="text-align: center; text-decoration: underline; margin-bottom: 20px;">LAPORAN
+            PERJALANAN DINAS</h3>
+    </div>
+
     <div class="header no-print">
         <h2>Data Perjalanan Dinas KPU Tubaba</h2>
-        <div>
-            <a href="/" class="btn btn-back"> + Input Baru</a>
-            <button onclick="window.print()" class="btn btn-print">Cetak Laporan</button>
+        <div class="button-group">
+            <a href="/" class="btn btn-back"><span>➕</span> Input Baru</a>
+            <button onclick="exportToExcel()" class="btn btn-excel"><span>📄</span> Ekspor
+                Excel</button>
+            <button onclick="window.print()" class="btn btn-print"><span>🖨️</span> Cetak
+                Laporan</button>
         </div>
+    </div>
+
+    <div class="no-print" style="margin-bottom: 15px;">
+        <input type="text" id="searchInput"
+            placeholder="🔍 Cari berdasarkan Nama Pegawai, No. Surat, atau Tujuan..."
+            style="width: 100%; padding: 10px; border-radius: 5px; border: 1px solid #ccc; font-size: 14px; box-sizing: border-box;">
     </div>
 
     <table>
@@ -108,36 +195,111 @@
                 <th>Transport</th>
                 <th>Hotel</th>
                 <th>Total Biaya</th>
+                <th class="no-print">Aksi</th>
             </tr>
         </thead>
-        <tbody id="table-body">
-        </tbody>
+        <tbody id="table-body"></tbody>
     </table>
 
     <script>
+        // Fungsi pembantu format tanggal
+        function formatTanggalIndo(tgl) {
+            if (!tgl || tgl === "") return "-";
+            const d = new Date(tgl);
+            const hari = String(d.getDate()).padStart(2, '0');
+            const bulan = String(d.getMonth() + 1).padStart(2, '0');
+            const tahun = d.getFullYear();
+            return `${hari}/${bulan}/${tahun}`;
+        }
+
+        // Ambil Data dari API
         fetch('/api/get-perjadin')
             .then(res => res.json())
             .then(data => {
                 const body = document.getElementById('table-body');
+                body.innerHTML = '';
                 data.forEach(item => {
+                    // 1. Tentukan pengali (jumlah pegawai)
+                    const jml = item.jumlah_sppd || 1;
+                    const pengali = jml > 1 ? `<br><small style="color: #d35400; font-weight:bold;">(x${jml} Org)</small>` : '';
+
                     const row = `
-                    <tr>
-                        <td>${item.no_surat_tugas}<br><small>${item.tgl_surat_tugas}</small></td>
-                        <td><b>${item.nama_pegawai}</b><br>${item.jabatan}</td>
-                        <td>${item.tujuan}</td>
-                        <td>${item.maksud_dinas}</td>
-                        <td>${item.tgl_berangkat} s/d ${item.tgl_pulang}</td>
-                        <td>Rp ${item.uang_harian.toLocaleString('id-ID')}</td>
-                        <td>Rp ${item.biaya_transportasi.toLocaleString('id-ID')}</td>
-                        <td>${item.nama_hotel || '-'}<br>Rp ${item.tarif_hotel.toLocaleString('id-ID')}</td>
-                        <td class="total-row">Rp ${item.total_biaya.toLocaleString('id-ID')}</td>
-                    </tr>
-                `;
+        <tr>
+            <td>${item.no_surat_tugas}<br><small>${formatTanggalIndo(item.tgl_surat_tugas)}</small></td>
+            <td><b>${item.nama_pegawai || 'Tidak ada nama'}</b><br><small>${item.jabatan || ''}</small></td>
+            <td>${item.tujuan}</td>
+            <td>${item.maksud_dinas}</td>
+            <td>${formatTanggalIndo(item.tgl_berangkat)} s/d ${formatTanggalIndo(item.tgl_pulang)}</td>
+            
+            <td>Rp ${(item.uang_harian || 0).toLocaleString('id-ID')}${pengali}</td>
+            
+            <td>Rp ${(item.biaya_transportasi || 0).toLocaleString('id-ID')}</td>
+            
+            <td>${item.nama_hotel || '-'}<br>Rp ${(item.tarif_hotel || 0).toLocaleString('id-ID')}${pengali}</td>
+            
+            <td class="total-row">Rp ${(item.total_biaya || 0).toLocaleString('id-ID')}</td>
+            <td class="no-print">
+                <div style="display: flex; gap: 5px;">
+                    <a href="/index.html?edit=${item.id}" class="btn-edit" style="text-decoration:none; background:#f39c12; color:white; padding:6px 10px; border-radius:4px; font-size:11px; font-weight:bold;">
+                        <span>✏️</span> Edit
+                    </a>
+                    <button onclick="hapusData(${item.id})" class="btn-delete">
+                        <span>🗑️</span> Hapus
+                    </button>
+                </div>
+            </td>
+        </tr>
+    `;
                     body.innerHTML += row;
                 });
             });
-    </script>
 
+        // Live Search
+        document.getElementById('searchInput').addEventListener('keyup', function () {
+            const filter = this.value.toLowerCase();
+            const rows = document.querySelectorAll('#table-body tr');
+            rows.forEach(row => {
+                const text = row.innerText.toLowerCase();
+                row.style.display = text.includes(filter) ? '' : 'none';
+            });
+        });
+
+        // Fungsi Hapus Data (Sesuai app.js)
+        function hapusData(id) {
+            if (confirm('Yakin ingin menghapus data ini?')) {
+                fetch(`/api/delete/${id}`)
+                    .then(res => {
+                        if (res.ok) {
+                            alert("Data berhasil dihapus!");
+                            location.reload();
+                        } else {
+                            alert("Gagal menghapus data.");
+                        }
+                    });
+            }
+        }
+
+        // Fungsi Export Excel
+        function exportToExcel() {
+            const table = document.querySelector("table");
+            const tableClone = table.cloneNode(true);
+
+            // Bersihkan kolom aksi
+            const noPrintElements = tableClone.querySelectorAll('.no-print');
+            noPrintElements.forEach(el => el.remove());
+
+            const tableHTML = tableClone.outerHTML.replace(/ /g, '%20');
+            const filename = 'Laporan_Perjadin_KPU_Tubaba.xls';
+            const downloadLink = document.createElement("a");
+
+            document.body.appendChild(downloadLink);
+            downloadLink.href = 'data:application/vnd.ms-excel,' + tableHTML;
+            downloadLink.download = filename;
+            downloadLink.click();
+            document.body.removeChild(downloadLink);
+        }
+
+    </script>
 </body>
 
 </html>
