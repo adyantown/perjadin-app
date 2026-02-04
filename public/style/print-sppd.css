@@ -1,0 +1,185 @@
+/* ============================================================
+   A. TAMPILAN LAYAR (Monitor/Input Form)
+   ============================================================ */
+:root {
+    --kpu-red: #bb2d3b;
+    --kpu-dark: #a52835;
+}
+
+/* UI Components */
+.bg-kpu {
+    background-color: var(--kpu-red) !important;
+}
+
+.btn-kpu {
+    background-color: var(--kpu-red);
+    color: white;
+    border: none;
+}
+
+.btn-kpu:hover {
+    background-color: var(--kpu-dark);
+    color: white;
+}
+
+/* Form Styling */
+.form-label {
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: #444;
+}
+
+.section-title {
+    border-left: 4px solid var(--kpu-red);
+    padding-left: 10px;
+    margin: 20px 0 5px 0;
+    font-weight: bold;
+    color: var(--kpu-red);
+    text-transform: uppercase;
+    font-size: 1rem;
+}
+
+/* Layout Helper */
+#printArea {
+    display: none;
+}
+
+/* ============================================================
+   B. TAMPILAN CETAK (Standardisasi Dokumen Negara)
+   ============================================================ */
+@media print {
+    /* Reset Global */
+    .no-print,
+    .container,
+    .navbar,
+    .card,
+    form,
+    .btn {
+        display: none !important;
+    }
+
+    html,
+    body {
+        width: 100%;
+        margin: 0 !important;
+        padding: 0 !important;
+        background: white !important;
+        font-family: Cambria, Georgia, serif;
+    }
+
+    #printArea {
+        display: block !important;
+    }
+
+    /* PENGATURAN HALAMAN (PENTING) */
+    .halaman {
+        width: 100%;
+        height: 100vh; /* Setinggi kertas */
+        position: relative;
+        page-break-after: always; /* Paksa ganti halaman setelah div ini */
+        overflow: hidden;
+    }
+
+    .halaman:last-child {
+        page-break-after: auto; /* Halaman terakhir tidak perlu break */
+    }
+
+    @page {
+        size: auto;
+        margin: 1cm 1.5cm;
+    } /* Margin disesuaikan dikit biar muat */
+
+    /* --- GAYA HALAMAN DEPAN (YANG LAMA) --- */
+    .header-cetak-wrapper img {
+        display: block;
+        margin: 0;
+    }
+    .header-cetak-wrapper .col-7 .d-flex {
+        flex-direction: column !important;
+        align-items: center !important;
+        text-align: center !important;
+    }
+    .table-sppd-main {
+        border-collapse: collapse;
+        width: 100%;
+        margin-top: 10px;
+    }
+    .table-sppd-main td {
+        border: 1px solid black !important;
+        padding: 4px;
+        vertical-align: top;
+    }
+    hr {
+        border-top: 2px solid black !important;
+        opacity: 1 !important;
+    }
+
+    /* --- GAYA HALAMAN BELAKANG (BARU) --- */
+    .table-belakang {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 10pt; /* Font sedikit lebih kecil biar muat */
+        margin-top: 20px;
+    }
+
+    .table-belakang td {
+        border: 1px solid black !important;
+        padding: 5px;
+        vertical-align: top;
+        width: 50%; /* Bagi 2 kolom rata */
+    }
+
+    .box-ttd {
+        height: 100px; /* Ruang untuk tanda tangan */
+    }
+
+    .text-justify {
+        text-align: justify;
+    }
+
+    .justify-content-between {
+        justify-content: space-between !important;
+        display: flex !important;
+        width: 100%;
+    }
+
+    .border-end-black {
+        border-right: 1px solid black !important;
+    }
+
+    /* Memastikan tabel di dalam tabel tidak double border */
+    .p-0 {
+        padding: 0 !important;
+        border: none !important;
+    }
+
+    .align-middle {
+        vertical-align: middle !important;
+    }
+
+    /* ========================================================
+       FIX TABEL PENGIKUT (NESTED) BIAR GAK DOUBLE BORDER
+       ======================================================== */
+
+    /* 1. Reset: Matikan border default warisan untuk tabel dalam */
+    .table-sppd-main .nested-table td {
+        border: none !important; /* Hapus semua garis dulu */
+        padding: 4px 6px !important; /* Atur jarak teks biar lega */
+    }
+
+    /* 2. Helper: Garis Pembatas Vertikal (Kanan) */
+    .garis-kanan {
+        border-right: 1px solid black !important;
+    }
+
+    /* 3. Helper: Garis Pembatas Horizontal (Bawah) */
+    .garis-bawah {
+        border-bottom: 1px solid black !important;
+    }
+
+    /* 4. Pastikan Container Luar (No 8) Tetap Punya Kotak */
+    .td-container-8 {
+        padding: 0 !important;
+        border: 1px solid black !important; /* Kotak luar tetap ada */
+    }
+}

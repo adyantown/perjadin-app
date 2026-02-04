@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/png" href="img/kpu_logo.png">
+    <title>Input Perjadin - KPU Tubaba</title>
+    <link rel="stylesheet" href="style/perjadin-style.css">
+</head>
+
+<body>
+
+    <div class="container">
+        <h2>Form Perjalanan Dinas (SPPD)</h2>
+        <div style="margin-bottom: 20px;">
+            <a href="/daftar.html"
+                style="color: #800000; font-weight: bold; text-decoration: none;">📂
+                Lihat Daftar Perjadin >></a>
+        </div>
+        <form id="perjadinForm">
+            <input type="hidden" name="id_edit" id="id_edit">
+            <div class="form-group-title">I. Administrasi Surat Tugas</div>
+            <div class="grid">
+                <div>
+                    <label>No. Surat Tugas</label>
+                    <input type="text" name="no_surat_tugas" placeholder="Contoh: 001/ST/KPU..."
+                        required>
+                </div>
+                <div>
+                    <label>Tanggal Surat Tugas</label>
+                    <input type="date" name="tgl_surat_tugas" required>
+                </div>
+            </div>
+
+            <div class="form-group-title">II. Data Pegawai Terlibat</div>
+
+            <div class="mb-3"
+                style="background: #f9f9f9; padding: 15px; border-radius: 8px; border: 1px solid #ddd; margin-bottom: 20px;">
+                <label class="form-label" style="font-weight: bold; color: #800000;">⚡ Tambah
+                    Pegawai Cepat
+                    (Pilih dari Database):</label><br>
+
+                <div style="margin-top: 5px;">
+                    <div class="radio-group-container">
+                        <div class="radio-item">
+                            <input type="radio" name="kat" id="pns" value="PNS"
+                                onclick="loadPegawai('PNS')">
+                            <label for="pns">PNS</label>
+                        </div>
+                        <div class="radio-item">
+                            <input type="radio" name="kat" id="pppk" value="PPPK"
+                                onclick="loadPegawai('PPPK')">
+                            <label for="pppk">PPPK</label>
+                        </div>
+                        <div class="radio-item">
+                            <input type="radio" name="kat" id="kom" value="Komisioner"
+                                onclick="loadPegawai('Komisioner')">
+                            <label for="kom">Komisioner</label>
+                        </div>
+                    </div>
+                </div>
+
+                <select id="selectNama" class="form-select" onchange="tambahPegawaiOtomatis()"
+                    style="margin-top: 10px; width: 100%;">
+                    <option value="">-- Pilih Nama dari Hasil Filter --</option>
+                </select>
+            </div>
+
+            <div id="pegawai-container">
+            </div>
+
+            <div style="margin-bottom: 30px;">
+                <button type="button" onclick="tambahPegawai()" class="btn btn-add"
+                    style="background: #2c3e50; border: none; padding: 10px 20px;">
+                    + Input Manual Pegawai Luar
+                </button>
+                <p style="font-size: 12px; color: #666; margin-top: 5px;">*Gunakan tombol ini jika
+                    orang
+                    tersebut tidak ada di database Satker.</p>
+            </div>
+
+            <div class="form-group-title">III. Detail Perjalanan</div>
+            <label>Maksud Perjalanan Dinas</label>
+            <textarea name="maksud_dinas" rows="2" required></textarea>
+            <div class="grid">
+                <div>
+                    <label>Daerah Tujuan</label>
+                    <input type="text" name="tujuan" required>
+                </div>
+                <div>
+                    <label>Transportasi</label>
+                    <select name="jenis_transportasi">
+                        <option value="Kendaraan Dinas/Pribadi">Kendaraan Dinas/Pribadi (BBM)
+                        </option>
+                        <option value="Angkutan Umum">Angkutan Umum (Tiket)</option>
+                    </select>
+                </div>
+                <div>
+                    <label>Tanggal Berangkat</label>
+                    <input type="date" name="tgl_berangkat" id="tgl_berangkat" required>
+                </div>
+                <div>
+                    <label>Tanggal Pulang</label>
+                    <input type="date" name="tgl_pulang" id="tgl_pulang" required>
+                </div>
+            </div>
+
+            <div class="form-group-title">IV. Biaya & Akomodasi</div>
+            <div class="grid">
+                <div>
+                    <label>Uang Harian (Per Hari)</label>
+                    <input type="number" name="uang_harian" placeholder="Rp" required>
+                </div>
+                <div>
+                    <label>Biaya Transport (BBM/Tiket)</label>
+                    <input type="number" name="biaya_transportasi" placeholder="Rp" value="0">
+                </div>
+            </div>
+            <p style="margin-top:15px; font-weight:bold; color:#800000;">Data Hotel (Jika Menginap):
+            </p>
+            <div class="grid">
+                <div style="grid-column: span 2;">
+                    <label>Nama Hotel</label>
+                    <input type="text" name="nama_hotel" placeholder="Nama Hotel">
+                </div>
+                <div>
+                    <label>Tarif Per Malam</label>
+                    <input type="number" name="tarif_hotel" placeholder="Rp" value="0">
+                </div>
+                <div>
+                    <label>Check-in</label>
+                    <input type="date" name="tgl_checkin">
+                </div>
+                <div style="grid-column: start 2;">
+                    <label>Check-out</label>
+                    <input type="date" name="tgl_checkout">
+                </div>
+            </div>
+            <div
+                style="background: #fff8e1; padding: 15px; border-radius: 8px; margin-top: 20px; border: 1px solid #ffda44;">
+                <p style="margin: 0; font-size: 14px; color: #555;">Estimasi Total Biaya:</p>
+                <h3 id="preview-total" style="margin: 5px 0 0 0; color: #800000;">Rp 0</h3>
+            </div>
+            <button type="submit" class="btn btn-submit">Simpan Data Perjadin</button>
+        </form>
+    </div>
+    <script src="js/utils.js"></script>
+    <script src="js/perjadin-handler.js"></script>
+
+</body>
+
+</html>
