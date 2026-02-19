@@ -140,7 +140,20 @@ app.use('/api/settings', cekLogin, hanyaAdmin, settingRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/dokumentasi', dokumentasiRoutes);
 
-const PORT = process.env.PORT;
-app.listen(PORT, () => {
-    console.log(`Server nyala dengan AMAN di http://localhost:${PORT}`);
-});
+// const PORT = process.env.PORT;
+// app.listen(PORT, () => {
+//     console.log(`Server nyala dengan AMAN di http://localhost:${PORT}`);
+// });
+
+const PORT = process.env.PORT || 3000;
+
+// Cek: Apakah kita sedang di Vercel atau di Laptop?
+if (require.main === module) {
+    // Kalau di Laptop (dijalankan pakai 'node server.js'), kita butuh app.listen
+    app.listen(PORT, () => {
+        console.log(`Server nyala di http://localhost:${PORT}`);
+    });
+}
+
+// PENTING BUAT VERCEL: Kita harus export 'app'
+module.exports = app;
