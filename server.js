@@ -2,6 +2,7 @@
 require('dotenv').config();
 const express = require('express');
 const session = require('express-session'); // <--- PENTING
+const MySQLStore = require('express-mysql-session')(session);
 const bcrypt = require('bcryptjs'); // <--- PENTING
 const path = require('path');
 const db = require('./config/db'); // Pastikan path ini benar
@@ -13,14 +14,38 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
 // 2. SETUP SESSION (TIKET MASUK)
+// --- PENTING BUAT VERCEL (Supaya Cookie HTTPS jalan) ---
+app.set('trust proxy', 1);
+
+// --- KONFIGURASI SESI DATABASE ---
+const sessionStore = new MySQLStore(
+    {
+        // Opsi ini biarkan default, dia akan otomatis pakai koneksi dari 'db'
+        expiration: 10800000, // Sesi berlaku 3 jam (opsional)
+        createDatabaseTable: true, // Otomatis bikin tabel 'sessions' di DB
+        schema: {
+            tableName: 'sessions',
+            columnNames: {
+                session_id: 'session_id',
+                expires: 'expires',
+                data: 'data',
+            },
+        },
+    },
+    db,
+); // <--- KITA MASUKKAN KONEKSI DATABASE KITA DI SINI
+
 app.use(
     session({
-        secret: 'rahasia_negara_kpu_2026', // Kunci rahasia (bebas ganti)
+        key: 'session_cookie_name',
+        secret: process.env.SESSION_SECRET || 'rahasia_negara',
+        store: sessionStore, // <--- GUNAKAN STORE MYSQL, JANGAN RAM LAGI
         resave: false,
         saveUninitialized: false,
         cookie: {
-            secure: false, // Set true jika pakai HTTPS
-            maxAge: 24 * 60 * 60 * 1000, // Sesi berlaku 24 jam
+            secure: true, // Wajib TRUE di Vercel (HTTPS)
+            httpOnly: true,
+            maxAge: 1000 * 60 * 60 * 24, // 1 Hari
         },
     }),
 );
