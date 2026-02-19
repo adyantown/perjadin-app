@@ -145,7 +145,7 @@ app.use('/api/dokumentasi', dokumentasiRoutes);
 //     console.log(`Server nyala dengan AMAN di http://localhost:${PORT}`);
 // });
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3300;
 
 // Cek: Apakah kita sedang di Vercel atau di Laptop?
 if (require.main === module) {
