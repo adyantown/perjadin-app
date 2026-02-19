@@ -1,5 +1,5 @@
-node_modules/
-.env
-.py
-.jpeg
+node_modules/ 
+.env 
+.py 
+.jpeg 
 .txt
