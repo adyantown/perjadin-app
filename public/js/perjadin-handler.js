@@ -1,99 +1,199 @@
-// Gunakan yang ini saja, sudah mencakup Edit dan Manual
+// public/js/perjadin-handler.js
+// VERSI FINAL & RAPI
+
+// --- 1. FUNGSI TAMBAH PEGAWAI (TAMPILAN BOOTSTRAP CARD) ---
 function tambahPegawai(nama = '', gol = '', jab = '') {
     const container = document.getElementById('pegawai-container');
+
+    // HTML Template dengan Card Bootstrap (Ini yang bikin rapi!)
     const htmlBaris = `
-        <div class="grid pegawai-row" style="margin-bottom: 10px; border-bottom: 1px dashed #ccc; padding-bottom: 10px;">
-            <div>
-                <label>Nama Pegawai</label>
-                <input type="text" name="nama_pegawai[]" value="${nama}" required>
-            </div>
-            <div>
-                <label>Golongan</label>
-                <input type="text" name="golongan[]" value="${gol}" placeholder="Contoh: IV/a">
-            </div>
-            <div>
-                <label>Jabatan</label>
-                <input type="text" name="jabatan[]" value="${jab}" required>
-            </div>
-            <div style="display: flex; align-items: flex-end;">
-                <button type="button" class="btn-remove" onclick="hapusBaris(this)" 
-                    style="background:#e74c3c; width:auto; margin:0; padding: 8px 15px; color:white; border:none; border-radius:4px; cursor:pointer;">Hapus</button>
+        <div class="pegawai-row card mb-3 bg-light border-0 shadow-sm">
+            <div class="card-body p-3">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <h6 class="fw-bold text-danger m-0">
+                        <i class="bi bi-person-badge-fill me-1"></i> Data Pegawai
+                    </h6>
+                    <button type="button" class="btn btn-outline-danger btn-sm btn-remove" onclick="hapusBaris(this)" title="Hapus Baris Ini">
+                        <i class="bi bi-trash"></i> Hapus
+                    </button>
+                </div>
+                
+                <div class="row g-2">
+                    <div class="col-md-5">
+                        <label class="form-label small text-muted fw-bold">Nama Pegawai</label>
+                        <input type="text" name="nama_pegawai[]" value="${nama}" class="form-control" placeholder="Nama Lengkap" required>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label small text-muted fw-bold">Golongan</label>
+                        <input type="text" name="golongan[]" value="${gol}" class="form-control" placeholder="Contoh: IV/a">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label small text-muted fw-bold">Jabatan</label>
+                        <input type="text" name="jabatan[]" value="${jab}" class="form-control" placeholder="Jabatan" required>
+                    </div>
+                </div>
             </div>
         </div>`;
+
     container.insertAdjacentHTML('beforeend', htmlBaris);
     updateTombolHapus();
-    hitungOtomatis();
+    hitungOtomatis(); // Hitung ulang total biaya
 }
 
+// --- 2. FUNGSI HAPUS BARIS ---
 function hapusBaris(btn) {
     btn.closest('.pegawai-row').remove();
     updateTombolHapus();
     hitungOtomatis();
 }
 
+// --- 3. UTILS: UPDATE TOMBOL HAPUS ---
 function updateTombolHapus() {
     const rows = document.querySelectorAll('.pegawai-row');
+    // Jika baris tinggal 1, sembunyikan tombol hapus biar gak kosong melompong
     rows.forEach((row) => {
-        row.querySelector('.btn-remove').style.display = rows.length === 1 ? 'none' : 'block';
+        const btn = row.querySelector('.btn-remove');
+        if (btn) btn.style.display = rows.length === 1 ? 'none' : 'block';
     });
 }
 
-// --- 4. MODE EDIT ---
-const urlParams = new URLSearchParams(window.location.search);
-const editId = urlParams.get('edit');
+// --- 4. LOGIKA LOAD DATA PEGAWAI (DROPDOWN OTOMATIS) ---
+window.dataPegawai = [];
 
-const formatDate = (d) => (d && d !== 'null' && !d.startsWith('0000') && !d.startsWith('1899') ? d.split('T')[0] : '');
+window.loadPegawai = async function (kategori) {
+    // Reset dropdown biar bersih
+    const dropdown = document.getElementById('selectNama');
+    dropdown.innerHTML = '<option value="">Memuat data...</option>';
 
-if (editId) {
-    document.querySelector('h2').innerText = 'Edit Data Perjalanan Dinas';
-    fetch(`/api/perjadin/get-perjadin/${editId}`)
-        .then((res) => res.json())
-        .then((data) => {
-            document.getElementById('id_edit').value = editId;
-            document.getElementsByName('no_surat_tugas')[0].value = data.no_surat_tugas;
-            document.getElementsByName('tgl_surat_tugas')[0].value = formatDate(data.tgl_surat_tugas);
-            document.getElementsByName('maksud_dinas')[0].value = data.maksud_dinas;
-            document.getElementsByName('tujuan')[0].value = data.tujuan;
-            document.getElementsByName('jenis_transportasi')[0].value = data.jenis_transportasi;
-            document.getElementsByName('tgl_berangkat')[0].value = formatDate(data.tgl_berangkat);
-            document.getElementsByName('tgl_pulang')[0].value = formatDate(data.tgl_pulang);
+    try {
+        const response = await fetch(`/api/pegawai/${kategori}`);
+        if (!response.ok) throw new Error('Gagal koneksi API');
 
-            // Format angka saat load
-            document.getElementsByName('uang_harian')[0].value = formatRupiah((data.uang_harian || 0).toString());
-            document.getElementsByName('biaya_transportasi')[0].value = formatRupiah((data.biaya_transportasi || 0).toString());
-            document.getElementsByName('tarif_hotel')[0].value = formatRupiah((data.tarif_hotel || 0).toString());
+        window.dataPegawai = await response.json();
 
-            document.getElementsByName('nama_hotel')[0].value = data.nama_hotel || '';
-            document.getElementsByName('tgl_checkin')[0].value = formatDate(data.tgl_checkin);
-            document.getElementsByName('tgl_checkout')[0].value = formatDate(data.tgl_checkout);
+        dropdown.innerHTML = '<option value="">-- Pilih Nama dari Hasil Filter --</option>';
 
-            const container = document.getElementById('pegawai-container');
-            container.innerHTML = '';
-            const namaArr = data.nama_pegawai ? data.nama_pegawai.split(', ') : [''];
-            const golArr = data.golongan ? data.golongan.split(', ') : [''];
-            const jabArr = data.jabatan ? data.jabatan.split(', ') : [''];
-
-            namaArr.forEach((n, i) => tambahPegawai(n, golArr[i] || '', jabArr[i] || ''));
-            setTimeout(hitungOtomatis, 300);
+        window.dataPegawai.forEach((p) => {
+            const option = document.createElement('option');
+            // Gunakan NIP atau ID sebagai value unik
+            option.value = p.nip_nik || p.id;
+            option.textContent = p.nama_pegawai;
+            dropdown.appendChild(option);
         });
-}
+    } catch (error) {
+        console.error('Error:', error);
+        dropdown.innerHTML = '<option value="">Gagal memuat data</option>';
+    }
+};
 
-// --- 5. EVENT LISTENERS ---
+window.tambahPegawaiOtomatis = function () {
+    const dropdown = document.getElementById('selectNama');
+    const valTerpilih = dropdown.value;
+    if (!valTerpilih) return;
+
+    // Cari data pegawai di memory browser
+    const p = window.dataPegawai.find((peg) => (peg.nip_nik || peg.id) == valTerpilih);
+
+    if (p) {
+        const displayGol = p.pangkat ? `${p.pangkat} (${p.golongan})` : p.golongan;
+
+        // Cek: Apakah baris pertama masih kosong?
+        const rows = document.querySelectorAll('.pegawai-row');
+        const firstRow = rows[0];
+        const inputNamaPertama = firstRow ? firstRow.querySelector('[name="nama_pegawai[]"]') : null;
+
+        if (firstRow && (!inputNamaPertama.value || inputNamaPertama.value.trim() === '')) {
+            // Kalau kosong, TIMPA baris pertama
+            firstRow.querySelector('[name="nama_pegawai[]"]').value = p.nama_pegawai;
+            firstRow.querySelector('[name="golongan[]"]').value = displayGol || '';
+            firstRow.querySelector('[name="jabatan[]"]').value = p.jabatan || '';
+        } else {
+            // Kalau sudah ada isinya, BUAT baris baru
+            tambahPegawai(p.nama_pegawai, displayGol || '', p.jabatan || '');
+        }
+
+        dropdown.value = ''; // Reset pilihan
+        hitungOtomatis();
+    }
+};
+
+// --- 5. LOGIKA EDIT DATA (LOAD DARI SERVER) ---
+document.addEventListener('DOMContentLoaded', () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const editId = urlParams.get('edit');
+    const formatDate = (d) => (d && d !== 'null' && !d.startsWith('0000') ? d.split('T')[0] : '');
+
+    if (editId) {
+        // --- MODE EDIT ---
+        document.querySelector('h4').innerText = 'Edit Rincian Biaya';
+        document.getElementById('id_edit').value = editId;
+
+        fetch(`/api/perjadin/view/${editId}`)
+            .then((res) => res.json())
+            .then((data) => {
+                if (!data) return alert('Data tidak ditemukan!');
+
+                // Helper isi form
+                const setVal = (name, val) => {
+                    const el = document.getElementsByName(name)[0];
+                    if (el) el.value = val;
+                };
+
+                setVal('no_surat_tugas', data.no_surat_tugas);
+                setVal('tgl_surat_tugas', formatDate(data.tgl_surat_tugas));
+                setVal('maksud_dinas', data.maksud_dinas);
+                setVal('tujuan', data.tujuan);
+                setVal('jenis_transportasi', data.jenis_transportasi);
+                setVal('tgl_berangkat', formatDate(data.tgl_berangkat));
+                setVal('tgl_pulang', formatDate(data.tgl_pulang));
+
+                setVal('uang_harian', formatRupiah((data.uang_harian || 0).toString()));
+                setVal('biaya_transportasi', formatRupiah((data.biaya_transportasi || 0).toString()));
+                setVal('tarif_hotel', formatRupiah((data.tarif_hotel || 0).toString()));
+
+                setVal('nama_hotel', data.nama_hotel || '');
+                setVal('tgl_checkin', formatDate(data.tgl_checkin));
+                setVal('tgl_checkout', formatDate(data.tgl_checkout));
+
+                // Bersihkan baris pegawai lama, isi dengan yang baru
+                const container = document.getElementById('pegawai-container');
+                container.innerHTML = '';
+
+                const namaArr = data.nama_pegawai ? data.nama_pegawai.split(', ') : [];
+                const golArr = data.golongan ? data.golongan.split(', ') : [];
+                const jabArr = data.jabatan ? data.jabatan.split(', ') : [];
+
+                if (namaArr.length > 0 && namaArr[0] !== '') {
+                    namaArr.forEach((n, i) => {
+                        tambahPegawai(n, golArr[i] || '', jabArr[i] || '');
+                    });
+                } else {
+                    tambahPegawai();
+                }
+                setTimeout(hitungOtomatis, 500);
+            })
+            .catch((err) => console.error('Gagal load edit:', err));
+    } else {
+        // --- MODE INPUT BARU ---
+        tambahPegawai(); // Tambah 1 baris kosong di awal
+    }
+});
+
+// --- 6. EVENT LISTENER FORMAT RUPIAH & HITUNG ---
 document.addEventListener('input', (e) => {
-    if (e.target.name === 'uang_harian' || e.target.name === 'biaya_transportasi' || e.target.name === 'tarif_hotel') {
+    if (['uang_harian', 'biaya_transportasi', 'tarif_hotel'].includes(e.target.name)) {
         e.target.value = formatRupiah(e.target.value);
     }
     hitungOtomatis();
 });
 
-// --- 6. PROSES SIMPAN (SOLUSI NAMA HILANG) ---
+// --- 7. SUBMIT FORM (SIMPAN) ---
 document.getElementById('perjadinForm').onsubmit = async function (e) {
     e.preventDefault();
-
-    // Gunakan URLSearchParams secara manual agar array [] terkirim dengan benar
     const formData = new FormData(this);
     const searchParams = new URLSearchParams();
 
+    // Loop data biar array (nama_pegawai[]) terkirim benar
     for (const pair of formData.entries()) {
         searchParams.append(pair[0], pair[1]);
     }
@@ -101,9 +201,10 @@ document.getElementById('perjadinForm').onsubmit = async function (e) {
     try {
         const response = await fetch('/api/perjadin/save', {
             method: 'POST',
-            body: searchParams, // Mengirim data yang sudah mendukung multiple values
+            body: searchParams,
         });
         const result = await response.json();
+
         if (result.success) {
             alert(result.message);
             window.location.href = '/daftar.html';
@@ -111,85 +212,6 @@ document.getElementById('perjadinForm').onsubmit = async function (e) {
             alert('Gagal: ' + result.message);
         }
     } catch (err) {
-        console.error(err);
-        alert('Koneksi ke server terputus.');
+        alert('Terjadi kesalahan koneksi server.');
     }
 };
-
-// Fungsi ini dipanggil saat nama di dropdown dipilih
-// 1. Definisikan variabel data di luar agar bisa diakses semua fungsi
-window.dataPegawai = [];
-
-// 2. Gunakan window.namaFungsi agar PASTI terbaca oleh HTML onclick
-window.loadPegawai = async function (kategori) {
-    console.log('Tombol diklik, mencari kategori:', kategori);
-    try {
-        const response = await fetch(`/api/pegawai/${kategori}`);
-
-        // Cek apakah response oke
-        if (!response.ok) throw new Error('Gagal mengambil data dari server');
-
-        window.dataPegawai = await response.json();
-        console.log('Data diterima:', window.dataPegawai);
-
-        const dropdown = document.getElementById('selectNama');
-        dropdown.innerHTML = '<option value="">-- Pilih Nama dari Hasil Filter --</option>';
-
-        window.dataPegawai.forEach((p) => {
-            const option = document.createElement('option');
-            option.value = p.nip_nik;
-            option.textContent = p.nama_pegawai;
-            dropdown.appendChild(option);
-        });
-    } catch (error) {
-        console.error('Fetch error:', error);
-        alert('Error: ' + error.message);
-    }
-};
-
-// Fungsi ini yang memindahkan data dari dropdown ke field input
-window.tambahPegawaiOtomatis = function () {
-    const dropdown = document.getElementById('selectNama');
-    const nipTerpilih = dropdown.value;
-
-    if (!nipTerpilih) return;
-
-    const p = window.dataPegawai.find((peg) => String(peg.nip_nik) === String(nipTerpilih));
-
-    if (p) {
-        const displayGol = p.pangkat ? `${p.pangkat} (${p.golongan})` : p.golongan;
-
-        // --- LOGIKA PINTAR DIMULAI DISINI ---
-        const rows = document.querySelectorAll('.pegawai-row');
-        const firstRow = rows[0];
-
-        // Cek apakah baris pertama masih kosong (nama_pegawai belum diisi)
-        const firstInputNama = firstRow ? firstRow.querySelector('[name="nama_pegawai[]"]') : null;
-
-        if (firstRow && (!firstInputNama.value || firstInputNama.value.trim() === '')) {
-            // Jika baris pertama kosong, langsung isi field yang ada
-            console.log('Menimpa baris pertama yang kosong...');
-            firstRow.querySelector('[name="nama_pegawai[]"]').value = p.nama_pegawai;
-            firstRow.querySelector('[name="golongan[]"]').value = displayGol;
-            firstRow.querySelector('[name="jabatan[]"]').value = p.jabatan || '';
-        } else {
-            // Jika baris pertama sudah ada isinya, baru tambah baris baru di bawah
-            console.log('Baris pertama sudah terisi, menambah baris baru...');
-            tambahPegawai(p.nama_pegawai, displayGol, p.jabatan || '');
-        }
-        // --- LOGIKA PINTAR SELESAI ---
-
-        dropdown.value = ''; // Reset dropdown
-        hitungOtomatis(); // Update total biaya
-    }
-};
-
-// Jangan lupa fungsi hapusnya!
-function hapusBaris(btn) {
-    btn.closest('.pegawai-row').remove();
-}
-
-// Tambahkan satu baris kosong saat halaman pertama kali dibuka
-if (!editId) {
-    tambahPegawai();
-}

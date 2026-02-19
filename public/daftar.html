@@ -3,12 +3,118 @@
 
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" type="image/png" href="img/kpu_logo.png">
     <title>Daftar Perjadin - KPU Tubaba</title>
-    <link rel="stylesheet" href="style/perjadin-style.css">
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+        rel="stylesheet">
+    <link rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+
+    <link rel="stylesheet" href="style/index-style.css">
+
+    <style>
+        /* CSS Tambahan untuk Merapikan Tabel */
+        .table th {
+            vertical-align: middle;
+            text-align: center;
+        }
+
+        /* Memastikan tombol aksi selalu rata tengah */
+        td:last-child div {
+            justify-content: center;
+        }
+
+        /* --- ATURAN CETAK (PRINT) --- */
+        #kop-surat {
+            display: none;
+        }
+
+        @media print {
+
+            @page {
+                size: landscape;
+                /* Paksa kertas miring */
+                margin: 1cm;
+            }
+
+            /* Kecilkan font sedikit biar muat semua */
+            table {
+                font-size: 9pt !important;
+            }
+
+            /* 1. FIX: Jangan sembunyikan .card, cukup sembunyikan elemen navigasi */
+            .no-print,
+            .navbar,
+            .btn,
+            footer,
+            .card-header {
+                display: none !important;
+            }
+
+            /* Reset body & Container biar putih bersih */
+            body,
+            .container-fluid,
+            .card,
+            .card-body {
+                background-color: white !important;
+                border: none !important;
+                box-shadow: none !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                width: 100% !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+
+            /* Munculkan Kop Surat */
+            #kop-surat {
+                display: block !important;
+                margin-bottom: 20px;
+            }
+
+            /* Tampilkan Tabel Versi Cetak */
+            .table-responsive {
+                overflow: visible !important;
+            }
+
+            table {
+                width: 100%;
+                border-collapse: collapse;
+                font-size: 11px;
+            }
+
+            th,
+            td {
+                border: 1px solid black !important;
+                padding: 5px;
+                color: black !important;
+            }
+
+            th {
+                background-color: #eee !important;
+            }
+
+            /* Hilangkan kolom aksi saat print (Biar rapi) */
+            th:last-child,
+            td:last-child {
+                display: none !important;
+            }
+        }
+    </style>
 </head>
 
-<body>
+<body style="background-color: #f4f6f9;">
+
+    <nav class="navbar navbar-expand-lg navbar-dark navbar-kpu py-3 shadow-sm no-print">
+        <div class="container-fluid px-4">
+            <a class="navbar-brand d-flex align-items-center" href="/index.html">
+                <i class="bi bi-arrow-left-circle me-2"></i> Kembali ke Dashboard
+            </a>
+            <span class="text-white fw-bold">DATA REKAPITULASI BIAYA</span>
+        </div>
+    </nav>
 
     <div id="kop-surat" class="print-only">
         <div
@@ -28,41 +134,88 @@
             PERJALANAN DINAS</h3>
     </div>
 
-    <div class="header no-print">
-        <h2>Data Perjalanan Dinas KPU Tubaba</h2>
-        <div class="button-group">
-            <a href="/" class="btn btn-back"><span>➕</span> Input Baru</a>
-            <button onclick="exportToExcel()" class="btn btn-excel"><span>📄</span> Excel</button>
-            <button onclick="window.print()" class="btn btn-print"><span>🖨️</span> Cetak</button>
+    <div class="container-fluid px-4 mt-4">
+
+        <div class="card shadow-sm border-0 rounded-4">
+            <div
+                class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center no-print">
+                <h5 class="m-0 fw-bold text-danger"><i class="bi bi-table me-2"></i>Data Perjalanan
+                    Dinas KPU Tubaba</h5>
+
+                <div class="d-flex gap-2">
+                    <a href="/perjadin.html" class="btn btn-danger btn-sm">
+                        <i class="bi bi-plus-lg"></i> Input Baru
+                    </a>
+                    <button onclick="exportToExcel()" class="btn btn-success btn-sm">
+                        <i class="bi bi-file-earmark-excel"></i> Excel
+                    </button>
+                    <button onclick="window.print()" class="btn btn-primary btn-sm">
+                        <i class="bi bi-printer"></i> Cetak Laporan
+                    </button>
+                </div>
+            </div>
+
+            <div class="card-body p-4">
+
+                <div class="row g-2 mb-3 no-print">
+                    <div class="col-md-8">
+                        <div class="input-group">
+                            <span class="input-group-text bg-light border-end-0">
+                                <i class="bi bi-search text-muted"></i>
+                            </span>
+                            <input type="text" id="searchInput"
+                                class="form-control border-start-0 ps-0"
+                                placeholder="Cari Nama Pegawai, No. Surat, atau Tujuan...">
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <div class="input-group">
+                            <span class="input-group-text bg-light fw-bold text-secondary">
+                                <i class="bi bi-calendar-month me-2"></i>Bulan
+                            </span>
+                            <input type="month" id="filterBulan" class="form-control"
+                                style="cursor: pointer;">
+                            <button class="btn btn-outline-secondary" type="button"
+                                onclick="resetFilter()" title="Reset Filter">
+                                <i class="bi bi-x-lg"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle table-striped table-bordered">
+                        <thead class="table-danger text-white">
+                            <tr>
+                                <th class="text-nowrap">No. Surat</th>
+                                <th>Pegawai & Jabatan</th>
+                                <th>Tujuan</th>
+                                <th>Maksud Dinas</th>
+                                <th>Waktu Pelaksanaan</th>
+                                <th class="text-center">Uang Harian</th>
+                                <th class="text-center">Transport</th>
+                                <th class="text-center">Hotel</th>
+                                <th class="text-center bg-warning text-dark">Total Biaya</th>
+                                <th class="text-center no-print" style="width: 150px;">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="table-body">
+                            <tr>
+                                <td colspan="9" class="text-center py-5 text-muted">Sedang memuat
+                                    data...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
     </div>
 
-    <div class="no-print" style="margin-bottom: 15px;">
-        <input type="text" id="searchInput"
-            placeholder="🔍 Cari berdasarkan Nama Pegawai, No. Surat, atau Tujuan..."
-            style="width: 100%; padding: 10px; border-radius: 5px; border: 1px solid #ccc; font-size: 14px; box-sizing: border-box;">
-    </div>
-
-    <table>
-        <thead>
-            <tr>
-                <th>No. Surat</th>
-                <th>Pegawai</th>
-                <th>Tujuan</th>
-                <th>Maksud Dinas</th>
-                <th>Waktu</th>
-                <th>Uang Harian</th>
-                <th>Transport</th>
-                <th>Hotel</th>
-                <th>Total Biaya</th>
-                <th class="no-print">Aksi</th>
-            </tr>
-        </thead>
-        <tbody id="table-body"></tbody>
-    </table>
-
-    <script src="js/daftar-handler.js"></script>
+    <script
+        src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="js/utils.js"></script>
+    <script src="js/daftar-handler.js"></script>
 
 </body>
 

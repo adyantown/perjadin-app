@@ -1,174 +1,83 @@
-/* --- 1. GLOBAL & RESET --- */
+/* ============================================================
+   1. GLOBAL VARIABLES & RESET
+   ============================================================ */
+:root {
+    --kpu-red: #bb2d3b;
+    --kpu-dark: #800000;
+}
+
 body {
     font-family: 'Segoe UI', Arial, sans-serif;
     background: #f4f4f4;
-    padding: 20px;
-    margin: 0;
     color: #333;
+    margin: 0;
+    /* Padding di-handle per halaman aja biar fleksibel */
 }
 
-h2 {
-    color: #800000;
-    border-bottom: 2px solid #800000;
-    padding-bottom: 10px;
+/* ============================================================
+   2. STYLE KHUSUS HALAMAN INPUT (perjadin.html - Bootstrap)
+   ============================================================ */
+/* Style judul Section (I, II, III...) */
+.form-group-title {
+    background: #f8f9fa;
+    padding: 12px 15px;
+    margin: 25px 0 15px 0;
+    border-left: 5px solid var(--kpu-red);
+    font-weight: bold;
+    color: var(--kpu-dark);
+    text-transform: uppercase;
+    font-size: 0.9rem;
+    border-radius: 4px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
-/* Kontainer utama untuk grup radio */
+/* Radio Button Group di Input Pegawai */
 .radio-group-container {
     display: flex;
-    gap: 20px; /* Jarak antar pilihan */
-    margin-top: 10px;
+    gap: 20px;
     align-items: center;
 }
-
-/* Tiap item (Radio + Label) */
 .radio-item {
     display: flex;
-    align-items: center; /* Ini kunci biar simetris atas-bawah */
+    align-items: center;
     cursor: pointer;
 }
-
-/* Beri jarak sedikit antara buletan dan teksnya */
 .radio-item input[type='radio'] {
-    margin: 0 8px 0 0;
-    cursor: pointer;
-    width: 18px; /* Sedikit diperbesar biar enak diklik */
+    width: 18px;
     height: 18px;
+    margin-right: 8px;
+    accent-color: var(--kpu-red);
 }
-
 .radio-item label {
+    margin-bottom: 0;
     cursor: pointer;
-    font-size: 14px;
-    color: #333;
-    margin-bottom: 0; /* Menghapus margin bawaan label */
-    line-height: 1; /* Biar teks bener-bener di tengah */
 }
 
-#selectNama {
-    padding: 8px;
-    border-radius: 6px;
-    border: 1px solid #ccc;
-    outline: none;
-    transition: border 0.3s;
-}
-#selectNama:focus {
-    border-color: #800000; /* Warna merah KPU saat diklik */
-}
+/* ============================================================
+   3. STYLE KHUSUS HALAMAN DAFTAR (daftar.html - Legacy)
+   ============================================================ */
 
-/* --- 2. LAYOUT CONTAINER --- */
-.container {
-    max-width: 950px;
-    margin: auto;
-    background: white;
-    padding: 30px;
-    border-radius: 12px;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-}
-
+/* Header Halaman Daftar (Judul & Tombol Atas) */
 .header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 20px;
+    margin: 20px; /* Balikin margin biar gak nempel atas */
 }
 
-/* --- 3. FORM COMPONENTS --- */
-.form-group-title {
-    background: #eee;
-    padding: 10px;
-    font-weight: bold;
-    margin: 25px 0 15px 0;
-    border-left: 5px solid #800000;
-    text-transform: uppercase;
-    font-size: 13px;
-}
-
-.grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 15px;
-}
-
-label {
-    display: block;
-    margin-bottom: 5px;
-    font-size: 13px;
-    font-weight: bold;
-}
-
-input,
-select,
-textarea {
+/* Kotak Pencarian */
+#searchInput {
     width: 100%;
     padding: 10px;
     border: 1px solid #ccc;
-    border-radius: 4px;
+    border-radius: 5px;
+    font-size: 14px;
     box-sizing: border-box;
-    font-size: 14px;
+    margin-bottom: 15px; /* Jarak ke tabel */
 }
 
-input:focus {
-    border-color: #800000;
-    outline: none;
-    box-shadow: 0 0 5px rgba(128, 0, 0, 0.2);
-}
-
-/* --- 4. BUTTON SYSTEM --- */
-.btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    padding: 10px 18px;
-    text-decoration: none;
-    border-radius: 6px;
-    color: white;
-    font-weight: bold;
-    font-size: 14px;
-    cursor: pointer;
-    border: none;
-    transition: all 0.2s;
-}
-
-.btn:hover {
-    opacity: 0.9;
-    transform: translateY(-1px);
-}
-
-.btn-submit {
-    background: #800000;
-    width: 100%;
-    margin-top: 20px;
-    font-size: 16px;
-}
-.btn-back {
-    background: #555;
-}
-.btn-add {
-    background: #27ae60;
-    width: auto;
-    font-size: 13px;
-    margin-top: 10px;
-}
-.btn-excel {
-    background: #1d6f42;
-}
-.btn-print {
-    background: #2980b9;
-}
-.btn-edit {
-    background: #f39c12;
-    padding: 6px 10px;
-    font-size: 11px;
-}
-.btn-delete {
-    background: #e74c3c;
-    border: 1px solid #c0392b;
-    padding: 6px 12px;
-    font-size: 11px;
-}
-
-/* --- 5. TABLE STYLE --- */
+/* --- TABEL DATA (PENTING BUAT DAFTAR.HTML) --- */
+/* Kita target tag 'table' langsung karena daftar.html pake tag ini */
 table {
     width: 100%;
     border-collapse: collapse;
@@ -176,13 +85,15 @@ table {
     font-size: 12px;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
     margin-top: 10px;
+    margin-bottom: 30px;
 }
 
 th {
-    background: #800000;
+    background: var(--kpu-dark);
     color: white;
     padding: 12px;
     text-align: left;
+    white-space: nowrap; /* Biar header gak turun baris */
 }
 
 td {
@@ -198,60 +109,129 @@ tr:hover {
     background: #f1f1f1;
 }
 
+/* Baris Total di Daftar */
 .total-row {
+    background-color: #fff3cd !important;
     font-weight: bold;
-    color: #800000;
-    background: #fff8e1;
+    color: var(--kpu-dark);
 }
 
-/* --- 6. PRINT RULES --- */
-.print-only {
-    display: none;
+/* --- TOMBOL-TOMBOL DI DAFTAR (BTN LEGACY) --- */
+/* Gunakan selector spesifik biar gak ngerusak Bootstrap di halaman lain */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    padding: 8px 15px;
+    text-decoration: none;
+    border-radius: 4px;
+    color: white;
+    font-weight: bold;
+    font-size: 13px;
+    border: none;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+/* Warna-warni Tombol Daftar */
+.btn-back {
+    background-color: #555;
+}
+.btn-excel {
+    background-color: #198754;
+} /* Hijau */
+.btn-print {
+    background-color: #0d6efd;
+} /* Biru */
+
+/* Tombol Aksi di dalam Tabel (Kecil) */
+.btn-edit {
+    background-color: #ffc107;
+    color: #000 !important;
+    padding: 6px 10px;
+    font-size: 11px;
+    border-radius: 4px;
+    text-decoration: none;
+}
+.btn-delete {
+    background-color: #dc3545;
+    padding: 6px 10px;
+    font-size: 11px;
+    border-radius: 4px;
+    border: none;
+    color: white;
+    cursor: pointer;
+}
+
+/* ============================================================
+   4. ATURAN CETAK (PRINT RULES)
+   ============================================================ */
+/* Kop Surat (Hanya muncul saat print) */
+#kop-surat {
+    display: none; /* Default sembunyi di layar */
 }
 
 @media print {
+    /* Sembunyikan elemen navigasi saat print */
     .no-print,
+    .navbar,
     .btn,
+    footer,
+    .card-header,
+    a[href],
     #searchInput {
         display: none !important;
     }
-    .print-only {
-        display: block !important;
-    }
-
-    /* TAMBAHKAN INI: Hilangkan garis merah h2 saat print */
-    h2 {
-        border-bottom: none !important;
-        margin: 0 !important;
-        padding: 0 !important;
-    }
 
     body {
-        background: white;
+        background-color: white !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
         padding: 0;
-    }
-    .container {
-        box-shadow: none;
-        width: 100%;
-        max-width: 100%;
-        padding: 0;
+        margin: 0;
     }
 
-    /* Garis hitam Kop Surat tetap aman karena Mas pakai inline-style di HTML */
+    /* Munculkan Kop Surat */
+    #kop-surat {
+        display: block !important;
+        margin-bottom: 20px;
+    }
+
+    /* Reset container biar gak error pas print */
+    .container,
+    .card,
+    .card-body {
+        border: none !important;
+        box-shadow: none !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        width: 100% !important;
+        max-width: 100% !important;
+    }
+
+    /* Tabel Cetak */
     table {
         width: 100%;
-        border: 1px solid #000 !important;
+        border-collapse: collapse;
         font-size: 10px;
-        margin-top: 10px;
+        margin-top: 0;
     }
     th,
     td {
-        border: 1px solid #000 !important;
-        color: black;
+        border: 1px solid black !important;
         padding: 5px;
+        color: black;
     }
     th {
-        background: #eee !important;
-        color: black;
+        background-color: #eee !important;
+    }
+
+    h2,
+    h4 {
+        text-align: center;
+        color: black !important;
+        border: none !important;
+        margin: 0;
     }
 }

@@ -1,49 +1,37 @@
 const express = require('express');
 const router = express.Router();
-const db = require('../config/db'); // Sesuaikan dengan lokasi file koneksi db Mas
-const pegawaiController = require('../controllers/pegawaiController');
+const db = require('../config/db'); // KONEKSI DATABASE (Wajib ada)
+const pegawaiController = require('../controllers/pegawaiController'); // CONTROLLER
 
-// --- [BARU] API AMBIL SEMUA PEGAWAI (Urut Prioritas) ---
-// Endpoint ini nanti jadi: /api/pegawai/data/all
-router.get('/data/all', (req, res) => {
-    const sql = `
-        SELECT * FROM master_pegawai 
-        ORDER BY FIELD(kategori, 'Komisioner', 'PNS', 'PPPK'), nama_pegawai ASC
-    `;
+// --- 1. API UTAMA (Pakai Controller) ---
 
-    db.query(sql, (err, results) => {
-        if (err) {
-            return res.status(500).json({ success: false, error: err.message });
-        }
-        // Kita bungkus pakai format { success: true, data: ... } biar sama kayak handler frontend
-        res.json({ success: true, data: results });
-    });
-});
-
-// --- API ENDPOINTS ---
-
-// 1. Ambil Semua Data (Untuk Tabel & Dropdown)
+// Ambil Semua Data (Untuk Dropdown di Form SPPD & Tabel Database)
 router.get('/data/all', pegawaiController.getAllPegawai);
 
-// 2. Ambil Satu Data (Untuk Edit)
+// Ambil Satu Data Detail (Untuk Edit)
 router.get('/detail/:id', pegawaiController.getPegawaiById);
 
-// 3. Simpan Baru
+// Simpan, Update, Hapus
 router.post('/save', pegawaiController.createPegawai);
-
-// 4. Update Data
 router.put('/update/:id', pegawaiController.updatePegawai);
-
-// 5. Hapus Data
 router.delete('/delete/:id', pegawaiController.deletePegawai);
 
-// --- [LAMA] API ambil data per kategori (Biarkan saja) ---
+// --- 2. API KHUSUS FILTER (Untuk Radio Button PNS/PPPK/Komisioner) ---
+// Route ini menangkap request seperti: /api/pegawai/PNS
 router.get('/:kategori', (req, res) => {
     const kategori = req.params.kategori;
+
+    // Debugging: Cek di terminal apakah request masuk
+    console.log(`[API] Request masuk filter kategori: ${kategori}`);
+
     const sql = 'SELECT * FROM master_pegawai WHERE kategori = ? ORDER BY nama_pegawai ASC';
 
     db.query(sql, [kategori], (err, results) => {
-        if (err) return res.status(500).json({ error: err.message });
+        if (err) {
+            // Tampilkan error jelas di Terminal VS Code
+            console.error('[DATABASE ERROR]:', err.message);
+            return res.status(500).json({ success: false, error: err.message });
+        }
         res.json(results);
     });
 });

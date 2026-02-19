@@ -9,7 +9,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 1. [BARU] INISIALISASI DROPDOWN PEGAWAI
     initDropdownPegawai();
-
+    loadPejabat();
     // 2. CEK MODE EDIT SAAT HALAMAN DIMUAT
     const urlParams = new URLSearchParams(window.location.search);
     currentEditId = urlParams.get('edit');
@@ -133,6 +133,28 @@ async function initDropdownPegawai() {
             if (elJabatan) elJabatan.value = p.jabatan || '';
         }
     });
+}
+
+async function loadPejabat() {
+    // Kalau lagi mode edit, jangan timpa data yang sudah tersimpan
+    // Kecuali Mas mau force update PPK terbaru
+    if (currentEditId) return;
+
+    try {
+        const res = await fetch('/api/settings');
+        const json = await res.json();
+        if (json.success && json.data) {
+            const s = json.data;
+            // Isi Inputan PPK Otomatis
+            const elNama = document.querySelector('input[name="ppk_nama"]');
+            const elNip = document.querySelector('input[name="ppk_nip"]');
+
+            if (elNama) elNama.value = s.ppk_nama;
+            if (elNip) elNip.value = s.ppk_nip;
+        }
+    } catch (err) {
+        console.error('Gagal load setting pejabat');
+    }
 }
 
 // --- FUNGSI MAPPING DATA KE CETAKAN (SAFE MODE) ---

@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lapor Kegiatan - E-PERJADIN</title>
+    <link rel="icon" type="image/x-icon" href="/img/kpu_logo.png">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+        rel="stylesheet">
+    <link rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="style/index-style.css">
+</head>
+
+<body style="background-color: #f0f2f5;">
+
+    <nav class="navbar navbar-dark navbar-kpu py-3 shadow-sm mb-4">
+        <div class="container">
+            <a class="navbar-brand d-flex align-items-center" href="/index.html">
+                <i class="bi bi-arrow-left-circle me-2"></i> Kembali ke Dashboard
+            </a>
+            <span class="text-white fw-bold">LAPOR KEGIATAN</span>
+        </div>
+    </nav>
+
+    <div class="container pb-5" style="max-width: 600px;">
+        <div class="card shadow border-0 rounded-4">
+            <div class="card-body p-4">
+
+                <div class="text-center mb-4">
+                    <div class="icon-box bg-light text-primary mx-auto mb-3"
+                        style="width: 70px; height: 70px; font-size: 2rem; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                        <i class="bi bi-camera-fill"></i>
+                    </div>
+                    <h5 class="fw-bold text-secondary">Upload Dokumentasi</h5>
+                    <p class="text-muted small">Laporkan bukti kehadiran & foto kegiatan perjalanan
+                        dinas Anda.</p>
+                </div>
+
+                <form id="formLaporan">
+                    <div class="mb-4">
+                        <label class="form-label fw-bold">1. Pilih Kegiatan SPPD</label>
+                        <select name="id_sppd" id="pilihSppd" class="form-select form-select-lg"
+                            required>
+                            <option value="">-- Sedang memuat data... --</option>
+                        </select>
+                        <div class="form-text">Pilih surat tugas yang sedang Anda laksanakan.</div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label fw-bold">2. Tagging Lokasi (GPS)</label>
+                        <div class="p-3 bg-light border rounded text-center">
+                            <div id="statusLokasi" class="mb-3 text-muted">
+                                <i class="bi bi-geo-alt"></i> Lokasi belum terdeteksi
+                            </div>
+
+                            <input type="hidden" name="latitude" id="inputLat">
+                            <input type="hidden" name="longitude" id="inputLong">
+
+                            <button type="button" class="btn btn-outline-danger rounded-pill px-4"
+                                onclick="ambilLokasi()">
+                                <i class="bi bi-geo-fill me-1"></i> Deteksi Lokasi Saya
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label fw-bold">3. Foto Dokumentasi</label>
+                        <input type="file" name="foto" id="inputFoto" class="form-control"
+                            accept="image/*" capture="environment" required>
+                        <div class="form-text">Bisa langsung ambil dari kamera HP.</div>
+
+                        <div class="mt-3 text-center d-none" id="previewContainer">
+                            <img id="previewImg" src="" class="img-fluid rounded shadow-sm"
+                                style="max-height: 200px;">
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label fw-bold">4. Keterangan Tambahan</label>
+                        <textarea name="keterangan" class="form-control" rows="2"
+                            placeholder="Contoh: Pembukaan acara di aula..."></textarea>
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary btn-lg fw-bold" id="btnSubmit">
+                            KIRIM LAPORAN 🚀
+                        </button>
+                    </div>
+
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script
+        src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="js/upload-laporan-handler.js"></script>
+
+</body>
+
+</html>

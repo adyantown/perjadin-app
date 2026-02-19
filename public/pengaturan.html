@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pengaturan Aplikasi - KPU Tubaba</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+        rel="stylesheet">
+    <link rel="stylesheet" href="style/index-style.css">
+    <link rel="icon" type="image/x-icon" href="/img/kpu_logo.png">
+</head>
+
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark navbar-kpu py-3 shadow-sm">
+        <div class="container">
+            <a class="navbar-brand d-flex align-items-center" href="/index.html">
+                <i class="bi bi-arrow-left-circle me-2"></i> Kembali ke Dashboard
+            </a>
+            <span class="text-white fw-bold">PENGATURAN APLIKASI</span>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <div class="card shadow-sm border-0 rounded-4">
+            <div class="card-body p-4">
+                <h5 class="mb-4 fw-bold text-secondary">Setting Pejabat Penandatangan</h5>
+                <form id="formSetting">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Nama PPK</label>
+                            <input type="text" name="ppk_nama" class="form-control" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">NIP PPK</label>
+                            <input type="text" name="ppk_nip" class="form-control">
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Nama Bendahara</label>
+                            <input type="text" name="bendahara_nama" class="form-control">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">NIP Bendahara</label>
+                            <input type="text" name="bendahara_nip" class="form-control">
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Nama Ketua KPU</label>
+                            <input type="text" name="ketua_nama" class="form-control">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">NIP Ketua</label>
+                            <input type="text" name="ketua_nip" class="form-control"
+                                placeholder="- jika tidak ada">
+                        </div>
+                    </div>
+                    <div class="mt-4 text-end">
+                        <button type="submit" class="btn btn-primary bg-kpu border-0 px-4">Simpan
+                            Perubahan 💾</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Script langsung di sini biar praktis (atau pisah file juga boleh)
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Load Data Saat Buka
+            try {
+                const res = await fetch('/api/settings');
+                const json = await res.json();
+                if (json.success) {
+                    const d = json.data;
+                    const f = document.getElementById('formSetting');
+                    f.ppk_nama.value = d.ppk_nama || '';
+                    f.ppk_nip.value = d.ppk_nip || '';
+                    f.bendahara_nama.value = d.bendahara_nama || '';
+                    f.bendahara_nip.value = d.bendahara_nip || '';
+                    f.ketua_nama.value = d.ketua_nama || '';
+                    f.ketua_nip.value = d.ketua_nip || '';
+                }
+            } catch (err) { console.error(err); }
+
+            // Simpan Data
+            document.getElementById('formSetting').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const formData = new FormData(e.target);
+                const data = Object.fromEntries(formData.entries());
+
+                try {
+                    const res = await fetch('/api/settings', {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(data)
+                    });
+                    const json = await res.json();
+                    alert(json.message);
+                } catch (err) { alert('Gagal menyimpan'); }
+            });
+        });
+    </script>
+</body>
+
+</html>

@@ -1,82 +1,178 @@
-// Ambil Data dari API
-fetch('/api/perjadin/all')
-    .then((res) => res.json())
-    .then((data) => {
-        const body = document.getElementById('table-body');
-        body.innerHTML = '';
-        data.forEach((item) => {
-            // 1. Tentukan pengali (jumlah pegawai)
-            const jml = item.jumlah_sppd || 1;
-            const pengali = jml > 1 ? `<br><small style="color: #d35400; font-weight:bold;">(x${jml} Org)</small>` : '';
+// public/js/daftar-handler.js
 
-            const row = `
-        <tr>
-            <td>${item.no_surat_tugas}<br><small>${formatTanggalIndo(item.tgl_surat_tugas)}</small></td>
-            <td><b>${item.nama_pegawai || 'Tidak ada nama'}</b><br><small>${item.jabatan || ''}</small></td>
-            <td>${item.tujuan}</td>
-            <td>${item.maksud_dinas}</td>
-            <td>${formatTanggalIndo(item.tgl_berangkat)} s/d ${formatTanggalIndo(item.tgl_pulang)}</td>
-            
-            <td>Rp ${(item.uang_harian || 0).toLocaleString('id-ID')}${pengali}</td>
-            
-            <td>Rp ${(item.biaya_transportasi || 0).toLocaleString('id-ID')}</td>
-            
-            <td>${item.nama_hotel || '-'}<br>Rp ${(item.tarif_hotel || 0).toLocaleString('id-ID')}${pengali}</td>
-            
-            <td class="total-row">Rp ${(item.total_biaya || 0).toLocaleString('id-ID')}</td>
-            <td class="no-print">
-                <div style="display: flex; gap: 5px;">
-                    <a href="/index.html?edit=${item.id}" class="btn-edit" style="text-decoration:none; background:#f39c12; color:white; padding:6px 10px; border-radius:4px; font-size:11px; font-weight:bold;">
-                        <span>✏️</span> Edit
-                    </a>
-                    <button onclick="hapusData(${item.id})" class="btn-delete">
-                        <span>🗑️</span> Hapus
-                    </button>
-                </div>
-            </td>
-        </tr>
-    `;
-            body.innerHTML += row;
-        });
-    });
+let allData = []; // Wadah data mentah
 
-// Live Search
-document.getElementById('searchInput').addEventListener('keyup', function () {
-    const filter = this.value.toLowerCase();
-    const rows = document.querySelectorAll('#table-body tr');
-    rows.forEach((row) => {
-        const text = row.innerText.toLowerCase();
-        row.style.display = text.includes(filter) ? '' : 'none';
-    });
+document.addEventListener('DOMContentLoaded', () => {
+    loadData();
+
+    // Event Listener: Jalankan filter setiap kali user ngetik atau ganti bulan
+    const searchInput = document.getElementById('searchInput');
+    const filterBulan = document.getElementById('filterBulan');
+
+    searchInput.addEventListener('keyup', applyFilter);
+    filterBulan.addEventListener('change', applyFilter);
 });
 
-// Fungsi Hapus Data (Sesuai app.js)
+// 1. FUNGSI AMBIL DATA
+function loadData() {
+    fetch('/api/perjadin/all')
+        .then((res) => res.json())
+        .then((data) => {
+            allData = data;
+            renderTable(allData);
+        })
+        .catch((err) => {
+            console.error(err);
+            document.getElementById('table-body').innerHTML = '<tr><td colspan="10" class="text-center text-danger">Gagal memuat data API.</td></tr>';
+        });
+}
+
+// 2. FUNGSI FILTER GABUNGAN (PENTING!)
+function applyFilter() {
+    const keyword = document.getElementById('searchInput').value.toLowerCase();
+    const bulanDipilih = document.getElementById('filterBulan').value; // Format: "2026-01"
+
+    const filteredData = allData.filter((item) => {
+        // A. Cek Keyword (Nama/Surat/Tujuan)
+        const str = (val) => (val || '').toString().toLowerCase();
+        const matchKeyword = str(item.nama_pegawai).includes(keyword) || str(item.no_surat_tugas).includes(keyword) || str(item.tujuan).includes(keyword);
+
+        // B. Cek Bulan (Berdasarkan Tgl Berangkat)
+        // item.tgl_berangkat formatnya "YYYY-MM-DD"
+        let matchBulan = true;
+        if (bulanDipilih) {
+            // Ambil 7 karakter awal (YYYY-MM) dari data
+            const bulanData = (item.tgl_berangkat || '').substring(0, 7);
+            matchBulan = bulanData === bulanDipilih;
+        }
+
+        // C. Data harus lolos KEDUANYA (Keyword && Bulan)
+        return matchKeyword && matchBulan;
+    });
+
+    renderTable(filteredData);
+}
+
+// 3. FUNGSI RENDER TABEL (Sub-total Otomatis)
+function renderTable(data) {
+    const body = document.getElementById('table-body');
+    body.innerHTML = '';
+
+    if (data.length === 0) {
+        body.innerHTML = '<tr><td colspan="10" class="text-center py-4 text-muted">Data tidak ditemukan.</td></tr>';
+        return;
+    }
+
+    let grandTotal = 0;
+
+    data.forEach((item) => {
+        grandTotal += parseInt(item.total_biaya) || 0;
+
+        const jml = item.jumlah_sppd || 1;
+        const pengali = jml > 1 ? `<div class="badge bg-warning text-dark mt-1" style="font-size: 0.75rem;">x${jml} Org</div>` : '';
+        const rp = (num) => 'Rp ' + (num || 0).toLocaleString('id-ID');
+
+        const row = `
+            <tr>
+                <td>
+                    <span class="fw-bold text-dark">${item.no_surat_tugas}</span><br>
+                    <small class="text-muted">${formatTanggalIndo(item.tgl_surat_tugas)}</small>
+                </td>
+                <td>
+                    <div class="fw-bold text-primary">${item.nama_pegawai || 'Tidak ada nama'}</div>
+                    <small class="text-muted">${item.jabatan || '-'}</small>
+                </td>
+                <td>${item.tujuan}</td>
+                <td><small>${item.maksud_dinas}</small></td>
+                <td>
+                    <span class="d-block" style="min-width: 120px;">
+                        ${formatTanggalIndo(item.tgl_berangkat)} s/d<br>
+                        ${formatTanggalIndo(item.tgl_pulang)}
+                    </span>
+                </td>
+                
+                <td class="text-end text-nowrap">
+                    ${rp(item.uang_harian)}
+                    ${pengali}
+                </td>
+                
+                <td class="text-end text-nowrap">${rp(item.biaya_transportasi)}</td>
+                
+                <td class="text-end">
+                    ${item.nama_hotel || '-'}
+                    ${item.tarif_hotel ? '<br>' + rp(item.tarif_hotel) : ''}
+                </td>
+                
+                <td class="text-end fw-bold bg-light text-nowrap" style="color: #bb2d3b;">
+                    ${rp(item.total_biaya)}
+                </td>
+
+                <td class="no-print align-middle text-center">
+                    <div class="d-flex justify-content-center gap-1">
+                        <a href="/perjadin.html?edit=${item.id}" class="btn btn-warning btn-sm text-dark fw-bold" title="Edit Data" style="font-size: 0.8rem;">
+                            <i class="bi bi-pencil-square"></i> Edit
+                        </a>
+                        <button onclick="hapusData(${item.id})" class="btn btn-danger btn-sm fw-bold" title="Hapus Data" style="font-size: 0.8rem;">
+                            <i class="bi bi-trash"></i> Hapus
+                        </button>
+                    </div>
+                </td>
+            </tr>
+        `;
+        body.innerHTML += row;
+    });
+
+    // Baris Sub-Total (Abu-abu & Print Friendly)
+    const totalRow = `
+        <tr style="background-color: #e2e6ea; border-top: 3px solid #333;">
+            <td colspan="8" class="text-end text-uppercase pe-3 align-middle text-dark fw-bold">
+                Total Pengeluaran (Data Ditampilkan):
+            </td>
+            <td class="text-end fw-bold text-dark fs-6 text-nowrap align-middle" style="background-color: #d1d5db;">
+                Rp ${grandTotal.toLocaleString('id-ID')}
+            </td>
+            <td class="no-print bg-white border-0"></td> 
+        </tr>
+    `;
+    body.innerHTML += totalRow;
+}
+
+// 4. FUNGSI RESET FILTER (Tombol X)
+function resetFilter() {
+    document.getElementById('searchInput').value = '';
+    document.getElementById('filterBulan').value = '';
+    applyFilter(); // Render ulang semua data
+}
+
+// 5. FUNGSI HAPUS DATA
 function hapusData(id) {
     if (confirm('Yakin ingin menghapus data ini?')) {
-        fetch(`/api/perjadin/delete/${id}`).then((res) => {
-            if (res.ok) {
-                alert('Data berhasil dihapus!');
-                location.reload();
-            } else {
-                alert('Gagal menghapus data.');
-            }
-        });
+        fetch(`/api/perjadin/delete/${id}`, { method: 'DELETE' })
+            .then((res) => res.json())
+            .then((res) => {
+                if (res.success) {
+                    alert('Data berhasil dihapus!');
+                    loadData();
+                } else {
+                    alert('Gagal menghapus data.');
+                }
+            })
+            .catch(() => alert('Terjadi kesalahan koneksi.'));
     }
 }
 
-// Fungsi Export Excel
+// 6. FUNGSI EXPORT EXCEL (Otomatis ngikutin hasil filter)
 function exportToExcel() {
     const table = document.querySelector('table');
-    const tableClone = table.cloneNode(true);
+    const tableClone = table.cloneNode(true); // Clone tabel yg sedang tampil (terfilter)
 
-    // Bersihkan kolom aksi
     const noPrintElements = tableClone.querySelectorAll('.no-print');
     noPrintElements.forEach((el) => el.remove());
 
     const tableHTML = tableClone.outerHTML.replace(/ /g, '%20');
-    const filename = 'Laporan_Perjadin_KPU_Tubaba.xls';
-    const downloadLink = document.createElement('a');
+    const filename = 'Laporan_Rekap_Biaya_KPU.xls';
 
+    const downloadLink = document.createElement('a');
     document.body.appendChild(downloadLink);
     downloadLink.href = 'data:application/vnd.ms-excel,' + tableHTML;
     downloadLink.download = filename;
