@@ -4,3 +4,8 @@ node_modules/
 .jpeg 
 .txt
 .jpg
+*.py
+*.jpeg
+*.jpg
+*.sql
+*.txt
