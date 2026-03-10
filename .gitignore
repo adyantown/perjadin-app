@@ -9,3 +9,4 @@ node_modules/
 *.jpg
 *.sql
 *.txt
+*.db
