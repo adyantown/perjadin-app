@@ -1,4 +1,5 @@
 const db = require('../config/db');
+const logController = require('./logController');
 
 exports.saveSppd = (req, res) => {
     // Kita tangkap semua kiriman dari form (req.body)
@@ -34,6 +35,7 @@ exports.saveSppd = (req, res) => {
             console.error('Error Simpan SPPD:', err);
             return res.status(500).json({ success: false, message: err.message });
         }
+        logController.catatLog(req, 'Buat SPPD', `Membuat SPPD Baru dengan Nomor: ${data.nomor_st}`);
         res.json({
             success: true,
             message: 'Data SPPD Berhasil Disimpan!',
@@ -61,6 +63,7 @@ exports.deleteSppd = (req, res) => {
         if (err) {
             return res.status(500).json({ success: false, message: err.message });
         }
+        logController.catatLog(req, 'Hapus SPPD', `Menghapus data SPPD ID: ${id}`);
         res.json({ success: true, message: 'Data berhasil dihapus!' });
     });
 };
@@ -88,6 +91,7 @@ exports.updateSppd = (req, res) => {
         if (err) {
             return res.status(500).json({ success: false, message: err.message });
         }
+        logController.catatLog(req, 'Edit SPPD', `Mengubah data SPPD ID: ${id}`);
         res.json({ success: true, message: 'Data berhasil diperbarui!' });
     });
 };

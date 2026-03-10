@@ -1,14 +1,11 @@
 require('dotenv').config();
 const mysql = require('mysql2');
 
-// Kita tidak butuh 'fs' dan 'path' lagi karena sertifikatnya lewat variabel
-
 let pool;
 
+// Jika di .env ada DB_HOST (artinya lagi di Cloud/Vercel)
 if (process.env.DB_HOST) {
-    // --- KONFIGURASI CLOUD (AIVEN) ---
-    console.log('🌐 Menggunakan Konfigurasi CLOUD (Pool)...');
-
+    console.log('🌐 Menggunakan Konfigurasi CLOUD (Aiven Pool)...');
     pool = mysql.createPool({
         host: process.env.DB_HOST,
         user: process.env.DB_USER,
@@ -16,37 +13,26 @@ if (process.env.DB_HOST) {
         database: process.env.DB_NAME,
         port: process.env.DB_PORT || 17184,
         waitForConnections: true,
-        connectionLimit: 5, // Batasi koneksi (Penting buat Free Tier Aiven)
+        connectionLimit: 5,
         queueLimit: 0,
         ssl: {
-            // Ambil sertifikat dari Environment Variable Vercel
             ca: process.env.DB_SSL_CA,
             rejectUnauthorized: true,
         },
     });
 } else {
-    // --- KONFIGURASI LOCAL (XAMPP) ---
-    console.log('🏠 Menggunakan Konfigurasi LOCAL...');
-
+    // JIKA TIDAK ADA DB_HOST (Artinya lagi di Laptop/Localhost)
+    console.log('🏠 Menggunakan Konfigurasi LOCAL (XAMPP)...');
     pool = mysql.createPool({
-        host: 'localhost',
-        user: 'root',
-        password: '',
-        database: 'db_kpu',
+        host: 'localhost', // Host XAMPP
+        user: 'root', // User Default XAMPP
+        password: '', // Password Default XAMPP (biasanya kosong)
+        database: 'db_kpu', // Pastikan nama DB di phpMyAdmin sama
         waitForConnections: true,
         connectionLimit: 10,
         queueLimit: 0,
     });
 }
 
-// Tes koneksi awal (Optional, tapi bagus buat debug)
-pool.getConnection((err, connection) => {
-    if (err) {
-        console.error('❌ Gagal Konek Database:', err.message);
-    } else {
-        console.log('✅ BERHASIL Terhubung ke Database!');
-        connection.release(); // Jangan lupa lepaskan koneksi setelah tes
-    }
-});
-
+// ... kode tes koneksi ...
 module.exports = pool;

@@ -27,30 +27,41 @@ function loadData() {
         });
 }
 
-// 2. FUNGSI FILTER GABUNGAN (PENTING!)
+// 2. FUNGSI FILTER GABUNGAN
 function applyFilter() {
     const keyword = document.getElementById('searchInput').value.toLowerCase();
-    const bulanDipilih = document.getElementById('filterBulan').value; // Format: "2026-01"
+    const bulanDipilih = document.getElementById('filterBulan').value;
 
     const filteredData = allData.filter((item) => {
-        // A. Cek Keyword (Nama/Surat/Tujuan)
         const str = (val) => (val || '').toString().toLowerCase();
         const matchKeyword = str(item.nama_pegawai).includes(keyword) || str(item.no_surat_tugas).includes(keyword) || str(item.tujuan).includes(keyword);
 
-        // B. Cek Bulan (Berdasarkan Tgl Berangkat)
-        // item.tgl_berangkat formatnya "YYYY-MM-DD"
         let matchBulan = true;
         if (bulanDipilih) {
-            // Ambil 7 karakter awal (YYYY-MM) dari data
             const bulanData = (item.tgl_berangkat || '').substring(0, 7);
             matchBulan = bulanData === bulanDipilih;
         }
 
-        // C. Data harus lolos KEDUANYA (Keyword && Bulan)
         return matchKeyword && matchBulan;
     });
 
     renderTable(filteredData);
+}
+
+// FUNGSI HELPER: Pengubah Pipa (|||) jadi Daftar Bernomor (Biar Rapi di Tabel & Excel)
+function formatPipaAman(str) {
+    if (!str) return '-';
+    // Pecah berdasarkan pipa, bersihkan spasi, lalu buang yang kosong
+    const arr = str
+        .split('|||')
+        .map((s) => s.trim())
+        .filter(Boolean);
+
+    // Kalau cuma 1 orang, tampilkan biasa
+    if (arr.length <= 1) return arr[0] || '-';
+
+    // Kalau lebih dari 1, buat daftar ke bawah pakai <br>
+    return arr.map((val, idx) => `<span class="d-block mb-1"><b>${idx + 1}.</b> ${val}</span>`).join('');
 }
 
 // 3. FUNGSI RENDER TABEL (Sub-total Otomatis)
@@ -72,16 +83,23 @@ function renderTable(data) {
         const pengali = jml > 1 ? `<div class="badge bg-warning text-dark mt-1" style="font-size: 0.75rem;">x${jml} Org</div>` : '';
         const rp = (num) => 'Rp ' + (num || 0).toLocaleString('id-ID');
 
+        // ---> GUNAKAN HELPER PEMOTONG PIPA DI SINI <---
+        const namaFormatted = formatPipaAman(item.nama_pegawai) || 'Tidak ada nama';
+        const jabatanFormatted = formatPipaAman(item.jabatan);
+
         const row = `
             <tr>
                 <td>
                     <span class="fw-bold text-dark">${item.no_surat_tugas}</span><br>
                     <small class="text-muted">${formatTanggalIndo(item.tgl_surat_tugas)}</small>
                 </td>
+                
                 <td>
-                    <div class="fw-bold text-primary">${item.nama_pegawai || 'Tidak ada nama'}</div>
-                    <small class="text-muted">${item.jabatan || '-'}</small>
+                    <div class="text-primary fw-bold">${namaFormatted}</div>
+                    <hr class="my-1 border-secondary opacity-25">
+                    <div class="text-muted small">${jabatanFormatted}</div>
                 </td>
+                
                 <td>${item.tujuan}</td>
                 <td><small>${item.maksud_dinas}</small></td>
                 <td>
@@ -110,10 +128,10 @@ function renderTable(data) {
                 <td class="no-print align-middle text-center">
                     <div class="d-flex justify-content-center gap-1">
                         <a href="/perjadin.html?edit=${item.id}" class="btn btn-warning btn-sm text-dark fw-bold" title="Edit Data" style="font-size: 0.8rem;">
-                            <i class="bi bi-pencil-square"></i> Edit
+                            <i class="bi bi-pencil-square"></i>
                         </a>
                         <button onclick="hapusData(${item.id})" class="btn btn-danger btn-sm fw-bold" title="Hapus Data" style="font-size: 0.8rem;">
-                            <i class="bi bi-trash"></i> Hapus
+                            <i class="bi bi-trash"></i>
                         </button>
                     </div>
                 </td>
@@ -141,30 +159,48 @@ function renderTable(data) {
 function resetFilter() {
     document.getElementById('searchInput').value = '';
     document.getElementById('filterBulan').value = '';
-    applyFilter(); // Render ulang semua data
+    applyFilter();
 }
 
-// 5. FUNGSI HAPUS DATA
+// 5. FUNGSI HAPUS DATA (UPGRADE SWEETALERT2)
 function hapusData(id) {
-    if (confirm('Yakin ingin menghapus data ini?')) {
-        fetch(`/api/perjadin/delete/${id}`, { method: 'DELETE' })
-            .then((res) => res.json())
-            .then((res) => {
-                if (res.success) {
-                    alert('Data berhasil dihapus!');
-                    loadData();
-                } else {
-                    alert('Gagal menghapus data.');
-                }
-            })
-            .catch(() => alert('Terjadi kesalahan koneksi.'));
-    }
+    Swal.fire({
+        title: 'Hapus Rekap Biaya?',
+        text: 'Data yang dihapus tidak bisa dikembalikan!',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#bb2d3b',
+        cancelButtonColor: '#6c757d',
+        confirmButtonText: '<i class="bi bi-trash"></i> Ya, Hapus!',
+        cancelButtonText: 'Batal',
+        reverseButtons: true,
+    }).then((result) => {
+        if (result.isConfirmed) {
+            fetch(`/api/perjadin/delete/${id}`, { method: 'DELETE' })
+                .then((res) => res.json())
+                .then((res) => {
+                    if (res.success) {
+                        Swal.fire({
+                            title: 'Terhapus!',
+                            text: 'Data berhasil dihilangkan.',
+                            icon: 'success',
+                            timer: 1500,
+                            showConfirmButton: false,
+                        });
+                        loadData(); // Langsung refresh tabel tanpa perlu F5
+                    } else {
+                        Swal.fire('Gagal!', 'Gagal menghapus data.', 'error');
+                    }
+                })
+                .catch(() => Swal.fire('Error!', 'Terjadi kesalahan koneksi server.', 'error'));
+        }
+    });
 }
 
-// 6. FUNGSI EXPORT EXCEL (Otomatis ngikutin hasil filter)
+// 6. FUNGSI EXPORT EXCEL
 function exportToExcel() {
     const table = document.querySelector('table');
-    const tableClone = table.cloneNode(true); // Clone tabel yg sedang tampil (terfilter)
+    const tableClone = table.cloneNode(true);
 
     const noPrintElements = tableClone.querySelectorAll('.no-print');
     noPrintElements.forEach((el) => el.remove());

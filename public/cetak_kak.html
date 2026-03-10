@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cetak KAK - KPU Tubaba</title>
+    <link rel="icon" type="image/x-icon" href="/img/kpu_logo.png">
+    <link rel="stylesheet" href="style/cetak-kak-style.css">
+</head>
+
+<body>
+
+    <div class="kertas-a4">
+        <div class="kop-surat">
+            <div class="logo-wadah">
+                <img src="img/kpu_logo.png" alt="Logo KPU">
+            </div>
+
+            <div class="teks-kop">
+                <h3>KOMISI PEMILIHAN UMUM</h3>
+                <h2>KABUPATEN TULANG BAWANG BARAT</h2>
+                <p>Jalan KH. Ahmad Dahlan Candra Mukti Tulang Bawang Tengah<br>
+                    Kabupaten Tulang Bawang Barat Kode Pos: 34793<br>
+                    Email: kab_tulangbawangbarat@kpu.go.id</p>
+            </div>
+        </div>
+
+        <div class="judul-dokumen">
+            <h4>KAK (Kerangka Acuan Kerja)</h4>
+            <p id="c_judul">Memuat Judul...</p>
+        </div>
+
+        <div class="isi-kak">
+            <h5>A. Latar Belakang</h5>
+            <p><b>1. Pendahuluan</b></p>
+            <p id="c_pendahuluan">Memuat...</p>
+
+            <p><b>2. Dasar Hukum</b></p>
+            <p id="c_hukum">Memuat...</p>
+
+            <h5>B. Maksud dan Tujuan</h5>
+            <p id="c_tujuan">Memuat...</p>
+
+            <h5>C. Output yang Akan Dicapai</h5>
+            <p id="c_output">Memuat...</p>
+
+            <h5>D. Pembebanan Anggaran</h5>
+            <p>Kegiatan ini dibebankan pada pagu anggaran: <b id="c_pagu">Memuat...</b></p>
+
+            <h5>E. Penutup</h5>
+            <p style="white-space: nowrap;">Demikian Kerangka Acuan Kerja ini dibuat agar dapat
+                dipergunakan sebagaimana mestinya.
+            </p>
+        </div>
+
+        <table class="tanda-tangan">
+            <tr>
+                <td></td>
+                <td>
+                    <p>Candra Mukti, <span id="c_tgl">...</span><br>
+                        Pejabat Pembuat Komitmen</p>
+                    <br><br><br>
+                    <p class="nama-pejabat" id="c_nama_ppk">NAMA PPK</p>
+                    <p style="margin:0;">NIP. <span id="c_nip_ppk">...</span></p>
+                </td>
+            </tr>
+        </table>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Ambil ID dari URL (contoh: cetak_kak.html?id=1)
+            const urlParams = new URLSearchParams(window.location.search);
+            const idKak = urlParams.get('id');
+
+            if (!idKak) {
+                alert('ID KAK tidak ditemukan!');
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/kak/view/${idKak}`);
+                const result = await response.json();
+
+                if (result.success && result.data) {
+                    const d = result.data;
+
+                    // Format Tanggal (Format: 18 November 2026)
+                    const dateObj = new Date(d.tgl_kak);
+                    const tglIndo = dateObj.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+
+                    // Suntikkan data ke HTML
+                    document.getElementById('c_judul').innerText = d.judul_kegiatan;
+                    document.getElementById('c_pendahuluan').innerText = d.latar_belakang || '-';
+                    document.getElementById('c_hukum').innerText = d.dasar_hukum || '-';
+                    document.getElementById('c_tujuan').innerText = d.maksud_tujuan || '-';
+                    document.getElementById('c_output').innerText = d.output_kegiatan || '-';
+                    document.getElementById('c_pagu').innerText = d.nama_kamar || '-';
+
+                    document.getElementById('c_tgl').innerText = tglIndo;
+                    document.getElementById('c_nama_ppk').innerText = d.ppk_nama;
+                    document.getElementById('c_nip_ppk').innerText = d.ppk_nip;
+
+                    // MANTRA AUTO-PRINT (Tunggu 1 detik biar layout render sempurna)
+                    setTimeout(() => {
+                        window.print();
+                    }, 1000);
+
+                } else {
+                    alert('Gagal mengambil data KAK.');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Terjadi kesalahan sistem.');
+            }
+        });
+    </script>
+</body>
+
+</html>

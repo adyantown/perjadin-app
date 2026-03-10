@@ -47,14 +47,69 @@
                 <p class="mb-0 text-muted">Sistem Informasi Manajemen Perjalanan Dinas (SPPD)</p>
             </div>
             <div class="d-none d-md-block text-end">
-                <span class="badge bg-danger rounded-pill px-3 py-2">
-                    <i class="bi bi-calendar-event me-1"></i> Tahun Anggaran 2026
+                <span class="badge bg-secondary rounded-pill px-3 py-2 shadow-sm">
+                    <i class="bi bi-calendar-event me-1"></i> Tahun Anggaran <span
+                        id="tahunAnggaranSistem">2026</span>
                 </span>
             </div>
         </div>
-
+        <div class="row mb-4" id="heroAdminSection" style="display: none;">
+            <div class="col-12">
+                <div class="card border-0 shadow-sm text-white"
+                    style="background: linear-gradient(135deg, #0f766e 0%, #115e59 100%); border-radius: 15px;">
+                    <div class=" card-body p-4 d-flex justify-content-between align-items-center
+                    flex-wrap gap-3">
+                        <div>
+                            <h4 class="fw-bold mb-1"><i
+                                    class="bi bi-bar-chart-line-fill me-2"></i>Executive
+                                Summary</h4>
+                            <p class="mb-0 opacity-75" id="teksSapaanAdmin">Menganalisis data
+                                penyerapan
+                                anggaran...</p>
+                        </div>
+                        <div class="text-end text-start-sm">
+                            <div class="fs-3 fw-bold mb-1" id="totalAnggaranHero">Rp 0</div>
+                            <div class="small opacity-75 mb-3">Total Penyerapan Anggaran</div>
+                            <a href="/analitik.html"
+                                class="btn btn-light btn-sm fw-bold text-primary rounded-pill px-4 py-2 shadow-sm text-success">
+                                <i class="bi bi-pie-chart-fill me-1 text-success"></i> Buka Analitik
+                                Pegawai
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
         <h5 class="mb-3 fw-bold border-start border-4 border-danger ps-2">Menu Utama</h5>
         <div class="row g-4">
+            <div class="col-md-4">
+                <a href="/riwayat_kak.html" class="card menu-card p-4">
+                    <div class="card-body text-center">
+                        <div class="icon-box mx-auto"
+                            style="background-color: #e3f2fd; color: #1976d2;">
+                            <i class="bi bi-file-earmark-ruled-fill"></i>
+                        </div>
+                        <h5 class="card-title">Membuat KAK</h5>
+                        <p class="card-text">Kelola Kerangka Acuan Kerja (KAK) dan master data
+                            kegiatan
+                            anggaran.</p>
+                    </div>
+                </a>
+            </div>
+
+            <div class="col-md-4">
+                <a href="/riwayat_rab.html" class="card menu-card p-4">
+                    <div class="card-body text-center">
+                        <div class="icon-box mx-auto"
+                            style="background-color: #e8f5e9; color: #2e7d32;">
+                            <i class="bi bi-calculator-fill"></i>
+                        </div>
+                        <h5 class="card-title">Membuat RAB</h5>
+                        <p class="card-text">Susun Rencana Anggaran Biaya dan pantau otomatis sisa
+                            Pagu.</p>
+                    </div>
+                </a>
+            </div>
 
             <div class="col-md-4">
                 <a href="/input_sppd.html" class="card menu-card p-4">
@@ -68,7 +123,6 @@
                     </div>
                 </a>
             </div>
-
             <div class="col-md-4">
                 <a href="/riwayat_sppd.html" class="card menu-card p-4">
                     <div class="card-body text-center">
@@ -111,7 +165,7 @@
                         <div class="icon-box bg-warning text-dark mx-auto">
                             <i class="bi bi-cash-coin"></i>
                         </div>
-                        <h5 class="card-title">Rekap Biaya (Rill)</h5>
+                        <h5 class="card-title">Input-Rekap Biaya Perjadin</h5>
                         <p class="card-text">Input rincian uang harian, transport, & hotel untuk
                             laporan
                             keuangan.</p>
@@ -145,7 +199,30 @@
                     </div>
                 </a>
             </div>
-
+            <div class="col-md-4" id="cardLogAdmin" style="display: none;">
+                <a href="/log_aktivitas.html" class="card menu-card p-4">
+                    <div class="card-body text-center">
+                        <div class="icon-box bg-dark text-white mx-auto">
+                            <i class="bi bi-shield-lock-fill"></i>
+                        </div>
+                        <h5 class="card-title">System Logs</h5>
+                        <p class="card-text">Audit trail & rekam jejak aktivitas user di dalam
+                            aplikasi.</p>
+                    </div>
+                </a>
+            </div>
+            <div class="col-md-4" id="cardManajemenUser" style="display: none;">
+                <a href="/manajemen_user.html" class="card menu-card p-4">
+                    <div class="card-body text-center">
+                        <div class="icon-box bg-primary text-white mx-auto">
+                            <i class="bi bi-people-fill"></i>
+                        </div>
+                        <h5 class="card-title">Manajemen Akun</h5>
+                        <p class="card-text">Kelola akses sistem, tambah pengguna, dan reset
+                            password.</p>
+                    </div>
+                </a>
+            </div>
         </div>
 
         <div class="stats-container">

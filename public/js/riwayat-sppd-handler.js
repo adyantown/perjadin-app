@@ -37,9 +37,14 @@ async function loadRiwayat() {
                     </td>
                     <td>${item.tempat_tujuan || '-'}</td>
                     <td>
+                        <a href="/input_sppd.html?edit=${item.id}&action=print" target="_blank" class="btn btn-sm btn-outline-success me-1">
+                            🖨️ Cetak
+                        </a>
+                        
                         <button onclick="editSppd(${item.id})" class="btn btn-sm btn-outline-primary me-1">
-                            ✏️ Edit/Cetak
+                            ✏️ Edit
                         </button>
+                        
                         <button onclick="hapusSppd(${item.id})" class="btn btn-sm btn-outline-danger">
                             🗑️ Hapus
                         </button>

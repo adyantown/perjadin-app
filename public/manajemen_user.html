@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manajemen Akun - E-PERJADIN</title>
+    <link rel="icon" type="image/x-icon" href="/img/kpu_logo.png">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+        rel="stylesheet">
+    <link rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="style/index-style.css">
+</head>
+
+<body style="background-color: #f0f2f5;">
+
+    <nav class="navbar navbar-dark navbar-kpu py-3 shadow-sm mb-4">
+        <div class="container">
+            <a class="navbar-brand d-flex align-items-center" href="/index.html">
+                <i class="bi bi-arrow-left-circle me-2"></i> Kembali ke Dashboard
+            </a>
+            <span class="text-white fw-bold">MANAJEMEN AKUN (ADMIN ONLY)</span>
+        </div>
+    </nav>
+
+    <div class="container pb-5">
+        <div class="card shadow border-0 rounded-4">
+            <div class="card-body p-4">
+
+                <div
+                    class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-3">
+                    <div>
+                        <h5 class="fw-bold text-secondary mb-0"><i
+                                class="bi bi-people-fill me-2 text-primary"></i>Daftar Pengguna
+                            Sistem</h5>
+                        <small class="text-muted">Kelola akses, reset password, dan tambah
+                            admin/user baru.</small>
+                    </div>
+                    <button class="btn btn-primary" onclick="bukaModalTambah()">
+                        <i class="bi bi-person-plus-fill me-1"></i> Tambah Akun
+                    </button>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle border">
+                        <thead class="table-light">
+                            <tr>
+                                <th width="5%" class="text-center">No</th>
+                                <th width="30%">Nama Lengkap</th>
+                                <th width="25%">Username (Login)</th>
+                                <th width="15%" class="text-center">Role Akses</th>
+                                <th width="25%" class="text-center">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="userTableBody">
+                            <tr>
+                                <td colspan="5" class="text-center py-4">Memuat data...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="modalUser" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title">Buat Akun Baru</h5>
+                    <button type="button" class="btn-close btn-close-white"
+                        data-bs-dismiss="modal"></button>
+                </div>
+                <form id="formUser">
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Nama Lengkap</label>
+                            <input type="text" name="nama_lengkap" class="form-control"
+                                placeholder="Nama asli pengguna" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Username</label>
+                            <input type="text" name="username" class="form-control"
+                                placeholder="NIP / Nama Pendek tanpa spasi" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Password Default</label>
+                            <input type="password" name="password" class="form-control"
+                                placeholder="Minimal 6 karakter" required minlength="6">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Role (Hak Akses)</label>
+                            <select name="role" class="form-select" required>
+                                <option value="user">User Biasa (Hanya bisa input)</option>
+                                <option value="admin">Admin (Bisa semua fitur & pengaturan)</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary"
+                            data-bs-dismiss="modal">Batal</button>
+                        <button type="submit" class="btn btn-primary">Simpan Akun</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script
+        src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/user-handler.js"></script>
+</body>
+
+</html>

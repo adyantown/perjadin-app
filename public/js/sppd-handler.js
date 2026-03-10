@@ -236,6 +236,20 @@ async function enableEditMode(id) {
                 }
             }
             hitungLamaPerjalanan();
+
+            // ---> MANTRA AUTO-PRINT YANG BENAR <---
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('action') === 'print') {
+                // 1. PINDAHKAN DATA KE TEMPLATE CETAKAN DULU
+                isiTemplateCetak(d);
+
+                // 2. BARU PANGGIL JENDELA PRINT
+                // Karena datanya sudah dipindah instan, nunggu 1 detik aja (1000ms) udah cukup banget
+                setTimeout(() => {
+                    window.print();
+                }, 1000);
+            }
+            // ---------------------------------------------
         }
     } catch (err) {
         console.error('Gagal load data edit:', err);

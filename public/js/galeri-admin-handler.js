@@ -98,19 +98,42 @@ function renderCard(item) {
 
 // Fungsi Hapus Foto
 async function hapusFoto(id) {
-    if (!confirm('Yakin ingin menghapus dokumentasi ini? Foto akan hilang permanen.')) return;
+    // 1. Munculkan Popup Konfirmasi Keren
+    const result = await Swal.fire({
+        title: 'Yakin ingin menghapus?',
+        text: 'Foto dokumentasi ini akan hilang permanen lho!',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#bb2d3b', // Warna merah KPU
+        cancelButtonColor: '#6c757d', // Warna abu-abu
+        confirmButtonText: '<i class="bi bi-trash"></i> Ya, Hapus!',
+        cancelButtonText: 'Batal',
+        reverseButtons: true, // Posisi tombol batal di kiri
+    });
 
-    try {
-        const res = await fetch(`/api/dokumentasi/delete/${id}`, { method: 'DELETE' });
-        const json = await res.json();
+    // 2. Jika user klik "Ya, Hapus!"
+    if (result.isConfirmed) {
+        try {
+            // Tembak API untuk hapus
+            const res = await fetch(`/api/dokumentasi/delete/${id}`, { method: 'DELETE' });
+            const json = await res.json();
 
-        if (json.success) {
-            loadGaleri(); // Reload grid
-        } else {
-            alert('Gagal: ' + json.message);
+            if (json.success) {
+                // Munculkan notifikasi sukses
+                Swal.fire({
+                    title: 'Terhapus!',
+                    text: 'Dokumentasi berhasil dihilangkan.',
+                    icon: 'success',
+                    timer: 1500, // Otomatis tutup dalam 1.5 detik
+                    showConfirmButton: false,
+                });
+                loadGaleri(); // Reload grid foto [cite: 520, 521]
+            } else {
+                Swal.fire('Gagal!', json.message, 'error');
+            }
+        } catch (error) {
+            Swal.fire('Error!', 'Terjadi kesalahan koneksi.', 'error');
         }
-    } catch (error) {
-        alert('Terjadi kesalahan koneksi.');
     }
 }
 

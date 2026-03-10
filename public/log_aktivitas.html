@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Log Aktivitas - E-PERJADIN</title>
+    <link rel="icon" type="image/x-icon" href="/img/kpu_logo.png">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+        rel="stylesheet">
+    <link rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="style/index-style.css">
+</head>
+
+<body style="background-color: #f0f2f5;">
+
+    <nav class="navbar navbar-dark navbar-kpu py-3 shadow-sm mb-4">
+        <div class="container">
+            <a class="navbar-brand d-flex align-items-center" href="/index.html">
+                <i class="bi bi-arrow-left-circle me-2"></i> Kembali ke Dashboard
+            </a>
+            <span class="text-white fw-bold">SYSTEM LOG (ADMIN ONLY)</span>
+        </div>
+    </nav>
+
+    <div class="container pb-5">
+        <div class="card shadow border-0 rounded-4">
+            <div class="card-body p-4">
+                <h5 class="fw-bold text-secondary mb-4"><i
+                        class="bi bi-shield-lock-fill me-2 text-danger"></i>Log Aktivitas Pengguna
+                    (100 Terakhir)</h5>
+
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle table-sm border">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>Waktu</th>
+                                <th>Pengguna</th>
+                                <th>Aksi</th>
+                                <th>Detail Keterangan</th>
+                            </tr>
+                        </thead>
+                        <tbody id="logTableBody">
+                            <tr>
+                                <td colspan="4" class="text-center py-4">Memuat data log...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/utils.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                const res = await fetch('/api/logs');
+                const json = await res.json();
+                const tbody = document.getElementById('logTableBody');
+                tbody.innerHTML = '';
+
+                if (json.success && json.data.length > 0) {
+                    json.data.forEach(log => {
+                        // Pakai helper format tanggal & jam
+                        const tgl = new Date(log.waktu);
+                        const formatWaktu = `${tgl.toLocaleDateString('id-ID')} ${tgl.toLocaleTimeString('id-ID')}`;
+
+                        // Beri warna badge sesuai role
+                        const roleBadge = log.role === 'admin' ? 'bg-danger' : 'bg-primary';
+
+                        tbody.innerHTML += `
+                            <tr>
+                                <td class="text-muted small">${formatWaktu}</td>
+                                <td>
+                                    <span class="fw-bold">${log.nama_user}</span><br>
+                                    <span class="badge ${roleBadge} rounded-pill" style="font-size: 10px;">${log.role}</span>
+                                </td>
+                                <td><span class="fw-bold text-dark">${log.aksi}</span></td>
+                                <td class="text-muted small">${log.keterangan}</td>
+                            </tr>
+                        `;
+                    });
+                } else {
+                    tbody.innerHTML = '<tr><td colspan="4" class="text-center py-4 text-muted">Belum ada aktivitas yang terekam.</td></tr>';
+                }
+            } catch (err) {
+                document.getElementById('logTableBody').innerHTML = '<tr><td colspan="4" class="text-center text-danger">Gagal memuat log sistem.</td></tr>';
+            }
+        });
+    </script>
+</body>
+
+</html>

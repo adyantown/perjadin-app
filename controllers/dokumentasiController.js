@@ -1,6 +1,6 @@
 // controllers/dokumentasiController.js
 const db = require('../config/db');
-
+const logController = require('./logController');
 // 1. Simpan Bukti & Lokasi
 exports.uploadBukti = (req, res) => {
     try {
@@ -39,5 +39,21 @@ exports.getAllGaleri = (req, res) => {
     db.query(sql, (err, rows) => {
         if (err) return res.status(500).json({ success: false, message: err.message });
         res.json({ success: true, data: rows });
+    });
+};
+
+// 3. FUNGSI HAPUS DOKUMENTASI (BARU)
+exports.deleteDokumentasi = (req, res) => {
+    const id = req.params.id;
+
+    // Hapus data dari database berdasarkan ID
+    const sql = 'DELETE FROM dokumentasi_sppd WHERE id = ?';
+
+    db.query(sql, [id], (err, result) => {
+        if (err) {
+            console.error('Error hapus foto:', err);
+            return res.status(500).json({ success: false, message: err.message });
+        }
+        res.json({ success: true, message: 'Dokumentasi berhasil dihapus!' });
     });
 };

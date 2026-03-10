@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cetak RAB - KPU Tubaba</title>
+    <link rel="icon" type="image/x-icon" href="/img/kpu_logo.png">
+    <link rel="stylesheet" href="style/cetak-rab-style.css">
+</head>
+
+<body>
+
+    <div class="kertas-a4">
+        <div class="header-rab">
+            <h3>RENCANA ANGGARAN BIAYA</h3>
+            <h4>KPU KABUPATEN TULANG BAWANG BARAT</h4>
+            <h4>TAHUN ANGGARAN <span id="c_tahun">2026</span></h4>
+        </div>
+
+        <table class="tabel-rab">
+            <thead>
+                <tr>
+                    <th rowspan="2" width="15%">KODE</th>
+                    <th rowspan="2" width="30%">URAIAN</th>
+                    <th rowspan="2" width="13%">PAGU ANGGARAN</th>
+                    <th rowspan="2" width="13%">REALISASI</th>
+                    <th rowspan="2" width="5%">VOL</th>
+                    <th colspan="2">RENCANA PENGGUNAAN ANGGARAN</th>
+                    <th rowspan="2" width="13%">SISA ANGGARAN</th>
+                </tr>
+                <tr>
+                    <th>SATUAN</th>
+                    <th>BIAYA</th>
+                </tr>
+                <tr style="background-color: #f9f9f9; text-align: center;">
+                    <td>(1)</td>
+                    <td>(2)</td>
+                    <td>(3)</td>
+                    <td>(4)</td>
+                    <td>(5)</td>
+                    <td>(6)</td>
+                    <td>(7)</td>
+                    <td>(8)</td>
+                </tr>
+            </thead>
+            <tbody>
+                <tr class="fw-bold">
+                    <td class="text-center" id="c_prog_kode">-</td>
+                    <td id="c_prog_nama">-</td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td class="text-center" id="c_keg_kode">-</td>
+                    <td id="c_keg_nama">-</td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td class="text-center" id="c_komp_kode">-</td>
+                    <td id="c_komp_nama">-</td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td class="text-center">524111</td>
+                    <td id="c_akun_nama">Belanja Perjalanan Dinas Biasa</td>
+                    <td class="text-right" id="c_pagu">0</td>
+                    <td class="text-right" id="c_realisasi">0</td>
+                    <td></td>
+                    <td></td>
+                    <td class="text-right" id="c_total_rab">0</td>
+                    <td class="text-right" id="c_sisa_akhir">0</td>
+                </tr>
+
+                <tr>
+                    <td></td>
+                    <td>- Uang Harian [<span id="c_var_org"></span> ORG x <span
+                            id="c_var_keg"></span> KEG x <span id="c_var_hr"></span> HR]</td>
+                    <td></td>
+                    <td></td>
+                    <td class="text-center"><span id="c_vol_uh"></span></td>
+                    <td class="text-right" id="c_satuan_uh">0</td>
+                    <td class="text-right" id="c_biaya_uh">0</td>
+                    <td></td>
+                </tr>
+
+                <tr>
+                    <td></td>
+                    <td>- <span id="c_jenis_transport">Transport [BBM]</span></td>
+                    <td></td>
+                    <td></td>
+                    <td class="text-center"><span id="c_vol_tr"></span></td>
+                    <td class="text-right" id="c_satuan_tr">0</td>
+                    <td class="text-right" id="c_biaya_tr">0</td>
+                    <td></td>
+                </tr>
+            </tbody>
+        </table>
+
+        <table class="tanda-tangan">
+            <tr>
+                <td></td>
+                <td>
+                    <p>Candra Mukti, <span id="c_tgl">...</span><br>PEJABAT PEMBUAT KOMITMEN</p>
+                    <br><br><br><br>
+                    <p class="nama-pejabat" id="c_nama_ppk">NAMA PPK</p>
+                    <p style="margin:0;">NIP. <span id="c_nip_ppk">...</span></p>
+                </td>
+            </tr>
+        </table>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const idRab = urlParams.get('id');
+            if (!idRab) { alert('ID RAB tidak ditemukan!'); return; }
+
+            const formatRp = (angka) => new Intl.NumberFormat('id-ID').format(angka);
+
+            try {
+                const response = await fetch(`/api/rab/view/${idRab}`);
+                const result = await response.json();
+
+                if (result.success && result.data) {
+                    const d = result.data;
+
+                    const dateObj = new Date(d.tgl_rab);
+                    const tglIndo = dateObj.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+                    document.getElementById('c_tahun').innerText = dateObj.getFullYear();
+                    document.getElementById('c_tgl').innerText = tglIndo;
+
+                    // INI DIA MAPPING SESUAI REQUEST MAS ADY!
+                    // Baris 1: Program
+                    document.getElementById('c_prog_kode').innerText = d.program_kode || '-';
+                    document.getElementById('c_prog_nama').innerText = d.program_nama || '-';
+
+                    // Baris 2: Kegiatan / KRO (Menggunakan kode 3360.EBA.994 sesuai foto)
+                    document.getElementById('c_keg_kode').innerText = d.kro_kode || d.kegiatan_kode || '-';
+                    document.getElementById('c_keg_nama').innerText = d.kegiatan_nama || '-';
+
+                    // Baris 3: Komponen (Menggunakan kode 002 sesuai foto)
+                    document.getElementById('c_komp_kode').innerText = d.komponen_kode || '-';
+                    document.getElementById('c_komp_nama').innerText = d.komponen_nama || '-';
+
+                    // Baris 4: Akun & Judul KAK
+                    document.getElementById('c_akun_nama').innerHTML = `Belanja Perjalanan Dinas Biasa<br><br><span style="font-weight: normal; font-style: italic;">${d.judul_kegiatan}</span>`;
+
+                    // Info PPK
+                    document.getElementById('c_nama_ppk').innerText = d.ppk_nama;
+                    document.getElementById('c_nip_ppk').innerText = d.ppk_nip;
+
+                    // Brankas & Hitungan
+                    document.getElementById('c_pagu').innerText = formatRp(d.snapshot_pagu);
+                    document.getElementById('c_realisasi').innerText = formatRp(d.snapshot_realisasi);
+                    document.getElementById('c_total_rab').innerText = formatRp(d.total_rab);
+
+                    const sisaAkhir = d.snapshot_pagu - d.snapshot_realisasi - d.total_rab;
+                    document.getElementById('c_sisa_akhir').innerText = formatRp(sisaAkhir);
+
+                    // Rincian Variabel
+                    document.getElementById('c_var_org').innerText = d.jml_orang;
+                    document.getElementById('c_var_keg').innerText = d.jml_kegiatan;
+                    document.getElementById('c_var_hr').innerText = d.jml_hari;
+                    document.getElementById('c_vol_uh').innerText = (d.jml_orang * d.jml_kegiatan * d.jml_hari);
+                    document.getElementById('c_satuan_uh').innerText = formatRp(d.uang_harian_satuan);
+                    document.getElementById('c_biaya_uh').innerText = formatRp(d.uang_harian_total);
+
+                    document.getElementById('c_jenis_transport').innerText = d.jenis_transport;
+                    document.getElementById('c_vol_tr').innerText = d.transport_vol;
+                    document.getElementById('c_satuan_tr').innerText = formatRp(d.transport_satuan);
+                    document.getElementById('c_biaya_tr').innerText = formatRp(d.transport_total);
+
+                    setTimeout(() => { window.print(); }, 800);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        });
+    </script>
+</body>
+
+</html>

@@ -22,5 +22,6 @@ const upload = multer({ storage: storage });
 // Definisi Route
 router.post('/upload', upload.single('foto'), controller.uploadBukti); // API Upload
 router.get('/galeri', controller.getAllGaleri); // API Galeri
+router.delete('/delete/:id', controller.deleteDokumentasi);
 
 module.exports = router;

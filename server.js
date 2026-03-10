@@ -6,6 +6,7 @@ const MySQLStore = require('express-mysql-session')(session);
 const bcrypt = require('bcryptjs'); // <--- PENTING
 const path = require('path');
 const db = require('./config/db'); // Pastikan path ini benar
+const logController = require('./controllers/logController');
 
 const app = express();
 
@@ -35,15 +36,19 @@ const sessionStore = new MySQLStore(
     db,
 ); // <--- KITA MASUKKAN KONEKSI DATABASE KITA DI SINI
 
+const isProduction = process.env.NODE_ENV === 'production'; // Deteksi Mode
+
 app.use(
     session({
         key: 'session_cookie_name',
         secret: process.env.SESSION_SECRET || 'rahasia_negara',
-        store: sessionStore, // <--- GUNAKAN STORE MYSQL, JANGAN RAM LAGI
+        store: sessionStore,
         resave: false,
         saveUninitialized: false,
         cookie: {
-            secure: true, // Wajib TRUE di Vercel (HTTPS)
+            // KALAU PRODUCTION (VERCEL) = TRUE (HTTPS)
+            // KALAU LOCAL (LAPTOP) = FALSE (HTTP BIASA)
+            secure: isProduction,
             httpOnly: true,
             maxAge: 1000 * 60 * 60 * 24, // 1 Hari
         },
@@ -119,6 +124,8 @@ app.post('/api/auth/login', (req, res) => {
         req.session.nama = user.nama_lengkap;
         req.session.role = user.role;
 
+        logController.catatLog(req, 'Login', 'User berhasil login ke sistem.');
+
         res.json({
             success: true,
             message: 'Login Berhasil!',
@@ -157,6 +164,11 @@ const sppdRoutes = require('./routes/sppdRoutes');
 const settingRoutes = require('./routes/settingRoutes');
 const dashboardRoutes = require('./routes/dashboardRoutes');
 const dokumentasiRoutes = require('./routes/dokumentasiRoutes');
+const logRoutes = require('./routes/logRoutes');
+const userRoutes = require('./routes/userRoutes');
+const paguRoutes = require('./routes/paguRoutes');
+const kakRoutes = require('./routes/kakRoutes');
+const rabRoutes = require('./routes/rabRoutes');
 
 app.use('/api/perjadin', perjadinRoutes);
 app.use('/api/pegawai', pegawaiRoutes);
@@ -164,7 +176,11 @@ app.use('/api/sppd', sppdRoutes);
 app.use('/api/settings', cekLogin, hanyaAdmin, settingRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/dokumentasi', dokumentasiRoutes);
-
+app.use('/api/logs', cekLogin, hanyaAdmin, logRoutes);
+app.use('/api/users', cekLogin, hanyaAdmin, userRoutes);
+app.use('/api/pagu', paguRoutes);
+app.use('/api/kak', kakRoutes);
+app.use('/api/rab', rabRoutes);
 // const PORT = process.env.PORT;
 // app.listen(PORT, () => {
 //     console.log(`Server nyala dengan AMAN di http://localhost:${PORT}`);

@@ -1,0 +1,157 @@
+/* CSS KHUSUS CETAK DOKUMEN RESMI (A4) */
+@page {
+    size: A4;
+    margin: 2cm;
+}
+
+body {
+    font-family: 'Times New Roman', Times, serif;
+    font-size: 12pt;
+    line-height: 1.5;
+    color: #000;
+    background: #e0e0e0;
+    margin: 0;
+    padding: 20px;
+}
+
+.kertas-a4 {
+    background: #fff;
+    width: 21cm;
+    min-height: 29.7cm;
+    margin: 0 auto;
+    padding: 2cm;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+    box-sizing: border-box;
+}
+
+/* --- GANTI CSS KOP SURAT LAMA DENGAN INI --- */
+.kop-surat {
+    display: flex;
+    /* Aktifkan Flexbox */
+    align-items: center;
+    /* Teks & Logo rata tengah secara vertikal */
+    border-bottom: 3px solid #000;
+    padding-bottom: 15px;
+    margin-bottom: 20px;
+}
+
+.logo-wadah {
+    width: 80px;
+    /* Atur lebar logo (sekitar 2-2.5cm) */
+    padding-right: 20px;
+    /* Jarak antara logo dan teks */
+}
+
+.logo-wadah img {
+    width: 100%;
+    /* Logo memenuhi wadahnya */
+    height: auto;
+}
+
+.teks-kop {
+    flex: 1;
+    /* Teks mengambil sisa ruang yang ada */
+    text-align: center;
+    /* Teks tetap rata tengah di area-nya */
+}
+
+.teks-kop h3 {
+    margin: 0;
+    font-size: 16pt;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+.teks-kop h2 {
+    margin: 0;
+    font-size: 18pt;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+.teks-kop p {
+    margin: 5px 0 0 0;
+    font-size: 10pt;
+    line-height: 1.3;
+}
+
+/* ------------------------------------------- */
+
+.kop-surat h3 {
+    margin: 0;
+    font-size: 16pt;
+    font-weight: bold;
+}
+
+.kop-surat h2 {
+    margin: 0;
+    font-size: 18pt;
+    font-weight: bold;
+}
+
+.kop-surat p {
+    margin: 5px 0 0 0;
+    font-size: 10pt;
+    line-height: 1.2;
+}
+
+.judul-dokumen {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.judul-dokumen h4 {
+    margin: 0;
+    text-decoration: underline;
+    font-size: 14pt;
+}
+
+.judul-dokumen p {
+    margin: 5px 0 0 0;
+    font-weight: bold;
+}
+
+.isi-kak h5 {
+    font-size: 12pt;
+    font-weight: bold;
+    margin: 15px 0 5px 0;
+}
+
+.isi-kak p {
+    margin: 0 0 10px 0;
+    text-align: justify;
+    white-space: pre-wrap;
+}
+
+.tanda-tangan {
+    margin-top: 20px;
+    width: 100%;
+}
+
+.tanda-tangan td {
+    width: 50%;
+    text-align: center;
+    vertical-align: bottom;
+}
+
+.nama-pejabat {
+    font-weight: bold;
+    text-decoration: underline;
+    margin-bottom: 0;
+}
+
+/* Hilangkan shadow & background abu-abu saat diprint beneran */
+@media print {
+    body {
+        background: #fff;
+        padding: 0;
+    }
+
+    .kertas-a4 {
+        box-shadow: none;
+        width: auto;
+        min-height: auto;
+        margin: 0;
+        padding: 0;
+    }
+}

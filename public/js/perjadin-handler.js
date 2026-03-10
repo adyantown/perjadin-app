@@ -59,6 +59,61 @@ function updateTombolHapus() {
 
 // --- 4. LOGIKA LOAD DATA PEGAWAI (DROPDOWN OTOMATIS) ---
 window.dataPegawai = [];
+let sppdCache = [];
+
+// Fungsi untuk Load Dropdown Surat Tugas
+async function loadSppdDropdown() {
+    const select = document.getElementById('selectSppd');
+    try {
+        const res = await fetch('/api/sppd/all');
+        const json = await res.json();
+
+        if (json.success && json.data) {
+            sppdCache = json.data; // Simpan ke wadah
+            select.innerHTML = '<option value="">-- Pilih Surat Tugas dari SPPD --</option>';
+
+            json.data.forEach((item) => {
+                const option = document.createElement('option');
+                option.value = item.nomor_st;
+                // Tampilkan Nomor Surat + Tujuan biar Admin gampang milihnya
+                option.textContent = `${item.nomor_st} (Ke: ${item.tempat_tujuan})`;
+                select.appendChild(option);
+            });
+        }
+    } catch (e) {
+        console.error('Gagal meload SPPD:', e);
+        select.innerHTML = '<option value="">Gagal memuat data</option>';
+    }
+}
+
+// Fungsi Auto-Fill saat Dropdown Dipilih
+window.autoFillSppd = function () {
+    const select = document.getElementById('selectSppd');
+    const selectedNoSt = select.value;
+
+    // Cari data SPPD yang cocok dengan pilihan Admin
+    const sppd = sppdCache.find((s) => s.nomor_st === selectedNoSt);
+
+    if (sppd) {
+        const formatDate = (d) => (d ? d.split('T')[0] : '');
+
+        // 1. Isi Tanggal Surat Tugas
+        document.getElementById('tgl_surat_tugas').value = formatDate(sppd.tgl_surat);
+
+        // 2. BONUS: Isi otomatis field lainnya!
+        document.querySelector('[name="maksud_dinas"]').value = sppd.maksud_dinas || '';
+        document.querySelector('[name="tujuan"]').value = sppd.tempat_tujuan || '';
+        document.querySelector('[name="tgl_berangkat"]').value = formatDate(sppd.tgl_berangkat);
+        document.querySelector('[name="tgl_pulang"]').value = formatDate(sppd.tgl_kembali);
+
+        hitungOtomatis(); // Jalankan fungsi hitung total
+    } else {
+        // Kosongkan kalau admin memilih "-- Pilih Surat Tugas --"
+        document.getElementById('tgl_surat_tugas').value = '';
+        document.querySelector('[name="maksud_dinas"]').value = '';
+        document.querySelector('[name="tujuan"]').value = '';
+    }
+};
 
 window.loadPegawai = async function (kategori) {
     // Reset dropdown biar bersih
@@ -118,7 +173,8 @@ window.tambahPegawaiOtomatis = function () {
 };
 
 // --- 5. LOGIKA EDIT DATA (LOAD DARI SERVER) ---
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+    await loadSppdDropdown();
     const urlParams = new URLSearchParams(window.location.search);
     const editId = urlParams.get('edit');
     const formatDate = (d) => (d && d !== 'null' && !d.startsWith('0000') ? d.split('T')[0] : '');
@@ -159,9 +215,22 @@ document.addEventListener('DOMContentLoaded', () => {
                 const container = document.getElementById('pegawai-container');
                 container.innerHTML = '';
 
-                const namaArr = data.nama_pegawai ? data.nama_pegawai.split(', ') : [];
-                const golArr = data.golongan ? data.golongan.split(', ') : [];
-                const jabArr = data.jabatan ? data.jabatan.split(', ') : [];
+                const splitAman = (str) => {
+                    if (!str) return [];
+
+                    // 1. Cek format baru yang paling aman (3 Pipa)
+                    if (str.includes('|||')) return str.split('|||').map((s) => s.trim());
+
+                    // 2. Cek format transisi (yang bikin ngacak di gambar ke-2)
+                    if (str.includes('|')) return str.split('|').map((s) => s.trim());
+
+                    // 3. Cek format paling jadul (Koma)
+                    return str.split(', ');
+                };
+
+                const namaArr = splitAman(data.nama_pegawai);
+                const golArr = splitAman(data.golongan);
+                const jabArr = splitAman(data.jabatan);
 
                 if (namaArr.length > 0 && namaArr[0] !== '') {
                     namaArr.forEach((n, i) => {
@@ -206,12 +275,20 @@ document.getElementById('perjadinForm').onsubmit = async function (e) {
         const result = await response.json();
 
         if (result.success) {
-            alert(result.message);
-            window.location.href = '/daftar.html';
+            // Pakai SweetAlert2 biar keren
+            Swal.fire({
+                title: 'Berhasil!',
+                text: result.message,
+                icon: 'success',
+                timer: 1500,
+                showConfirmButton: false,
+            }).then(() => {
+                window.location.href = '/daftar.html'; // Pindah halaman setelah animasi selesai
+            });
         } else {
-            alert('Gagal: ' + result.message);
+            Swal.fire('Gagal!', result.message, 'error');
         }
     } catch (err) {
-        alert('Terjadi kesalahan koneksi server.');
+        Swal.fire('Error!', 'Terjadi kesalahan koneksi server.', 'error');
     }
 };

@@ -1,10 +1,37 @@
 // --- ENDPOINT SIMPAN & UPDATE ---
 const db = require('../config/db');
+const logController = require('./logController');
 
 const cleanMoney = (val) => {
     if (!val) return 0;
     if (typeof val === 'number') return val;
     return parseFloat(val.toString().replace(/\./g, '')) || 0;
+};
+
+const syncPegawaiPivot = (perjadinId, namaArray) => {
+    if (!namaArray || namaArray.length === 0) return;
+
+    // Cari pegawai berdasarkan nama
+    namaArray.forEach((nama) => {
+        const cleanNama = nama.trim();
+
+        if (!cleanNama) return;
+
+        const sqlCari = `SELECT id FROM master_pegawai WHERE nama_pegawai LIKE ? LIMIT 1`;
+
+        db.query(sqlCari, [`%${cleanNama}%`], (err, rows) => {
+            if (err || rows.length === 0) return;
+
+            const pegawaiId = rows[0].id;
+
+            const sqlInsertPivot = `
+                INSERT INTO perjadin_pegawai (perjadin_id, pegawai_id)
+                VALUES (?, ?)
+            `;
+
+            db.query(sqlInsertPivot, [perjadinId, pegawaiId]);
+        });
+    });
 };
 
 exports.save = (req, res) => {
@@ -28,7 +55,7 @@ exports.save = (req, res) => {
         let namaPegawaiAll = namaArray
             .map((n) => n.trim())
             .filter((n) => n !== '')
-            .join(', ');
+            .join('||| ');
 
         if (!namaPegawaiAll) {
             namaPegawaiAll = 'Tidak ada nama'; // Supaya di DB tidak kosong melompong
@@ -36,11 +63,11 @@ exports.save = (req, res) => {
         const golonganAll = golArray
             .map((g) => g.trim())
             .filter((g) => g !== '')
-            .join(', ');
+            .join('||| ');
         const jabatanAll = jabArray
             .map((j) => j.trim())
             .filter((j) => j !== '')
-            .join(', ');
+            .join('||| ');
         const jumlahPegawai = namaArray.filter((n) => n.trim() !== '').length || 1;
 
         // 2. MEMBERSIHKAN NOMINAL UANG
@@ -115,6 +142,23 @@ exports.save = (req, res) => {
                     console.error('SQL Update Error:', err);
                     return res.status(500).json({ success: false, message: err.message });
                 }
+
+                // 1️⃣ Hapus relasi pegawai lama
+                db.query('DELETE FROM perjadin_pegawai WHERE perjadin_id = ?', [editId], () => {
+                    // 2️⃣ Insert ulang relasi pegawai baru
+                    try {
+                        syncPegawaiPivot(editId, namaArray);
+                    } catch (e) {
+                        console.error('Gagal sync pivot:', e);
+                    }
+                });
+
+                // 3️⃣ Log aktivitas
+                try {
+                    logController.catatLog(req, 'Edit Perjadin', `Mengubah data rekap biaya Surat Tugas: ${d.no_surat_tugas}`);
+                } catch (e) {}
+
+                // 4️⃣ Response ke frontend
                 res.json({ success: true, message: 'Data Berhasil Diupdate!' });
             });
         } else {
@@ -130,6 +174,19 @@ exports.save = (req, res) => {
                 if (err) {
                     console.error('SQL Insert Error:', err);
                     return res.status(500).json({ success: false, message: err.message });
+                }
+
+                // ---> PASANG CCTV DI SINI <---
+                try {
+                    logController.catatLog(req, 'Tambah Data Perjadin', `Berhasil Menambah Data Perjadin`);
+                } catch (e) {}
+                const newId = result.insertId;
+
+                // Sinkronkan ke pivot
+                try {
+                    syncPegawaiPivot(newId, namaArray);
+                } catch (e) {
+                    console.error('Gagal sync pivot:', e);
                 }
                 res.json({ success: true, message: 'Data Berhasil Disimpan!' });
             });
@@ -157,9 +214,30 @@ exports.getById = (req, res) => {
 exports.delete = (req, res) => {
     db.query('DELETE FROM perjadin WHERE id = ?', [req.params.id], (err) => {
         if (err) return res.status(500).json({ error: err.message });
-        // GANTI res.sendStatus(200) JADI INI:
+
+        // ---> PASANG CCTV DI SINI <---
+        try {
+            logController.catatLog(req, 'Hapus Perjadin', `Menghapus data rekap biaya dengan ID: ${req.params.id}`);
+        } catch (e) {}
+
         res.json({ success: true, message: 'Data Berhasil Dihapus!' });
     });
 };
 
 // --- AKHIR ENDPOINT SIMPAN & UPDATE ---
+// --- ENDPOINT ANALITIK PEGAWAI ---
+exports.getAnalitikPegawai = (req, res) => {
+    const pegawaiId = req.params.id;
+    // Query sakti: Gabungkan tabel perjadin dengan pivot table
+    const sql = `
+        SELECT p.* FROM perjadin p
+        JOIN perjadin_pegawai pp ON p.id = pp.perjadin_id
+        WHERE pp.pegawai_id = ?
+        ORDER BY p.tgl_berangkat ASC
+    `;
+
+    db.query(sql, [pegawaiId], (err, rows) => {
+        if (err) return res.status(500).json({ success: false, message: err.message });
+        res.json({ success: true, data: rows });
+    });
+};
