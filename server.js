@@ -170,17 +170,17 @@ const paguRoutes = require('./routes/paguRoutes');
 const kakRoutes = require('./routes/kakRoutes');
 const rabRoutes = require('./routes/rabRoutes');
 
-app.use('/api/perjadin', perjadinRoutes);
-app.use('/api/pegawai', pegawaiRoutes);
-app.use('/api/sppd', sppdRoutes);
-app.use('/api/settings', cekLogin, hanyaAdmin, settingRoutes);
-app.use('/api/dashboard', dashboardRoutes);
-app.use('/api/dokumentasi', dokumentasiRoutes);
+app.use('/api/perjadin', cekLogin, perjadinRoutes);
+app.use('/api/pegawai', cekLogin, pegawaiRoutes);
+app.use('/api/sppd', cekLogin, sppdRoutes);
+app.use('/api/settings', cekLogin, settingRoutes);
+app.use('/api/dashboard', cekLogin, dashboardRoutes);
+app.use('/api/dokumentasi', cekLogin, dokumentasiRoutes);
 app.use('/api/logs', cekLogin, hanyaAdmin, logRoutes);
 app.use('/api/users', cekLogin, hanyaAdmin, userRoutes);
-app.use('/api/pagu', paguRoutes);
-app.use('/api/kak', kakRoutes);
-app.use('/api/rab', rabRoutes);
+app.use('/api/pagu', cekLogin, paguRoutes);
+app.use('/api/kak', cekLogin, kakRoutes);
+app.use('/api/rab', cekLogin, rabRoutes);
 // const PORT = process.env.PORT;
 // app.listen(PORT, () => {
 //     console.log(`Server nyala dengan AMAN di http://localhost:${PORT}`);

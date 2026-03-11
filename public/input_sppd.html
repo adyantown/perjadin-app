@@ -30,6 +30,25 @@
 
             <div class="card-body p-4">
                 <form id="formSppd">
+                    <div class="row g-3 mb-4 p-3 border rounded-3 bg-white shadow-sm"
+                        style="border-left: 5px solid #198754 !important;">
+                        <div class="col-md-12">
+                            <label class="form-label fw-bold text-success"><i
+                                    class="bi bi-link-45deg fs-5"></i>
+                                Integrasi Otomatis (Tarik Data dari KAK/RAB)</label>
+                            <select id="pilih_rab" class="form-select border-success"
+                                style="background-color: #f8fff9;">
+                                <option value="" selected>-- Ketik Manual atau Pilih Kegiatan yang
+                                    Sudah Di-RAB-kan --
+                                </option>
+                            </select>
+                            <small class="text-muted mt-1 d-block"><i class="bi bi-info-circle"></i>
+                                Memilih kegiatan
+                                akan otomatis mengisi <b>Maksud Perjalanan Dinas</b> dan <b>Beban
+                                    Akun
+                                    Anggaran</b>.</small>
+                        </div>
+                    </div>
                     <div class="row g-3 mb-4">
                         <div class="col-md-3">
                             <label class="form-label">Nomor Surat (Kode No.)</label>
@@ -150,12 +169,12 @@
                         <div class="col-md-8">
                             <label class="form-label">9.a Instansi / DIPA</label>
                             <input type="text" name="instansi" class="form-control"
-                                value="DIPA KPU KAB. TULANG BAWANG BARAT TA 2026">
+                                value="DIPA KPU Tulang Bawang Barat TA 2026">
                         </div>
                         <div class="col-md-4">
                             <label class="form-label">9.b Akun</label>
                             <input type="text" name="akun_anggaran" class="form-control"
-                                placeholder="Contoh: 524111">
+                                value="524111">
                         </div>
                     </div>
 

@@ -9,7 +9,14 @@ exports.getSettings = (req, res) => {
 };
 
 // Update data setting
+// Update data setting (HANYA ADMIN YANG BOLEH!)
 exports.updateSettings = (req, res) => {
+    // --- GEMBOK PENGAMAN KHUSUS ADMIN ---
+    if (req.session.role !== 'admin') {
+        return res.status(403).json({ success: false, message: 'Akses Ditolak! Hanya Admin yang boleh mengubah nama Pejabat.' });
+    }
+    // ------------------------------------
+
     const data = req.body;
     db.query('UPDATE setting_pejabat SET ? WHERE id = 1', data, (err, result) => {
         if (err) return res.status(500).json({ success: false, message: err.message });

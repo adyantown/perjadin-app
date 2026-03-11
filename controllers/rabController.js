@@ -162,11 +162,11 @@ exports.updateRab = (req, res) => {
     const rabId = req.params.id;
     const data = req.body;
 
-    // A. Cari dulu data RAB lama buat tahu berapa total biaya sebelumnya
+    // KEMBALIKAN KODINGAN INI KE VERSI ASLINYA (Hanya ambil total_rab dan pagu_id)
     const querySelect = `
-        SELECT r.*, k.judul_kegiatan, k.ppk_nama, k.ppk_nip, p.* FROM dokumen_rab r
+        SELECT r.total_rab, k.pagu_id 
+        FROM dokumen_rab r
         JOIN dokumen_kak k ON r.kak_id = k.id
-        JOIN pagu_anggaran p ON k.pagu_id = p.id
         WHERE r.id = ?
     `;
 
@@ -176,22 +176,21 @@ exports.updateRab = (req, res) => {
             return res.status(500).json({ success: false, message: 'Gagal mencari data RAB lama.' });
         }
 
-        const oldTotal = parseFloat(results[0].total_rab);
+        const oldTotal = parseFloat(results.total_rab);
         const newTotal = parseFloat(data.total_rab);
-        const paguId = results[0].pagu_id;
+        const paguId = results.pagu_id;
 
         // B. Hitung Selisih (Total Baru - Total Lama)
         const selisih = newTotal - oldTotal;
 
         // C. Cek Saldo Brankas (Kalau revisinya bikin biaya nambah, duitnya cukup gak?)
         db.query('SELECT sisa_pagu FROM pagu_anggaran WHERE id = ?', [paguId], (errCek, paguRes) => {
-            if (selisih > 0 && paguRes[0].sisa_pagu < selisih) {
+            // JIKA selisih positif (nambah biaya) dan uang di pagu kurang
+            if (selisih > 0 && paguRes.sisa_pagu < selisih) {
                 return res.status(400).json({ success: false, message: 'Revisi ditolak! Saldo Pagu tidak mencukupi untuk penambahan biaya.' });
             }
 
             // D. Sesuaikan Saldo Brankas (Sisa Pagu - Selisih)
-            // Kalau selisih positif (biaya naik) -> Sisa Pagu berkurang
-            // Kalau selisih negatif (biaya turun) -> Sisa Pagu bertambah otomatis! (Min ketemu Min = Plus)
             db.query('UPDATE pagu_anggaran SET sisa_pagu = sisa_pagu - ? WHERE id = ?', [selisih, paguId], (errUpdatePagu) => {
                 // E. Simpan Rincian RAB yang Baru ke Database
                 const queryUpdateRab = `

@@ -40,9 +40,10 @@ exports.saveKak = (req, res) => {
 // MENGAMBIL SEMUA DATA RIWAYAT KAK
 // ==========================================
 exports.getAllKak = (req, res) => {
-    // Kita JOIN dengan tabel pagu_anggaran biar nama kamarnya ikut keambil
+    // NAH INI YANG KURANG MAS! Kita tambahkan subquery 'has_rab'
     const query = `
-        SELECT k.*, p.nama_kamar 
+        SELECT k.*, p.nama_kamar,
+        (SELECT COUNT(*) FROM dokumen_rab r WHERE r.kak_id = k.id) as has_rab
         FROM dokumen_kak k 
         LEFT JOIN pagu_anggaran p ON k.pagu_id = p.id 
         ORDER BY k.id DESC
@@ -77,5 +78,39 @@ exports.getKakById = (req, res) => {
             return res.status(404).json({ success: false, message: 'Data KAK tidak ditemukan' });
         }
         res.json({ success: true, data: results[0] });
+    });
+};
+
+// ==========================================
+// MENGHAPUS DATA KAK (Hanya jika belum ada RAB)
+// ==========================================
+exports.deleteKak = (req, res) => {
+    const kakId = req.params.id;
+    const query = 'DELETE FROM dokumen_kak WHERE id = ?';
+
+    db.query(query, [kakId], (err, result) => {
+        if (err) return res.status(500).json({ success: false, message: 'Gagal menghapus KAK.' });
+        res.json({ success: true, message: 'Data KAK berhasil dihapus!' });
+    });
+};
+
+// ==========================================
+// UPDATE DATA KAK
+// ==========================================
+exports.updateKak = (req, res) => {
+    const kakId = req.params.id;
+    const data = req.body;
+
+    const query = `
+        UPDATE dokumen_kak SET 
+            judul_kegiatan=?, latar_belakang=?, dasar_hukum=?, 
+            maksud_tujuan=?, output_kegiatan=?, tgl_kak=? 
+        WHERE id=?
+    `;
+    const values = [data.judul_kegiatan, data.latar_belakang, data.dasar_hukum, data.maksud_tujuan, data.output_kegiatan, data.tgl_kak, kakId];
+
+    db.query(query, values, (err) => {
+        if (err) return res.status(500).json({ success: false, message: 'Gagal mengupdate KAK.' });
+        res.json({ success: true, message: 'Revisi KAK berhasil disimpan!' });
     });
 };

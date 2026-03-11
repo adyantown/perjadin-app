@@ -4,100 +4,192 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lapor Kegiatan - E-PERJADIN</title>
+    <title>Upload SPJ - E-Perjadin</title>
     <link rel="icon" type="image/x-icon" href="/img/kpu_logo.png">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
         rel="stylesheet">
     <link rel="stylesheet"
-        href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
-    <link rel="stylesheet" href="style/index-style.css">
+        href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+
+        .navbar-kpu {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+        }
+    </style>
 </head>
 
-<body style="background-color: #f0f2f5;">
-
+<body>
     <nav class="navbar navbar-dark navbar-kpu py-3 shadow-sm mb-4">
         <div class="container">
-            <a class="navbar-brand d-flex align-items-center" href="/index.html">
-                <i class="bi bi-arrow-left-circle me-2"></i> Kembali ke Dashboard
+            <a class="navbar-brand fw-bold" href="/index.html">
+                <i class="bi bi-wallet2 me-2"></i>E-Perjadin
             </a>
-            <span class="text-white fw-bold">LAPOR KEGIATAN</span>
+            <a href="/index.html" class="btn btn-sm btn-outline-light rounded-pill px-3">Kembali</a>
         </div>
     </nav>
 
-    <div class="container pb-5" style="max-width: 600px;">
-        <div class="card shadow border-0 rounded-4">
-            <div class="card-body p-4">
-
-                <div class="text-center mb-4">
-                    <div class="icon-box bg-light text-primary mx-auto mb-3"
-                        style="width: 70px; height: 70px; font-size: 2rem; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
-                        <i class="bi bi-camera-fill"></i>
+    <div class="container pb-5">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card shadow-sm border-0 rounded-4 mb-4">
+                    <div class="card-header bg-white border-0 pt-4 px-4">
+                        <h5 class="fw-bold text-dark"><i
+                                class="bi bi-cloud-arrow-up-fill text-primary me-2"></i>Upload Bukti
+                            SPJ (PDF)</h5>
+                        <p class="text-muted small mb-0">Upload berkas laporan, tiket, dan kuitansi
+                            hotel yang telah di-scan menjadi 1 file PDF (Maks 10MB).</p>
                     </div>
-                    <h5 class="fw-bold text-secondary">Upload Dokumentasi</h5>
-                    <p class="text-muted small">Laporkan bukti kehadiran & foto kegiatan perjalanan
-                        dinas Anda.</p>
+                    <div class="card-body p-4">
+                        <form id="formUploadSpj">
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Pilih Kegiatan (SPPD)</label>
+                                <select class="form-select" id="sppd_id" name="sppd_id" required>
+                                    <option value="">-- Memuat daftar SPPD... --</option>
+                                </select>
+                            </div>
+                            <div class="mb-4">
+                                <label class="form-label fw-bold">File PDF SPJ</label>
+                                <input class="form-control" type="file" id="file_pdf"
+                                    name="file_pdf" accept="application/pdf" required>
+                                <small class="text-danger mt-1 d-block" id="errorSize"
+                                    style="display:none;"><i
+                                        class="bi bi-exclamation-triangle-fill"></i> Ukuran file
+                                    melebihi 10MB!</small>
+                            </div>
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-primary rounded-pill fw-bold"
+                                    id="btnSubmit">
+                                    <i class="bi bi-send-fill me-1"></i> Kirim untuk Diverifikasi
+                                </button>
+                            </div>
+                        </form>
+                    </div>
                 </div>
 
-                <form id="formLaporan">
-                    <div class="mb-4">
-                        <label class="form-label fw-bold">1. Pilih Kegiatan SPPD</label>
-                        <select name="id_sppd" id="pilihSppd" class="form-select form-select-lg"
-                            required>
-                            <option value="">-- Sedang memuat data... --</option>
-                        </select>
-                        <div class="form-text">Pilih surat tugas yang sedang Anda laksanakan.</div>
+                <div class="card shadow-sm border-0 rounded-4">
+                    <div class="card-header bg-white border-0 pt-4 px-4">
+                        <h6 class="fw-bold text-secondary"><i class="bi bi-clock-history me-1"></i>
+                            Status Verifikasi SPJ</h6>
                     </div>
-
-                    <div class="mb-4">
-                        <label class="form-label fw-bold">2. Tagging Lokasi (GPS)</label>
-                        <div class="p-3 bg-light border rounded text-center">
-                            <div id="statusLokasi" class="mb-3 text-muted">
-                                <i class="bi bi-geo-alt"></i> Lokasi belum terdeteksi
-                            </div>
-
-                            <input type="hidden" name="latitude" id="inputLat">
-                            <input type="hidden" name="longitude" id="inputLong">
-
-                            <button type="button" class="btn btn-outline-danger rounded-pill px-4"
-                                onclick="ambilLokasi()">
-                                <i class="bi bi-geo-fill me-1"></i> Deteksi Lokasi Saya
-                            </button>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0">
+                                <tbody id="tabelStatusUser">
+                                    <tr>
+                                        <td class="text-center text-muted py-4">Memuat data...</td>
+                                    </tr>
+                                </tbody>
+                            </table>
                         </div>
                     </div>
+                </div>
 
-                    <div class="mb-4">
-                        <label class="form-label fw-bold">3. Foto Dokumentasi</label>
-                        <input type="file" name="foto" id="inputFoto" class="form-control"
-                            accept="image/*" capture="environment" required>
-                        <div class="form-text">Bisa langsung ambil dari kamera HP.</div>
-
-                        <div class="mt-3 text-center d-none" id="previewContainer">
-                            <img id="previewImg" src="" class="img-fluid rounded shadow-sm"
-                                style="max-height: 200px;">
-                        </div>
-                    </div>
-
-                    <div class="mb-4">
-                        <label class="form-label fw-bold">4. Keterangan Tambahan</label>
-                        <textarea name="keterangan" class="form-control" rows="2"
-                            placeholder="Contoh: Pembukaan acara di aula..."></textarea>
-                    </div>
-
-                    <div class="d-grid gap-2">
-                        <button type="submit" class="btn btn-primary btn-lg fw-bold" id="btnSubmit">
-                            KIRIM LAPORAN 🚀
-                        </button>
-                    </div>
-
-                </form>
             </div>
         </div>
     </div>
 
-    <script
-        src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="js/upload-laporan-handler.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            // 1. Ambil data SPPD dan SPJ secara bersamaan
+            try {
+                const resSppd = await fetch('/api/sppd/all');
+                const jsonSppd = await resSppd.json();
 
+                const resSpj = await fetch('/api/dokumentasi/semua');
+                const jsonSpj = await resSpj.json();
+
+                // 2. Kumpulkan ID SPPD yang status SPJ-nya sudah "ACC"
+                const accSppdIds = [];
+                if (jsonSpj.success) {
+                    jsonSpj.data.forEach(spj => {
+                        if (spj.status === 'ACC') {
+                            accSppdIds.push(spj.sppd_id); // Masukkan ke daftar hitam (disembunyikan)
+                        }
+                    });
+                }
+
+                // 3. Render Dropdown SPPD (Saring yang udah ACC)
+                const select = document.getElementById('sppd_id');
+                select.innerHTML = '<option value="">-- Pilih SPPD yang ingin di-SPJ-kan --</option>';
+
+                if (jsonSppd.success) {
+                    jsonSppd.data.forEach(item => {
+                        // TAMPILKAN HANYA JIKA SPPD INI BELUM DI-ACC
+                        if (!accSppdIds.includes(item.id)) {
+                            select.innerHTML += `<option value="${item.id}">[${item.tgl_berangkat}] ${item.maksud_dinas} - ${item.nama_pegawai}</option>`;
+                        }
+                    });
+                }
+            } catch (err) {
+                console.error('Gagal memuat dropdown:', err);
+            }
+
+            // 4. Load Status SPJ ke tabel bawah
+            loadStatusSpj();
+        });
+
+        // Validasi Ukuran File (Maks 10MB)
+        document.getElementById('file_pdf').addEventListener('change', function () {
+            const btn = document.getElementById('btnSubmit');
+            const errorTxt = document.getElementById('errorSize');
+            if (this.files.size > 10 * 1024 * 1024) {
+                btn.disabled = true; errorTxt.style.display = 'block';
+            } else {
+                btn.disabled = false; errorTxt.style.display = 'none';
+            }
+        });
+
+        // 3. Handle Submit
+        document.getElementById('formUploadSpj').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+
+            Swal.fire({ title: 'Mengupload...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+
+            try {
+                const res = await fetch('/api/dokumentasi/upload', { method: 'POST', body: formData });
+                const result = await res.json();
+                if (result.success) {
+                    Swal.fire('Berhasil!', result.message, 'success');
+                    e.target.reset();
+                    loadStatusSpj(); // Refresh tabel
+                } else { Swal.fire('Gagal!', result.message, 'error'); }
+            } catch (err) { Swal.fire('Error', 'Gagal menghubungi server.', 'error'); }
+        });
+
+        async function loadStatusSpj() {
+            try {
+                const res = await fetch('/api/dokumentasi/semua');
+                const json = await res.json();
+                const tbody = document.getElementById('tabelStatusUser');
+                if (json.data.length === 0) return tbody.innerHTML = '<tr><td class="text-center text-muted py-3">Belum ada SPJ yang diupload.</td></tr>';
+
+                tbody.innerHTML = '';
+                json.data.forEach(item => {
+                    let badge = 'bg-warning text-dark';
+                    if (item.status === 'ACC') badge = 'bg-success';
+                    if (item.status === 'Revisi') badge = 'bg-danger';
+
+                    let catatan = item.status === 'Revisi' && item.catatan_admin ? `<div class="alert alert-danger p-2 mt-2 mb-0 small"><i class="bi bi-info-circle-fill"></i> <b>Catatan Admin:</b> ${item.catatan_admin}</div>` : '';
+
+                    tbody.innerHTML += `
+                        <tr>
+                            <td class="px-4 py-3">
+                                <div class="fw-bold text-dark">${item.maksud_dinas}</div>
+                                <div class="text-muted small"><i class="bi bi-person"></i> ${item.nama_pegawai} | <i class="bi bi-file-earmark-pdf"></i> <a href="/uploads/${item.file_pdf}" target="_blank">Lihat Berkas</a></div>
+                                ${catatan}
+                            </td>
+                            <td class="text-end px-4"><span class="badge ${badge} rounded-pill px-3 py-2">${item.status}</span></td>
+                        </tr>
+                    `;
+                });
+            } catch (err) { console.error(err); }
+        }
+    </script>
 </body>
 
 </html>

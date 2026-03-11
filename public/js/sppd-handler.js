@@ -10,6 +10,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // 1. [BARU] INISIALISASI DROPDOWN PEGAWAI
     initDropdownPegawai();
     loadPejabat();
+    initDropdownRab();
     // 2. CEK MODE EDIT SAAT HALAMAN DIMUAT
     const urlParams = new URLSearchParams(window.location.search);
     currentEditId = urlParams.get('edit');
@@ -286,5 +287,51 @@ function hitungLamaPerjalanan() {
         const jumlahHari = Math.round(selisihWaktu / (1000 * 60 * 60 * 24)) + 1;
         const teksTerbilang = terbilang(jumlahHari);
         inputLama.value = `${jumlahHari} (${teksTerbilang}) Hari`;
+    }
+}
+// --- [BARU] FUNGSI INTEGRASI KAK/RAB ---
+async function initDropdownRab() {
+    const selectRab = document.getElementById('pilih_rab');
+    if (!selectRab) return;
+
+    try {
+        const response = await fetch('/api/rab/all');
+        const data = await response.json();
+
+        // Masukkan data kegiatan ke dalam dropdown
+        data.forEach((item) => {
+            const option = document.createElement('option');
+            option.value = item.id;
+            // Kita tampilkan Judul Kegiatan + Nama Kamar Pagu-nya
+            option.text = `[RAB] ${item.judul_kegiatan} - ${item.nama_kamar || ''}`;
+
+            // Simpan datanya secara rahasia di atribut dataset
+            option.dataset.maksud = item.judul_kegiatan;
+            option.dataset.akun = item.nama_kamar || '';
+            selectRab.appendChild(option);
+        });
+
+        // Event Listener: Apa yang terjadi kalau user milih kegiatannya?
+        selectRab.addEventListener('change', function () {
+            const selected = this.options[this.selectedIndex];
+            const elm_maksud = document.querySelector('textarea[name="maksud_dinas"]');
+            const elm_akun = document.querySelector('input[name="akun_anggaran"]');
+
+            if (this.value) {
+                // Ssshhh! Sihir Auto-fill bekerja di sini
+                elm_maksud.value = selected.dataset.maksud;
+
+                // Kasih warna ijo (Valid) biar user tau kalau ini diisi otomatis
+                elm_maksud.classList.add('border-success', 'bg-success-subtle');
+            } else {
+                // Kalau dikembalikan ke "Ketik Manual", hilangkan warna ijonya
+                elm_maksud.value = '';
+                elm_akun.value = 'DIPA KPU Tulang Bawang Barat TA 2026';
+                elm_maksud.classList.remove('border-success', 'bg-success-subtle');
+                elm_akun.classList.remove('border-success', 'bg-success-subtle');
+            }
+        });
+    } catch (err) {
+        console.error('Gagal meload data RAB:', err);
     }
 }

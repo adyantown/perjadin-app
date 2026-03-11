@@ -5,23 +5,35 @@ const controller = require('../controllers/dokumentasiController');
 const multer = require('multer');
 const path = require('path');
 
-// Konfigurasi Penyimpanan File (Multer)
+// Konfigurasi Penyimpanan PDF SPJ (Multer)
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
-        cb(null, 'public/uploads/'); // Foto masuk ke folder public/uploads
+        cb(null, 'public/uploads/'); // File masuk ke folder public/uploads
     },
     filename: (req, file, cb) => {
-        // Nama file: bukti-TIMESTAMP-ACAK.jpg
+        // Nama file: SPJ-TIMESTAMP-ACAK.pdf
         const unique = Date.now() + '-' + Math.round(Math.random() * 1e9);
-        cb(null, 'bukti-' + unique + path.extname(file.originalname));
+        cb(null, 'SPJ-' + unique + path.extname(file.originalname));
     },
 });
 
-const upload = multer({ storage: storage });
+// Filter khusus PDF & Limit 10MB
+const uploadSpj = multer({
+    storage: storage,
+    limits: { fileSize: 10 * 1024 * 1024 }, // Maksimal 10 MB
+    fileFilter: (req, file, cb) => {
+        if (file.mimetype === 'application/pdf') {
+            cb(null, true);
+        } else {
+            cb(new Error('Hanya file PDF yang diperbolehkan!'));
+        }
+    },
+});
 
-// Definisi Route
-router.post('/upload', upload.single('foto'), controller.uploadBukti); // API Upload
-router.get('/galeri', controller.getAllGaleri); // API Galeri
-router.delete('/delete/:id', controller.deleteDokumentasi);
+// Definisi Route Baru untuk SPJ
+router.post('/upload', uploadSpj.single('file_pdf'), controller.uploadSpj); // Upload SPJ (User)
+router.get('/semua', controller.getAllSpj); // Lihat Antrean SPJ (Admin)
+router.put('/verifikasi/:id', controller.verifikasiSpj); // Eksekusi ACC/Revisi (Admin)
+router.delete('/delete/:id', controller.deleteSpj); // Hapus SPJ (Opsional)
 
 module.exports = router;

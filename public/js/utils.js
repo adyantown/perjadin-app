@@ -58,21 +58,29 @@ function hitungOtomatis() {
 }
 // Fungsi pembantu format tanggal
 
+// Fungsi pembantu format tanggal (Versi Bulletproof)
 function formatTanggalIndo(tgl) {
     if (!tgl || tgl === '') return '-';
 
-    // Teknik memecah string biar gak kena masalah Timezone
-    const bagian = tgl.split('-'); // 2026-01-28 jadi ['2026', '01', '28']
-    const tahun = bagian[0];
-    const bulanAngka = bagian[1];
-    const tanggal = bagian[2];
+    try {
+        // Objek Date akan otomatis mengenali format (ISO, YYYY-MM-DD, dll)
+        // dan menyesuaikannya dengan zona waktu lokal komputer (WIB)
+        const dateObj = new Date(tgl);
 
-    const namaBulan = ['', 'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+        // Jaring pengaman: Kalau datanya bukan tanggal yang valid, kembalikan teks aslinya
+        if (isNaN(dateObj.getTime())) return tgl;
 
-    // Hapus angka 0 di depan tanggal (misal 01 jadi 1)
-    const tglFix = parseInt(tanggal).toString();
-    const blnFix = namaBulan[parseInt(bulanAngka)];
+        const namaBulan = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
 
-    // Output: 28 Januari 2026
-    return `${tglFix} ${blnFix} ${tahun}`;
+        // Ambil elemen satu per satu
+        const tanggal = dateObj.getDate();
+        const bulan = namaBulan[dateObj.getMonth()];
+        const tahun = dateObj.getFullYear();
+
+        // DIJAMIN urutannya: Tanggal (Spasi) Bulan (Spasi) Tahun
+        return `${tanggal} ${bulan} ${tahun}`;
+    } catch (error) {
+        console.error('Error memformat tanggal:', error);
+        return tgl; // Fallback kalau terjadi error
+    }
 }

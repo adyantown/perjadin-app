@@ -11,3 +11,4 @@ node_modules/
 *.txt
 *.db
 *.pdf
+/.vscode
