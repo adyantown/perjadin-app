@@ -16,7 +16,7 @@
         }
 
         .navbar-kpu {
-            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            background: linear-gradient(135deg, #800000 0%, #bb2d3b 100%);
         }
     </style>
 </head>
@@ -24,12 +24,16 @@
 <body>
     <nav class="navbar navbar-dark navbar-kpu py-3 shadow-sm mb-4">
         <div class="container">
-            <a class="navbar-brand fw-bold" href="/index.html">
-                <i class="bi bi-wallet2 me-2"></i>E-Perjadin
+            <a class="navbar-brand d-flex align-items-center fw-bold" href="/index.html">
+                <img src="img/kpu_logo.png" alt="Logo KPU" height="50" class="me-3"></i>Laporan
+                Kegiatan Perjalan Dinas
             </a>
-            <a href="/index.html" class="btn btn-sm btn-outline-light rounded-pill px-3">Kembali</a>
-        </div>
+            <a href="/index.html" class="btn btn-sm btn-outline-light rounded-pill px-3 fw-bold">
+                <i class="bi bi-house-door-fill me-1"></i> Kembali ke Dashboard
+            </a>
+
     </nav>
+
 
     <div class="container pb-5">
         <div class="row justify-content-center">
@@ -120,7 +124,10 @@
                     jsonSppd.data.forEach(item => {
                         // TAMPILKAN HANYA JIKA SPPD INI BELUM DI-ACC
                         if (!accSppdIds.includes(item.id)) {
-                            select.innerHTML += `<option value="${item.id}">[${item.tgl_berangkat}] ${item.maksud_dinas} - ${item.nama_pegawai}</option>`;
+                            // SIHIR PEMOTONG WAKTU: Ambil karakter sebelum huruf 'T'
+                            const tglRapi = item.tgl_berangkat ? item.tgl_berangkat.split('T') : '-';
+
+                            select.innerHTML += `<option value="${item.id}">[${tglRapi}] ${item.maksud_dinas} - ${item.nama_pegawai}</option>`;
                         }
                     });
                 }
@@ -190,6 +197,7 @@
             } catch (err) { console.error(err); }
         }
     </script>
+    <script src="/js/load-components.js"></script>
 </body>
 
 </html>
