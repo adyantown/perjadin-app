@@ -1,5 +1,6 @@
 // controllers/rabController.js
 const db = require('../config/db');
+const logController = require('./logController');
 
 // ==========================================
 // 1. AMBIL KAK YANG BELUM PUNYA RAB
@@ -55,6 +56,7 @@ exports.saveRab = (req, res) => {
         db.query(queryUpdatePagu, [data.total_rab, data.kak_id], (err2) => {
             if (err2) console.error('Gagal memotong saldo pagu:', err2);
             // Tetap kita anggap sukses karena RAB-nya berhasil dibuat
+            logController.catatLog(req, 'Buat RAB', `Membuat RAB untuk KAK ID: ${data.kak_id}`);
             res.json({ success: true, message: 'RAB Berhasil Disimpan & Saldo Terpotong!' });
         });
     });
@@ -150,6 +152,7 @@ exports.deleteRab = (req, res) => {
                     return res.status(500).json({ success: false, message: 'Gagal menghapus dokumen RAB.' });
                 }
 
+                logController.catatLog(req, 'Hapus RAB', `Menghapus data RAB ID: ${rabId}`);
                 res.json({ success: true, message: 'RAB dibatalkan dan Saldo berhasil dikembalikan ke Brankas!' });
             });
         });
@@ -206,6 +209,7 @@ exports.updateRab = (req, res) => {
                 db.query(queryUpdateRab, values, (errUpdateRab) => {
                     if (errUpdateRab) return res.status(500).json({ success: false, message: 'Gagal menyimpan revisi RAB.' });
 
+                    logController.catatLog(req, 'Edit RAB', `Mengubah data RAB ID: ${rabId}`);
                     res.json({ success: true, message: 'Revisi berhasil disimpan dan Saldo Pagu otomatis disesuaikan!' });
                 });
             });

@@ -1,5 +1,5 @@
-// controllers/dokumentasiController.js
 const db = require('../config/db');
+const logController = require('./logController');
 
 // ==========================================
 // 1. UPLOAD FILE SPJ OLEH PEGAWAI
@@ -29,6 +29,7 @@ exports.uploadSpj = (req, res) => {
                     WHERE sppd_id = ?`;
                 db.query(updateQuery, [file_pdf, uploaded_by, sppd_id], (err2) => {
                     if (err2) return res.status(500).json({ success: false, message: err2.message });
+                    logController.catatLog(req, 'Upload SPJ', `Merevisi file SPJ untuk SPPD ID: ${sppd_id}`);
                     res.json({ success: true, message: 'File Revisi SPJ berhasil diupload!' });
                 });
             } else {
@@ -36,6 +37,7 @@ exports.uploadSpj = (req, res) => {
                 const insertQuery = `INSERT INTO dokumen_spj (sppd_id, file_pdf, uploaded_by, status) VALUES (?, ?, ?, 'Menunggu Verifikasi')`;
                 db.query(insertQuery, [sppd_id, file_pdf, uploaded_by], (err3) => {
                     if (err3) return res.status(500).json({ success: false, message: err3.message });
+                    logController.catatLog(req, 'Upload SPJ', `Mengupload file SPJ baru untuk SPPD ID: ${sppd_id}`);
                     res.json({ success: true, message: 'File SPJ berhasil diupload dan menunggu verifikasi!' });
                 });
             }
@@ -74,6 +76,7 @@ exports.verifikasiSpj = (req, res) => {
 
     db.query(sql, [status, catatan_admin, spjId], (err, result) => {
         if (err) return res.status(500).json({ success: false, message: err.message });
+        logController.catatLog(req, 'Verifikasi SPJ', `Mengubah status SPJ ID: ${spjId} menjadi ${status}`);
         res.json({ success: true, message: `SPJ berhasil di-set menjadi: ${status}` });
     });
 };
@@ -86,6 +89,7 @@ exports.deleteSpj = (req, res) => {
     const sql = 'DELETE FROM dokumen_spj WHERE id = ?';
     db.query(sql, [id], (err, result) => {
         if (err) return res.status(500).json({ success: false, message: err.message });
+        logController.catatLog(req, 'Hapus SPJ', `Menghapus file SPJ ID: ${id}`);
         res.json({ success: true, message: 'Data SPJ berhasil dihapus!' });
     });
 };

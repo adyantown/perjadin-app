@@ -23,21 +23,26 @@ c. Keputusan Komisi Pemilihan Umum Nomor 409 Tahun 2022 Tentang Pedoman Teknis P
 
     // 4. TARIK 3 KAMAR DARI TABEL PAGU ANGGARAN
     try {
-        const resPagu = await fetch('/api/pagu/all'); // Asumsi nanti kita bikin API ini
-        const dataPagu = await resPagu.json();
+        const resPagu = await fetch('/api/pagu/all');
+        const jsonPagu = await resPagu.json(); // Ganti nama variabel biar gak bingung
         const selectPagu = document.getElementById('pagu_id');
 
         selectPagu.innerHTML = '<option value="">-- Pilih Pagu Beban Anggaran --</option>';
-        dataPagu.forEach((pagu) => {
-            // Tampilkan Nama Kamar dan Sisa Duitnya biar transparan!
-            const sisaRupiah = parseInt(pagu.sisa_pagu).toLocaleString('id-ID');
-            selectPagu.innerHTML += `<option value="${pagu.id}">${pagu.nama_kamar} (Sisa: Rp ${sisaRupiah})</option>`;
-        });
+
+        // TAMBAHKAN PENGECEKAN SUCCESS & AMBIL ISI .data
+        if (jsonPagu.success && jsonPagu.data) {
+            jsonPagu.data.forEach((pagu) => {
+                // Tampilkan Nama Kamar dan Sisa Duitnya biar transparan!
+                const sisaRupiah = parseInt(pagu.sisa_pagu).toLocaleString('id-ID');
+                selectPagu.innerHTML += `<option value="${pagu.id}">${pagu.nama_kamar} (Sisa: Rp ${sisaRupiah})</option>`;
+            });
+        }
     } catch (err) {
         console.error('Gagal meload Pagu:', err);
-        document.getElementById('pagu_id').innerHTML = '<option value="">Gagal memuat data (Buat API-nya dulu ya Mas!)</option>';
+        document.getElementById('pagu_id').innerHTML = '<option value="">Gagal memuat data</option>';
     }
 });
+
 // ==========================================
 // 5. HANDLE SUBMIT FORM KAK
 // ==========================================

@@ -70,6 +70,7 @@
         </div>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             // 1. Cek apakah di URL ada tulisan "?alert=belum_login"
@@ -78,7 +79,12 @@
 
             if (alertType === 'belum_login') {
                 // 2. Munculkan Alert Keras!
-                alert('🛑 Anda harus LOGIN dulu sebelum masuk ke sistem!');
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Mohon Maaf',
+                    text: 'Anda harus LOGIN dulu sebelum masuk ke sistem!',
+                    confirmButtonColor: '#800000'
+                });
 
                 // 3. (Opsional) Bersihkan URL biar rapi lagi
                 window.history.replaceState({}, document.title, "/login.html");
@@ -106,14 +112,33 @@
                 if (data.success) {
                     // Login Berhasil!
                     localStorage.setItem('user_kpu', JSON.stringify(data.user)); // Simpan info user
-                    window.location.href = '/index.html'; // Pindah ke Dashboard
+
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Login Berhasil!',
+                        text: 'Selamat datang di E-PERJADIN',
+                        timer: 1500,
+                        showConfirmButton: false
+                    }).then(() => {
+                        window.location.href = '/index.html'; // Pindah ke Dashboard
+                    });
                 } else {
-                    alert('Gagal: ' + data.message);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Login Gagal',
+                        text: data.message,
+                        confirmButtonColor: '#800000'
+                    });
                     btn.innerHTML = 'MASUK APLIKASI';
                     btn.disabled = false;
                 }
             } catch (err) {
-                alert('Terjadi kesalahan koneksi.');
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Koneksi Bermasalah',
+                    text: 'Terjadi kesalahan saat terhubung ke server.',
+                    confirmButtonColor: '#800000'
+                });
                 btn.innerHTML = 'MASUK APLIKASI';
                 btn.disabled = false;
             }

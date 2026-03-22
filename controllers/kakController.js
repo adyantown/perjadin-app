@@ -1,5 +1,5 @@
-// controllers/kakController.js
 const db = require('../config/db');
+const logController = require('./logController');
 
 // ==========================================
 // MENGAMBIL SEMUA DATA PAGU (Untuk Dropdown)
@@ -33,6 +33,7 @@ exports.saveKak = (req, res) => {
             console.error('Error insert KAK:', err);
             return res.status(500).json({ success: false, message: 'Gagal menyimpan Kerangka Acuan Kerja' });
         }
+        logController.catatLog(req, 'Buat KAK', `Membuat KAK Baru: ${data.judul_kegiatan}`);
         res.json({ success: true, message: 'KAK berhasil disimpan!', id: result.insertId });
     });
 };
@@ -90,6 +91,7 @@ exports.deleteKak = (req, res) => {
 
     db.query(query, [kakId], (err, result) => {
         if (err) return res.status(500).json({ success: false, message: 'Gagal menghapus KAK.' });
+        logController.catatLog(req, 'Hapus KAK', `Menghapus data KAK ID: ${kakId}`);
         res.json({ success: true, message: 'Data KAK berhasil dihapus!' });
     });
 };
@@ -101,16 +103,23 @@ exports.updateKak = (req, res) => {
     const kakId = req.params.id;
     const data = req.body;
 
+    // PASTIKAN pagu_id ADA DI SINI ↓
     const query = `
         UPDATE dokumen_kak SET 
-            judul_kegiatan=?, latar_belakang=?, dasar_hukum=?, 
-            maksud_tujuan=?, output_kegiatan=?, tgl_kak=? 
+            pagu_id=?, judul_kegiatan=?, latar_belakang=?, dasar_hukum=?, 
+            maksud_tujuan=?, output_kegiatan=?, tgl_kak=?, ppk_nama=?, ppk_nip=?
         WHERE id=?
     `;
-    const values = [data.judul_kegiatan, data.latar_belakang, data.dasar_hukum, data.maksud_tujuan, data.output_kegiatan, data.tgl_kak, kakId];
 
-    db.query(query, values, (err) => {
-        if (err) return res.status(500).json({ success: false, message: 'Gagal mengupdate KAK.' });
-        res.json({ success: true, message: 'Revisi KAK berhasil disimpan!' });
+    // PASTIKAN data.pagu_id BERADA DI URUTAN PERTAMA ↓
+    const values = [data.pagu_id, data.judul_kegiatan, data.latar_belakang, data.dasar_hukum, data.maksud_tujuan, data.output_kegiatan, data.tgl_kak, data.ppk_nama, data.ppk_nip, kakId];
+
+    db.query(query, values, (err, result) => {
+        if (err) {
+            console.error('Error update KAK:', err);
+            return res.status(500).json({ success: false, message: 'Gagal mengupdate KAK.' });
+        }
+        logController.catatLog(req, 'Edit KAK', `Mengubah data KAK ID: ${kakId}`);
+        res.json({ success: true, message: 'Data KAK berhasil diperbarui!' });
     });
 };

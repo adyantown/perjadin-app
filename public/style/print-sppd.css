@@ -104,7 +104,8 @@
         width: 100%;
         margin-top: 10px;
     }
-    .table-sppd-main td {
+    .table-sppd-main > tbody > tr > td,
+    .table-sppd-main > tr > td {
         border: 1px solid black !important;
         padding: 4px;
         vertical-align: top;

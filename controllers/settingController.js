@@ -1,4 +1,5 @@
 const db = require('../config/db');
+const logController = require('./logController');
 
 // Ambil data setting (selalu ambil ID 1)
 exports.getSettings = (req, res) => {
@@ -20,6 +21,7 @@ exports.updateSettings = (req, res) => {
     const data = req.body;
     db.query('UPDATE setting_pejabat SET ? WHERE id = 1', data, (err, result) => {
         if (err) return res.status(500).json({ success: false, message: err.message });
+        logController.catatLog(req, 'Pengaturan Sistem', 'Menyimpan perubahan pengaturan Pejabat/Bendahara dll.');
         res.json({ success: true, message: 'Pengaturan pejabat berhasil disimpan!' });
     });
 };

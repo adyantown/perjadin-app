@@ -1,5 +1,6 @@
 // controllers/pegawaiController.js
 const db = require('../config/db');
+const logController = require('./logController');
 
 // 1. AMBIL SEMUA DATA (READ)
 exports.getAllPegawai = (req, res) => {
@@ -25,6 +26,7 @@ exports.createPegawai = (req, res) => {
     const data = req.body;
     db.query('INSERT INTO master_pegawai SET ?', data, (err, result) => {
         if (err) return res.status(500).json({ success: false, message: err.message });
+        logController.catatLog(req, 'Master Pegawai', `Menambahkan pegawai baru: ${data.nama_pegawai || 'Tanpa Nama'}`);
         res.json({ success: true, message: 'Pegawai berhasil ditambahkan!' });
     });
 };
@@ -35,6 +37,7 @@ exports.updatePegawai = (req, res) => {
     const data = req.body;
     db.query('UPDATE master_pegawai SET ? WHERE id = ?', [data, id], (err, result) => {
         if (err) return res.status(500).json({ success: false, message: err.message });
+        logController.catatLog(req, 'Master Pegawai', `Mengubah data pegawai ID: ${id}`);
         res.json({ success: true, message: 'Data pegawai berhasil diperbarui!' });
     });
 };
@@ -44,6 +47,7 @@ exports.deletePegawai = (req, res) => {
     const id = req.params.id;
     db.query('DELETE FROM master_pegawai WHERE id = ?', [id], (err, result) => {
         if (err) return res.status(500).json({ success: false, message: err.message });
+        logController.catatLog(req, 'Master Pegawai', `Menghapus pegawai ID: ${id}`);
         res.json({ success: true, message: 'Pegawai berhasil dihapus!' });
     });
 };

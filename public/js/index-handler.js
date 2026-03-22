@@ -14,6 +14,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 document.getElementById('cardGaleriAdmin').style.display = 'block';
                 document.getElementById('cardLogAdmin').style.display = 'block';
                 document.getElementById('cardManajemenUser').style.display = 'block';
+                document.getElementById('cardManajemenPagu').style.display = 'block';
                 document.getElementById('heroAdminSection').style.display = 'flex'; // Munculkan kotak Hero
                 loadExecutiveSummary(data.user); // Jalankan mesin penghitung (sesuaikan variabel nama user-nya)
                 // document.getElementById('cardUploadLaporan').style.display = 'none'; // Kalau admin gak perlu lapor
@@ -22,6 +23,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 document.getElementById('cardGaleriAdmin').style.display = 'none';
                 document.getElementById('cardLogAdmin').style.display = 'none';
                 document.getElementById('cardManajemenUser').style.display = 'none';
+                document.getElementById('cardManajemenPagu').style.display = 'none';
+
                 // Sembunyikan menu sensitif lainnya (Fitur yg sebelumnya kita buat)
                 const menuSetting = document.getElementById('menuSetting');
                 const menuPegawai = document.getElementById('menuPegawai');

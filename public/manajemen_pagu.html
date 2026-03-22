@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manajemen Pagu - E-Perjadin</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+        rel="stylesheet">
+    <link rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="style/index-style.css">
+</head>
+
+<body class="bg-light">
+
+    <nav class="navbar navbar-dark py-3 shadow-sm"
+        style="background: linear-gradient(135deg, #800000 0%, #bb2d3b 100%);">
+        <div class="container d-flex justify-content-between align-items-center">
+            <a class="navbar-brand fw-bold d-flex align-items-center" href="/index.html">
+                <img src="/img/kpu_logo.png" alt="Logo" height="40" class="me-2">
+                <div class="d-flex flex-column">
+                    <span class="fs-6">E-Perjadin KPU Tubaba</span>
+                    <small class="fw-normal text-white-50"
+                        style="font-size: 11px; text-transform: uppercase;">
+                        » Manajemen Pagu
+                    </small>
+                </div>
+            </a>
+            <a href="/index.html" class="btn btn-sm btn-outline-light rounded-pill px-3 fw-bold">
+                <i class="bi bi-house-door-fill me-1"></i> Dashboard
+            </a>
+        </div>
+    </nav>
+    <div
+        style="background: rgba(255, 255, 255, 0.5); backdrop-filter: blur(5px); -webkit-backdrop-filter: blur(5px); border-bottom: 1px solid rgba(0,0,0,0.05);">
+        <div class="container py-3 d-flex justify-content-between align-items-center">
+            <h5 class="m-0 fw-bold text-dark" style="letter-spacing: -0.5px;">Revisi Anggaran DIPA
+            </h5>
+            <div></div>
+        </div>
+    </div>
+    </div>
+    <div class="container pb-5">
+        <div class="card shadow-sm border-0 rounded-4 mt-4">
+            <div class="card-body p-4">
+                <h5 class="fw-bold mb-4 text-primary"><i class="bi bi-safe2-fill me-2"></i>Daftar
+                    Pagu
+                    Anggaran DIPA</h5>
+
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Kode & Uraian Kegiatan</th>
+                                <th class="text-end">Total Pagu DIPA</th>
+                                <th class="text-end">Sisa Anggaran</th>
+                                <th class="text-center">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="pagu-tbody">
+                            <tr>
+                                <td colspan="4" class="text-center py-4 text-muted">
+                                    <div class="spinner-border spinner-border-sm me-2"></div>Memuat
+                                    data...
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <script
+        src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="/js/utils.js"></script>
+
+    <script>
+        // Langsung muat data saat halaman dibuka
+        document.addEventListener("DOMContentLoaded", () => loadDataPagu());
+
+        async function loadDataPagu() {
+            try {
+                const res = await fetch('/api/pagu/all');
+                const json = await res.json();
+                const tbody = document.getElementById('pagu-tbody');
+                tbody.innerHTML = '';
+
+                if (json.success && json.data.length > 0) {
+                    json.data.forEach(item => {
+                        const paguBulat = parseInt(item.pagu_awal);
+                        const sisaBulat = parseInt(item.sisa_pagu);
+
+                        tbody.innerHTML += `
+                                <tr>
+                                    <td class="py-3">
+                                        <span class="badge bg-secondary mb-1">${item.kegiatan_kode || '-'}</span><br>
+                                        <span class="fw-bold text-dark">${item.nama_kamar}</span>
+                                    </td>
+                                    <td class="text-end fw-bold text-secondary">Rp ${paguBulat.toLocaleString('id-ID')}</td>
+                                    <td class="text-end fw-bold text-success fs-6">Rp ${sisaBulat.toLocaleString('id-ID')}</td>
+                                    <td class="text-center">
+                                        <button class="btn btn-sm btn-outline-warning rounded-pill px-3 shadow-sm fw-bold text-dark" 
+                                            onclick="modalRevisi(${item.id}, '${item.nama_kamar}', ${paguBulat})">
+                                            <i class="bi bi-pencil-square me-1"></i> Revisi
+                                        </button>
+                                    </td>
+                                </tr>
+                            `;
+                    });
+                } else {
+                    tbody.innerHTML = `<tr><td colspan="4" class="text-center py-3 text-muted">Belum ada data pagu.</td></tr>`;
+                }
+            } catch (err) {
+                console.error("Gagal meload pagu", err);
+                document.getElementById('pagu-tbody').innerHTML = `<tr><td colspan="4" class="text-center py-3 text-danger">Gagal mengambil data dari server.</td></tr>`;
+            }
+        }
+
+        // Pop-Up Cantik untuk Input Revisi
+        function modalRevisi(id, namaKamar, paguSaatIni) {
+            Swal.fire({
+                title: 'Revisi Pagu DIPA',
+                html: `
+                        <div class="text-start mb-3 p-3 bg-light rounded border">
+                            <small class="text-muted fw-bold d-block mb-1">Kamar Anggaran:</small>
+                            <span class="fw-bold text-primary">${namaKamar}</span>
+                        </div>
+                        <div class="text-start">
+                            <label class="form-label fw-bold">Nominal Pagu DIPA Baru:</label>
+                            <input type="number" id="inputPaguBaru" class="form-control form-control-lg text-end fw-bold" value="${paguSaatIni}">
+                            <small class="text-muted mt-2 d-block"><i class="bi bi-magic text-warning me-1"></i> Sisa anggaran rill saat ini akan disesuaikan secara otomatis oleh sistem.</small>
+                        </div>
+                    `,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#0d6efd',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Simpan Revisi',
+                cancelButtonText: 'Batal',
+                preConfirm: () => {
+                    const val = document.getElementById('inputPaguBaru').value;
+                    if (!val || val === '') {
+                        Swal.showValidationMessage('Nominal Pagu tidak boleh kosong!');
+                        return false;
+                    }
+                    return val;
+                }
+            }).then(async (result) => {
+                if (result.isConfirmed) {
+                    const paguBaru = result.value;
+                    try {
+                        // Tampilkan loading spinner SweetAlert
+                        Swal.fire({ title: 'Menyimpan...', allowOutsideClick: false, didOpen: () => { Swal.showLoading() } });
+
+                        const response = await fetch(`/api/pagu/revisi/${id}`, {
+                            method: 'PUT',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ pagu_baru: paguBaru })
+                        });
+                        const resJson = await response.json();
+
+                        if (resJson.success) {
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Berhasil!',
+                                text: resJson.message,
+                                timer: 2000,
+                                showConfirmButton: false
+                            });
+                            loadDataPagu(); // Refresh tabel setelah sukses
+                        } else {
+                            Swal.fire('Gagal!', resJson.message, 'error');
+                        }
+                    } catch (e) {
+                        Swal.fire('Error!', 'Terjadi kesalahan jaringan/server.', 'error');
+                    }
+                }
+            });
+        }
+    </script>
+</body>
+
+</html>
