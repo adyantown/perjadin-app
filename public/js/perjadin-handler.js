@@ -72,12 +72,21 @@ async function loadSppdDropdown() {
             sppdCache = json.data; // Simpan ke wadah
             select.innerHTML = '<option value="">-- Pilih Surat Tugas dari SPPD --</option>';
 
+            const uniqueST = [];
+
             json.data.forEach((item) => {
-                const option = document.createElement('option');
-                option.value = item.nomor_st;
-                // Tampilkan Nomor Surat + Tujuan biar Admin gampang milihnya
-                option.textContent = `${item.nomor_st} (Ke: ${item.tempat_tujuan})`;
-                select.appendChild(option);
+                if (!uniqueST.includes(item.nomor_st)) {
+                    uniqueST.push(item.nomor_st);
+                    
+                    const option = document.createElement('option');
+                    option.value = item.nomor_st;
+                    
+                    // Hitung jumlah rombongan
+                    const rombonganCount = json.data.filter(s => s.nomor_st === item.nomor_st).length;
+                    
+                    option.textContent = `${item.nomor_st} (Ke: ${item.tempat_tujuan} - ${rombonganCount} Orang)`;
+                    select.appendChild(option);
+                }
             });
         }
     } catch (e) {
@@ -91,20 +100,34 @@ window.autoFillSppd = function () {
     const select = document.getElementById('selectSppd');
     const selectedNoSt = select.value;
 
-    // Cari data SPPD yang cocok dengan pilihan Admin
-    const sppd = sppdCache.find((s) => s.nomor_st === selectedNoSt);
+    // Cari semua SPPD yang berada dalam satu rombongan (nomor_st sama)
+    const allSppdUnderSt = sppdCache.filter((s) => s.nomor_st === selectedNoSt);
+    const sppd = allSppdUnderSt[0]; // Jadikan indeks pertama sebagai referensi data perjalanan dinas
 
     if (sppd) {
         const formatDate = (d) => (d ? d.split('T')[0] : '');
 
-        // 1. Isi Tanggal Surat Tugas
+        // 1. Isi Data Administrasi dan Perjalanan
         document.getElementById('tgl_surat_tugas').value = formatDate(sppd.tgl_surat);
-
-        // 2. BONUS: Isi otomatis field lainnya!
         document.querySelector('[name="maksud_dinas"]').value = sppd.maksud_dinas || '';
         document.querySelector('[name="tujuan"]').value = sppd.tempat_tujuan || '';
         document.querySelector('[name="tgl_berangkat"]').value = formatDate(sppd.tgl_berangkat);
         document.querySelector('[name="tgl_pulang"]').value = formatDate(sppd.tgl_kembali);
+
+        // 2. AUTO-FILL ROMBONGAN PEGAWAI
+        // Bersihkan daftar pegawai lama (hapus row kosong atau rombongan lama)
+        const container = document.getElementById('pegawai-container');
+        container.innerHTML = '';
+        
+        // Loop tiap pegawai di rombongan SPPD ini, lalu masukkan ke dalam form
+        allSppdUnderSt.forEach((item) => {
+            // Bersihkan format "Nama / NIP" menjadi "Nama" saja
+            const namaUtama = item.nama_pegawai ? item.nama_pegawai.split(' /')[0] : '';
+            const golUtama = item.pangkat_gol || '';
+            const jabUtama = item.jabatan || '';
+            
+            tambahPegawai(namaUtama, golUtama, jabUtama);
+        });
 
         hitungOtomatis(); // Jalankan fungsi hitung total
     } else {
@@ -112,6 +135,11 @@ window.autoFillSppd = function () {
         document.getElementById('tgl_surat_tugas').value = '';
         document.querySelector('[name="maksud_dinas"]').value = '';
         document.querySelector('[name="tujuan"]').value = '';
+        
+        // Reset wadah pegawai dan berikan 1 ruang input kosong manual
+        const container = document.getElementById('pegawai-container');
+        container.innerHTML = '';
+        tambahPegawai();
     }
 };
 

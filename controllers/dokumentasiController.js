@@ -10,37 +10,89 @@ exports.uploadSpj = (req, res) => {
             return res.status(400).json({ success: false, message: 'Wajib upload file PDF SPJ!' });
         }
 
-        const sppd_id = req.body.sppd_id;
+        const nomor_st = req.body.nomor_st;
         const file_pdf = req.file.filename;
 
         // SSSHHH! Kita intip siapa yang lagi login dari session
         const uploaded_by = req.session.nama || 'Pegawai';
 
-        // Cek dulu, apakah SPPD ini sebelumnya udah pernah di-upload SPJ-nya?
-        const checkQuery = 'SELECT id FROM dokumen_spj WHERE sppd_id = ?';
-        db.query(checkQuery, [sppd_id], (err, results) => {
+        // 1. Cari semua sppd_id yang punya nomor_st ini
+        const getSppdQuery = 'SELECT id FROM sppd_kpu WHERE nomor_st = ?';
+        db.query(getSppdQuery, [nomor_st], (err, sppdResults) => {
             if (err) return res.status(500).json({ success: false, message: err.message });
-
-            if (results.length > 0) {
-                // Kalau udah ada (misal lagi proses revisi), UPDATE file dan catat siapa yang revisi
-                const updateQuery = `
-                    UPDATE dokumen_spj 
-                    SET file_pdf = ?, uploaded_by = ?, status = 'Menunggu Verifikasi', catatan_admin = NULL 
-                    WHERE sppd_id = ?`;
-                db.query(updateQuery, [file_pdf, uploaded_by, sppd_id], (err2) => {
-                    if (err2) return res.status(500).json({ success: false, message: err2.message });
-                    logController.catatLog(req, 'Upload SPJ', `Merevisi file SPJ untuk SPPD ID: ${sppd_id}`);
-                    res.json({ success: true, message: 'File Revisi SPJ berhasil diupload!' });
-                });
-            } else {
-                // Kalau belum pernah, kita INSERT data baru beserta nama penguploadnya
-                const insertQuery = `INSERT INTO dokumen_spj (sppd_id, file_pdf, uploaded_by, status) VALUES (?, ?, ?, 'Menunggu Verifikasi')`;
-                db.query(insertQuery, [sppd_id, file_pdf, uploaded_by], (err3) => {
-                    if (err3) return res.status(500).json({ success: false, message: err3.message });
-                    logController.catatLog(req, 'Upload SPJ', `Mengupload file SPJ baru untuk SPPD ID: ${sppd_id}`);
-                    res.json({ success: true, message: 'File SPJ berhasil diupload dan menunggu verifikasi!' });
-                });
+            
+            if (sppdResults.length === 0) {
+                return res.status(404).json({ success: false, message: 'Surat Tugas tidak ditemukan!' });
             }
+
+            // Ambil array ID saja
+            const sppdIds = sppdResults.map(row => row.id);
+
+            // 2. Cek mana yang udah punya SPJ, mana yang belum
+            const checkSpjQuery = 'SELECT id, sppd_id FROM dokumen_spj WHERE sppd_id IN (?)';
+            db.query(checkSpjQuery, [sppdIds], (err2, spjResults) => {
+                if (err2) return res.status(500).json({ success: false, message: err2.message });
+
+                const existingSppdIds = spjResults.map(row => row.sppd_id);
+                
+                // Pisahkan mana yang harus di-UPDATE (revisi), mana yang harus di-INSERT (baru)
+                const toUpdateIds = [];
+                const toInsertIds = [];
+
+                sppdIds.forEach(id => {
+                    if (existingSppdIds.includes(id)) {
+                        toUpdateIds.push(id);
+                    } else {
+                        toInsertIds.push(id);
+                    }
+                });
+
+                let pendingQueries = 0;
+                let hasError = false;
+
+                const finalize = () => {
+                    if (pendingQueries === 0 && !hasError) {
+                        logController.catatLog(req, 'Upload SPJ Rombongan', `Upload SPJ untuk Surat Tugas: ${nomor_st}`);
+                        return res.json({ success: true, message: 'File SPJ Rombongan berhasil diupload dan menunggu verifikasi!' });
+                    }
+                };
+
+                if (toUpdateIds.length > 0) {
+                    pendingQueries++;
+                    const updateQuery = `
+                        UPDATE dokumen_spj 
+                        SET file_pdf = ?, uploaded_by = ?, status = 'Menunggu Verifikasi', catatan_admin = NULL 
+                        WHERE sppd_id IN (?)`;
+                    db.query(updateQuery, [file_pdf, uploaded_by, toUpdateIds], (errU) => {
+                        if (errU && !hasError) {
+                            hasError = true;
+                            return res.status(500).json({ success: false, message: errU.message });
+                        }
+                        pendingQueries--;
+                        finalize();
+                    });
+                }
+
+                if (toInsertIds.length > 0) {
+                    pendingQueries++;
+                    // Insert bulk
+                    const values = toInsertIds.map(id => [id, file_pdf, uploaded_by, 'Menunggu Verifikasi']);
+                    const insertQuery = `INSERT INTO dokumen_spj (sppd_id, file_pdf, uploaded_by, status) VALUES ?`;
+                    db.query(insertQuery, [values], (errI) => {
+                        if (errI && !hasError) {
+                            hasError = true;
+                            return res.status(500).json({ success: false, message: errI.message });
+                        }
+                        pendingQueries--;
+                        finalize();
+                    });
+                }
+
+                if (toUpdateIds.length === 0 && toInsertIds.length === 0) {
+                    // Should not happen, but just in case
+                    finalize();
+                }
+            });
         });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });

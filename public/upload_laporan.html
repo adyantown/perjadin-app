@@ -49,9 +49,9 @@
                     <div class="card-body p-4">
                         <form id="formUploadSpj">
                             <div class="mb-3">
-                                <label class="form-label fw-bold">Pilih Kegiatan (SPPD)</label>
-                                <select class="form-select" id="sppd_id" name="sppd_id" required>
-                                    <option value="">-- Memuat daftar SPPD... --</option>
+                                <label class="form-label fw-bold">Pilih Kegiatan Rombongan (Surat Tugas)</label>
+                                <select class="form-select" id="nomor_st" name="nomor_st" required>
+                                    <option value="">-- Memuat daftar Surat Tugas... --</option>
                                 </select>
                             </div>
                             <div class="mb-4">
@@ -116,19 +116,34 @@
                     });
                 }
 
-                // 3. Render Dropdown SPPD (Saring yang udah ACC)
-                const select = document.getElementById('sppd_id');
-                select.innerHTML = '<option value="">-- Pilih SPPD yang ingin di-SPJ-kan --</option>';
+                // 3. Render Dropdown Surat Tugas (Grouping)
+                const select = document.getElementById('nomor_st');
+                select.innerHTML = '<option value="">-- Pilih Surat Tugas Rombongan --</option>';
 
                 if (jsonSppd.success) {
+                    const groupedSppd = {};
+                    
                     jsonSppd.data.forEach(item => {
                         // TAMPILKAN HANYA JIKA SPPD INI BELUM DI-ACC
                         if (!accSppdIds.includes(item.id)) {
-                            // SIHIR PEMOTONG WAKTU: Ambil karakter sebelum huruf 'T'
-                            const tglRapi = item.tgl_berangkat ? item.tgl_berangkat.split('T') : '-';
-
-                            select.innerHTML += `<option value="${item.id}">[${tglRapi}] ${item.maksud_dinas} - ${item.nama_pegawai}</option>`;
+                            if (!groupedSppd[item.nomor_st]) {
+                                groupedSppd[item.nomor_st] = {
+                                    nomor_st: item.nomor_st,
+                                    maksud_dinas: item.maksud_dinas,
+                                    tgl_berangkat: item.tgl_berangkat ? item.tgl_berangkat.split('T')[0] : '-',
+                                    pegawai_list: []
+                                };
+                            }
+                            // Ambil nama sebelum slash atau gelar agar tidak terlalu panjang
+                            const namaPendek = item.nama_pegawai ? item.nama_pegawai.split(' /')[0] : 'Tanpa Nama';
+                            groupedSppd[item.nomor_st].pegawai_list.push(namaPendek);
                         }
+                    });
+
+                    // Render ke dropdown
+                    Object.values(groupedSppd).forEach(group => {
+                        const namaNama = group.pegawai_list.join(', ');
+                        select.innerHTML += `<option value="${group.nomor_st}">[${group.tgl_berangkat}] ${group.maksud_dinas} (${group.pegawai_list.length} Orang: ${namaNama})</option>`;
                     });
                 }
             } catch (err) {
