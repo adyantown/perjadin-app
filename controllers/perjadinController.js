@@ -1,5 +1,5 @@
 // --- ENDPOINT SIMPAN & UPDATE ---
-const db = require('../config/db');
+const PerjadinModel = require('../models/perjadinModel');
 const logController = require('./logController');
 
 const cleanMoney = (val) => {
@@ -8,33 +8,27 @@ const cleanMoney = (val) => {
     return parseFloat(val.toString().replace(/\./g, '')) || 0;
 };
 
-const syncPegawaiPivot = (perjadinId, namaArray) => {
+const syncPegawaiPivot = async (perjadinId, namaArray) => {
     if (!namaArray || namaArray.length === 0) return;
 
     // Cari pegawai berdasarkan nama
-    namaArray.forEach((nama) => {
+    for (const nama of namaArray) {
         const cleanNama = nama.trim();
+        if (!cleanNama) continue;
 
-        if (!cleanNama) return;
-
-        const sqlCari = `SELECT id FROM master_pegawai WHERE nama_pegawai LIKE ? LIMIT 1`;
-
-        db.query(sqlCari, [`%${cleanNama}%`], (err, rows) => {
-            if (err || rows.length === 0) return;
+        try {
+            const rows = await PerjadinModel.findPegawaiByNama(cleanNama);
+            if (rows.length === 0) continue;
 
             const pegawaiId = rows[0].id;
-
-            const sqlInsertPivot = `
-                INSERT INTO perjadin_pegawai (perjadin_id, pegawai_id)
-                VALUES (?, ?)
-            `;
-
-            db.query(sqlInsertPivot, [perjadinId, pegawaiId]);
-        });
-    });
+            await PerjadinModel.insertPivot(perjadinId, pegawaiId);
+        } catch (err) {
+            // Silently continue if a single pivot insert fails
+        }
+    }
 };
 
-exports.save = (req, res) => {
+exports.save = async (req, res) => {
     const d = req.body;
     const editId = d.id_edit;
     const rawNama = d['nama_pegawai[]'] || d.nama_pegawai || [];
@@ -43,11 +37,6 @@ exports.save = (req, res) => {
 
     try {
         // 1. DATA PEGAWAI (Gunakan pembersihan array yang konsisten)
-        const getArrayData = (val) => {
-            if (!val) return [];
-            return Array.isArray(val) ? val : [val];
-        };
-
         const namaArray = Array.isArray(rawNama) ? rawNama : rawNama ? [rawNama] : [];
         const golArray = Array.isArray(rawGol) ? rawGol : [rawGol].filter(Boolean);
         const jabArray = Array.isArray(rawJab) ? rawJab : [rawJab].filter(Boolean);
@@ -105,11 +94,10 @@ exports.save = (req, res) => {
         const fixCheckout = !d.tgl_checkout || d.tgl_checkout === '' ? null : d.tgl_checkout;
 
         // 7. SIAPKAN PARAMETER (Harus urut sesuai kolom DB)
-        // --- BAGIAN PENYUSUNAN PARAMETER (PASTIKAN URUTANNYA SAMA DENGAN KOLOM SQL) ---
         const params = [
             d.no_surat_tugas, // 1
             d.tgl_surat_tugas, // 2
-            namaPegawaiAll, // 3 (Ini yang tadi hilang/kosong)
+            namaPegawaiAll, // 3
             golonganAll, // 4
             jabatanAll, // 5
             jumlahPegawai, // 6
@@ -130,66 +118,45 @@ exports.save = (req, res) => {
         // 8. EKSEKUSI SQL
         if (editId && editId !== '') {
             // MODE UPDATE
-            const sqlUpdate = `UPDATE perjadin SET 
-                no_surat_tugas=?, tgl_surat_tugas=?, nama_pegawai=?, golongan=?, jabatan=?, 
-                jumlah_sppd=?, tujuan=?, maksud_dinas=?, tgl_berangkat=?, tgl_pulang=?, 
-                uang_harian=?, jenis_transportasi=?, biaya_transportasi=?, nama_hotel=?, 
-                tarif_hotel=?, tgl_checkin=?, tgl_checkout=?, total_biaya=? 
-                WHERE id=?`;
+            await PerjadinModel.update(editId, params);
 
-            db.query(sqlUpdate, [...params, editId], (err, result) => {
-                if (err) {
-                    console.error('SQL Update Error:', err);
-                    return res.status(500).json({ success: false, message: err.message });
-                }
+            // 1️⃣ Hapus relasi pegawai lama
+            try {
+                await PerjadinModel.deletePivot(editId);
+            } catch (e) {}
 
-                // 1️⃣ Hapus relasi pegawai lama
-                db.query('DELETE FROM perjadin_pegawai WHERE perjadin_id = ?', [editId], () => {
-                    // 2️⃣ Insert ulang relasi pegawai baru
-                    try {
-                        syncPegawaiPivot(editId, namaArray);
-                    } catch (e) {
-                        console.error('Gagal sync pivot:', e);
-                    }
-                });
+            // 2️⃣ Insert ulang relasi pegawai baru
+            try {
+                await syncPegawaiPivot(editId, namaArray);
+            } catch (e) {
+                console.error('Gagal sync pivot:', e);
+            }
 
-                // 3️⃣ Log aktivitas
-                try {
-                    logController.catatLog(req, 'Edit Perjadin', `Mengubah data rekap biaya Surat Tugas: ${d.no_surat_tugas}`);
-                } catch (e) {}
+            // 3️⃣ Log aktivitas
+            try {
+                logController.catatLog(req, 'Edit Perjadin', `Mengubah data rekap biaya Surat Tugas: ${d.no_surat_tugas}`);
+            } catch (e) {}
 
-                // 4️⃣ Response ke frontend
-                res.json({ success: true, message: 'Data Berhasil Diupdate!' });
-            });
+            // 4️⃣ Response ke frontend
+            res.json({ success: true, message: 'Data Berhasil Diupdate!' });
         } else {
             // MODE INSERT
-            const sqlInsert = `INSERT INTO perjadin (
-                no_surat_tugas, tgl_surat_tugas, nama_pegawai, golongan, jabatan, 
-                jumlah_sppd, tujuan, maksud_dinas, tgl_berangkat, tgl_pulang, 
-                uang_harian, jenis_transportasi, biaya_transportasi, nama_hotel, 
-                tarif_hotel, tgl_checkin, tgl_checkout, total_biaya
-            ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`;
+            const result = await PerjadinModel.insert(params);
 
-            db.query(sqlInsert, params, (err, result) => {
-                if (err) {
-                    console.error('SQL Insert Error:', err);
-                    return res.status(500).json({ success: false, message: err.message });
-                }
+            // ---> PASANG CCTV DI SINI <---
+            try {
+                logController.catatLog(req, 'Tambah Data Perjadin', `Berhasil Menambah Data Perjadin`);
+            } catch (e) {}
 
-                // ---> PASANG CCTV DI SINI <---
-                try {
-                    logController.catatLog(req, 'Tambah Data Perjadin', `Berhasil Menambah Data Perjadin`);
-                } catch (e) {}
-                const newId = result.insertId;
+            const newId = result.insertId;
 
-                // Sinkronkan ke pivot
-                try {
-                    syncPegawaiPivot(newId, namaArray);
-                } catch (e) {
-                    console.error('Gagal sync pivot:', e);
-                }
-                res.json({ success: true, message: 'Data Berhasil Disimpan!' });
-            });
+            // Sinkronkan ke pivot
+            try {
+                await syncPegawaiPivot(newId, namaArray);
+            } catch (e) {
+                console.error('Gagal sync pivot:', e);
+            }
+            res.json({ success: true, message: 'Data Berhasil Disimpan!' });
         }
     } catch (error) {
         console.error('SERVER CRASH ERROR:', error);
@@ -197,23 +164,27 @@ exports.save = (req, res) => {
     }
 };
 
-exports.getAll = (req, res) => {
-    db.query('SELECT * FROM perjadin ORDER BY id DESC', (err, rows) => {
-        if (err) return res.status(500).json({ error: err.message });
+exports.getAll = async (req, res) => {
+    try {
+        const rows = await PerjadinModel.getAll();
         res.json(rows);
-    });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
 };
 
-exports.getById = (req, res) => {
-    db.query('SELECT * FROM perjadin WHERE id = ?', [req.params.id], (err, rows) => {
-        if (err) return res.status(500).json({ error: err.message });
+exports.getById = async (req, res) => {
+    try {
+        const rows = await PerjadinModel.getById(req.params.id);
         res.json(rows[0]);
-    });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
 };
 
-exports.delete = (req, res) => {
-    db.query('DELETE FROM perjadin WHERE id = ?', [req.params.id], (err) => {
-        if (err) return res.status(500).json({ error: err.message });
+exports.delete = async (req, res) => {
+    try {
+        await PerjadinModel.delete(req.params.id);
 
         // ---> PASANG CCTV DI SINI <---
         try {
@@ -221,23 +192,20 @@ exports.delete = (req, res) => {
         } catch (e) {}
 
         res.json({ success: true, message: 'Data Berhasil Dihapus!' });
-    });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
 };
 
 // --- AKHIR ENDPOINT SIMPAN & UPDATE ---
 // --- ENDPOINT ANALITIK PEGAWAI ---
-exports.getAnalitikPegawai = (req, res) => {
-    const pegawaiId = req.params.id;
-    // Query sakti: Gabungkan tabel perjadin dengan pivot table
-    const sql = `
-        SELECT p.* FROM perjadin p
-        JOIN perjadin_pegawai pp ON p.id = pp.perjadin_id
-        WHERE pp.pegawai_id = ?
-        ORDER BY p.tgl_berangkat ASC
-    `;
-
-    db.query(sql, [pegawaiId], (err, rows) => {
-        if (err) return res.status(500).json({ success: false, message: err.message });
+exports.getAnalitikPegawai = async (req, res) => {
+    try {
+        const pegawaiId = req.params.id;
+        // Query sakti: Gabungkan tabel perjadin dengan pivot table
+        const rows = await PerjadinModel.getAnalitikByPegawai(pegawaiId);
         res.json({ success: true, data: rows });
-    });
+    } catch (err) {
+        res.status(500).json({ success: false, message: err.message });
+    }
 };
