@@ -1,6 +1,7 @@
 const multer = require('multer');
 const { CloudinaryStorage } = require('multer-storage-cloudinary');
 const cloudinary = require('cloudinary').v2;
+const path = require('path');
 
 // Konfigurasi Cloudinary
 cloudinary.config({
@@ -14,7 +15,7 @@ const storage = new CloudinaryStorage({
     cloudinary: cloudinary,
     params: {
         folder: 'perjadin_kpu', // Folder terpisah di cloudinary
-        format: async (req, file) => 'pdf', // force output sebagai PDF
+        resource_type: 'raw', // WAJIB untuk file non-image (PDF, docx, dll)
         public_id: (req, file) => {
             const unique = Date.now() + '-' + Math.round(Math.random() * 1e9);
             return 'SPJ-' + unique;
