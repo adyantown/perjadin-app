@@ -18,7 +18,7 @@ const storage = new CloudinaryStorage({
         resource_type: 'raw', // WAJIB untuk file non-image (PDF, docx, dll)
         public_id: (req, file) => {
             const unique = Date.now() + '-' + Math.round(Math.random() * 1e9);
-            return 'SPJ-' + unique;
+            return 'SPJ-' + unique + '.pdf';
         },
     },
 });

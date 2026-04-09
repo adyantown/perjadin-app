@@ -50,7 +50,7 @@ async function loadAntrean() {
                         <div class="small text-secondary fw-medium">${item.maksud_dinas}</div>
                     </td>
                     <td class="text-center">
-                        <a href="${item.file_pdf}" target="_blank" class="btn btn-sm btn-outline-primary rounded-pill px-3 shadow-sm">
+                        <a href="${item.file_pdf.replace('/raw/upload/', '/raw/upload/fl_inline/')}" target="_blank" class="btn btn-sm btn-outline-primary rounded-pill px-3 shadow-sm">
                             <i class="bi bi-file-earmark-pdf-fill me-1"></i> Buka PDF
                         </a>
                     </td>
