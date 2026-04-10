@@ -11,7 +11,7 @@ exports.uploadSpj = async (req, res) => {
         }
 
         const nomor_st = req.body.nomor_st;
-        const file_pdf = req.file.path; // URL lengkap dari Cloudinary
+        const file_pdf = req.file.filename;
 
         // SSSHHH! Kita intip siapa yang lagi login dari session
         const uploaded_by = req.session.nama || 'Pegawai';
