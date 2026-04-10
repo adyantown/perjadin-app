@@ -8,11 +8,11 @@ async function loadAntrean() {
         const tbody = document.getElementById('tabelVerifikasi');
 
         if (json.data.length === 0) {
-            return (tbody.innerHTML = '<tr><td colspan="5" class="text-center py-5 text-muted"><i class="bi bi-emoji-smile fs-3 d-block mb-2"></i>Belum ada berkas SPJ yang masuk hari ini.</td></tr>');
+            return tbody.innerHTML = '<tr><td colspan="5" class="text-center py-5 text-muted"><i class="bi bi-emoji-smile fs-3 d-block mb-2"></i>Belum ada berkas SPJ yang masuk hari ini.</td></tr>';
         }
 
         tbody.innerHTML = '';
-        json.data.forEach((item) => {
+        json.data.forEach(item => {
             // Percantik Tanggal
             const dateObj = new Date(item.waktu_upload);
             const tgl = dateObj.toLocaleDateString('id-ID');
@@ -21,14 +21,8 @@ async function loadAntrean() {
             // Warna Badge Status
             let badgeClass = 'bg-warning text-dark';
             let iconStatus = 'bi-hourglass-split';
-            if (item.status === 'ACC') {
-                badgeClass = 'bg-success';
-                iconStatus = 'bi-check-circle-fill';
-            }
-            if (item.status === 'Revisi') {
-                badgeClass = 'bg-danger';
-                iconStatus = 'bi-exclamation-triangle-fill';
-            }
+            if (item.status === 'ACC') { badgeClass = 'bg-success'; iconStatus = 'bi-check-circle-fill'; }
+            if (item.status === 'Revisi') { badgeClass = 'bg-danger'; iconStatus = 'bi-exclamation-triangle-fill'; }
 
             // Tombol Tindakan
             let aksiBtn = `
@@ -56,7 +50,7 @@ async function loadAntrean() {
                         <div class="small text-secondary fw-medium">${item.maksud_dinas}</div>
                     </td>
                     <td class="text-center">
-                        <a href="${item.file_pdf.replace('/raw/upload/')}" target="_blank" class="btn btn-sm btn-outline-primary rounded-pill px-3 shadow-sm">
+                        <a href="${item.file_pdf.replace('/raw/upload/', '/raw/upload/fl_inline/')}" target="_blank" class="btn btn-sm btn-outline-primary rounded-pill px-3 shadow-sm">
                             <i class="bi bi-file-earmark-pdf-fill me-1"></i> Buka PDF
                         </a>
                     </td>
@@ -92,8 +86,8 @@ async function prosesSpj(id, statusTujuan) {
             confirmButtonText: '<i class="bi bi-send-fill me-1"></i> Kirim Catatan',
             cancelButtonText: 'Batal',
             inputValidator: (value) => {
-                if (!value) return 'Catatan tidak boleh kosong, Kasian pegawainya nanti bingung!';
-            },
+                if (!value) return 'Catatan tidak boleh kosong, Kasian pegawainya nanti bingung!'
+            }
         });
         if (!textInput) return; // Kalau dibatalkan
         catatan = textInput;
@@ -106,7 +100,7 @@ async function prosesSpj(id, statusTujuan) {
             showCancelButton: true,
             confirmButtonColor: '#198754',
             confirmButtonText: 'Ya, ACC!',
-            cancelButtonText: 'Cek Lagi',
+            cancelButtonText: 'Cek Lagi'
         });
         if (!confirm.isConfirmed) return;
     }
@@ -118,7 +112,7 @@ async function prosesSpj(id, statusTujuan) {
         const res = await fetch(`/api/dokumentasi/verifikasi/${id}`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ status: statusTujuan, catatan_admin: catatan }),
+            body: JSON.stringify({ status: statusTujuan, catatan_admin: catatan })
         });
 
         const result = await res.json();
