@@ -103,7 +103,7 @@ async function loadStatusSpj() {
                 <tr>
                     <td class="px-4 py-3">
                         <div class="fw-bold text-dark">${item.maksud_dinas}</div>
-                        <div class="text-muted small"><i class="bi bi-person"></i> ${item.nama_pegawai} | <i class="bi bi-file-earmark-pdf"></i> <a href="${item.file_pdf.replace('/raw/upload/', '/raw/upload/fl_inline/')}" target="_blank">Lihat Berkas</a></div>
+                        <div class="text-muted small"><i class="bi bi-person"></i> ${item.nama_pegawai} | <i class="bi bi-file-earmark-pdf"></i> <a href="${item.file_pdf}" target="_blank">Lihat Berkas</a></div>
                         ${catatan}
                     </td>
                     <td class="text-end px-4"><span class="badge ${badge} rounded-pill px-3 py-2">${item.status}</span></td>
