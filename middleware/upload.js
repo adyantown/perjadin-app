@@ -1,15 +1,24 @@
 const multer = require('multer');
-const path = require('path');
+const { CloudinaryStorage } = require('multer-storage-cloudinary');
+const cloudinary = require('cloudinary').v2;
 
-// Konfigurasi Penyimpanan PDF SPJ (Multer)
-const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        cb(null, 'public/uploads/'); // File masuk ke folder public/uploads
-    },
-    filename: (req, file, cb) => {
-        // Nama file: SPJ-TIMESTAMP-ACAK.pdf
-        const unique = Date.now() + '-' + Math.round(Math.random() * 1e9);
-        cb(null, 'SPJ-' + unique + path.extname(file.originalname));
+// Konfigurasi Cloudinary
+cloudinary.config({
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+    api_key: process.env.CLOUDINARY_API_KEY,
+    api_secret: process.env.CLOUDINARY_API_SECRET,
+});
+
+// Konfigurasi Penyimpanan PDF SPJ (Cloudinary)
+const storage = new CloudinaryStorage({
+    cloudinary: cloudinary,
+    params: {
+        folder: 'perjadin_kpu',
+        resource_type: 'raw', // WAJIB untuk file non-image (PDF)
+        public_id: (req, file) => {
+            const unique = Date.now() + '-' + Math.round(Math.random() * 1e9);
+            return 'SPJ-' + unique + '.pdf';
+        },
     },
 });
 
