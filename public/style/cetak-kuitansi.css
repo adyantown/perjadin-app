@@ -1,0 +1,92 @@
+/* ====================================
+   CETAK KUITANSI — Print Stylesheet
+   ==================================== */
+
+/* SETUP KERTAS CETAK */
+@media print {
+    @page {
+        size: portrait;
+        margin: 1cm;
+    }
+
+    .no-print {
+        display: none;
+    }
+
+    body {
+        background-color: white !important;
+        -webkit-print-color-adjust: exact;
+    }
+
+    /* SAKTI: Memaksa printer ganti kertas setiap selesai 1 kuitansi */
+    .kertas-kuitansi {
+        page-break-after: always;
+        border: none;
+        box-shadow: none;
+    }
+}
+
+body {
+    font-family: 'Times New Roman', Times, serif;
+    font-size: 12pt;
+    background-color: #f0f0f0;
+}
+
+.kertas-kuitansi {
+    background: white;
+    width: 210mm;
+    min-height: 297mm;
+    padding: 20mm;
+    margin: auto;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+}
+
+/* KOP SURAT & TABEL */
+.header-kpu {
+    border-bottom: 3px double black;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+}
+
+.logo-kpu {
+    width: 80px;
+    float: left;
+}
+
+.teks-header {
+    text-align: center;
+}
+
+.table-rincian {
+    border: 1px solid black;
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+}
+
+.table-rincian th,
+.table-rincian td {
+    border: 1px solid black;
+    padding: 8px;
+}
+
+.terbilang-box {
+    border: 1px solid black;
+    padding: 10px;
+    font-weight: bold;
+    margin-top: -1px;
+}
+
+/* TOMBOL TUTUP */
+.btn-tutup {
+    background-color: #dc3545;
+    border-color: #dc3545;
+    color: white;
+}
+
+.btn-tutup:hover {
+    background-color: #800000;
+    border-color: #800000;
+    color: white;
+}
