@@ -209,3 +209,64 @@ exports.getAnalitikPegawai = async (req, res) => {
         res.status(500).json({ success: false, message: err.message });
     }
 };
+exports.getKuitansiDetail = async (req, res) => {
+    try {
+        const id = req.params.id;
+        const rows = await PerjadinModel.getKuitansiData(id);
+
+        if (!rows || rows.length === 0) {
+            return res.status(404).json({ success: false, message: 'Data rincian biaya tidak ditemukan' });
+        }
+
+        const data = rows[0];
+
+        // ==========================================
+        // 🚀 LOGIKA PEMISAH NAMA (ANTI-GELAR & ANTI-BUG)
+        // ==========================================
+        let rawNama = data.nama_pegawai || '';
+        let listPegawai = [];
+
+        // Jaga-jaga kalau formatnya array JSON (konversi ke string |||)
+        try {
+            const parsed = JSON.parse(rawNama);
+            if (Array.isArray(parsed)) {
+                rawNama = parsed.join('|||');
+            }
+        } catch (e) {}
+
+        if (typeof rawNama === 'string' && rawNama.trim() !== '') {
+            let individualNames = [];
+
+            // HANYA pecah jika ada separator |||
+            // Kita buang pemisah koma (,) karena bentrok dengan gelar (S.T., S.Kom)
+            if (rawNama.includes('|||')) {
+                individualNames = rawNama.split('|||');
+            } else {
+                // Jika tidak ada |||, maka anggap itu adalah SATU orang utuh
+                // Meskipun di dalamnya ada koma (seperti: HENDY SYUHADA, S.T.)
+                individualNames = [rawNama];
+            }
+
+            individualNames.forEach((item) => {
+                let nama = item.trim();
+                if (nama !== '') {
+                    listPegawai.push({ nama: nama });
+                }
+            });
+        }
+
+        // Fallback jika kosong
+        if (listPegawai.length === 0) {
+            listPegawai.push({ nama: '-' });
+        }
+
+        data.listPegawai = listPegawai;
+        // ==========================================
+        // ==========================================
+
+        res.json({ success: true, data: data });
+    } catch (err) {
+        console.error('Error fetch kuitansi:', err);
+        res.status(500).json({ success: false, message: 'Gagal mengambil rincian kuitansi' });
+    }
+};

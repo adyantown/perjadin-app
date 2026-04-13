@@ -52,3 +52,26 @@ exports.getAnalitikByPegawai = (pegawaiId) => {
         ORDER BY p.tgl_berangkat ASC`;
     return db.query(sql, [pegawaiId]);
 };
+
+exports.getKuitansiData = (id) => {
+    // Kita panggil langsung nama kolom asli dari tabel perjadin Mas Ady
+    const sql = `
+        SELECT 
+            id,
+            no_surat_tugas AS nomor_st, 
+            tgl_surat_tugas AS tgl_st, 
+            tujuan AS kota_tujuan,
+            maksud_dinas AS maksud_tujuan, 
+            nama_pegawai, 
+            golongan, 
+            jabatan,
+            (DATEDIFF(tgl_pulang, tgl_berangkat) + 1) AS lama_hari,
+            uang_harian, 
+            biaya_transportasi AS uang_transport, 
+            tarif_hotel AS uang_penginapan
+        FROM perjadin 
+        WHERE id = ?
+    `;
+    // Memakai dbPromise yang sudah ada di file Mas Ady
+    return db.query(sql, [id]);
+};
