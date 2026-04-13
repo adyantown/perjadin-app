@@ -85,8 +85,12 @@ exports.verifikasiSpj = async (req, res) => {
         const { status, catatan_admin } = req.body;
         // status isinya bisa 'ACC' atau 'Revisi'
 
+        // Cari nomor ST untuk keperluan log
+        const stResult = await DokumentasiModel.getNomorStBySpjId(spjId);
+        const nomorStLog = stResult.length > 0 ? stResult[0].nomor_st : `ID ${spjId}`;
+
         await DokumentasiModel.updateSpjStatus(spjId, status, catatan_admin);
-        logController.catatLog(req, 'Verifikasi SPJ', `Mengubah status SPJ ID: ${spjId} menjadi ${status}`);
+        logController.catatLog(req, 'Verifikasi SPJ', `Mengubah status SPJ ${nomorStLog} menjadi ${status}`);
         res.json({ success: true, message: `SPJ berhasil di-set menjadi: ${status}` });
     } catch (err) {
         res.status(500).json({ success: false, message: err.message });

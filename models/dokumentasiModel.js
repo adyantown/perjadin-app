@@ -36,3 +36,13 @@ exports.updateSpjStatus = (id, status, catatanAdmin) => {
 exports.deleteSpj = (id) => {
     return db.query('DELETE FROM dokumen_spj WHERE id = ?', [id]);
 };
+
+exports.getNomorStBySpjId = (id) => {
+    const sql = `
+        SELECT s.nomor_st 
+        FROM dokumen_spj doc
+        JOIN sppd_kpu s ON doc.sppd_id = s.id
+        WHERE doc.id = ?
+    `;
+    return db.query(sql, [id]);
+};
