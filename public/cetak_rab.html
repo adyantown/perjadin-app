@@ -6,10 +6,21 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cetak RAB - KPU Tubaba</title>
     <link rel="icon" type="image/x-icon" href="/img/kpu_logo.png">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
     <link rel="stylesheet" href="style/cetak-rab-style.css">
 </head>
 
 <body>
+
+    <div class="no-print" style="text-align:center; padding:15px 0;">
+        <button onclick="window.print()" class="btn btn-success rounded-pill px-4 shadow">
+            <i class="bi bi-printer"></i> Cetak Sekarang
+        </button>
+        <button onclick="window.close()" class="btn btn-tutup rounded-pill px-4">
+            <i class="bi bi-x-octagon-fill"></i> Tutup
+        </button>
+    </div>
 
     <div class="kertas-a4">
         <div class="header-rab">

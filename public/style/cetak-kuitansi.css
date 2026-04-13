@@ -2,29 +2,7 @@
    CETAK KUITANSI — Print Stylesheet
    ==================================== */
 
-/* SETUP KERTAS CETAK */
-@media print {
-    @page {
-        size: portrait;
-        margin: 1cm;
-    }
 
-    .no-print {
-        display: none;
-    }
-
-    body {
-        background-color: white !important;
-        -webkit-print-color-adjust: exact;
-    }
-
-    /* SAKTI: Memaksa printer ganti kertas setiap selesai 1 kuitansi */
-    .kertas-kuitansi {
-        page-break-after: always;
-        border: none;
-        box-shadow: none;
-    }
-}
 
 body {
     font-family: 'Times New Roman', Times, serif;
@@ -89,4 +67,34 @@ body {
     background-color: #800000;
     border-color: #800000;
     color: white;
+}
+
+/* SETUP KERTAS CETAK (diletakkan di akhir agar meng-override style default saat diprint) */
+@media print {
+    @page {
+        size: A4;
+        margin: 1cm;
+    }
+
+    .no-print {
+        display: none;
+    }
+
+    body {
+        background-color: white !important;
+        -webkit-print-color-adjust: exact;
+        margin: 0;
+        padding: 0;
+    }
+
+    /* SAKTI: Memaksa printer ganti kertas setiap selesai 1 kuitansi, tanpa shadow / padding extra di kertas/print preview */
+    .kertas-kuitansi {
+        page-break-after: always;
+        border: none;
+        box-shadow: none;
+        width: auto;
+        min-height: auto;
+        margin: 0;
+        padding: 0;
+    }
 }

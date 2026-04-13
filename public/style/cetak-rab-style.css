@@ -98,6 +98,10 @@ table.tabel-rab th {
         padding: 0;
     }
 
+    .no-print {
+        display: none;
+    }
+
     .kertas-a4 {
         box-shadow: none;
         width: auto;
@@ -110,4 +114,17 @@ table.tabel-rab th {
         background-color: transparent !important;
         -webkit-print-color-adjust: exact;
     }
+}
+
+/* TOMBOL TUTUP */
+.btn-tutup {
+    background-color: #dc3545;
+    border-color: #dc3545;
+    color: white;
+}
+
+.btn-tutup:hover {
+    background-color: #800000;
+    border-color: #800000;
+    color: white;
 }
