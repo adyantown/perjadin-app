@@ -113,6 +113,7 @@ table.tabel-rab th {
     table.tabel-rab th {
         background-color: transparent !important;
         -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
     }
 }
 
