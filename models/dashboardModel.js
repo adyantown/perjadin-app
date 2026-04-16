@@ -1,7 +1,7 @@
 const db = require('../config/dbPromise');
 
 exports.countSppd = () => {
-    return db.query('SELECT COUNT(*) AS total FROM sppd_kpu');
+    return db.query('SELECT COUNT(*) AS total FROM perjadin');
 };
 
 exports.countPegawai = () => {

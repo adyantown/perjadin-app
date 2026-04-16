@@ -34,17 +34,26 @@ document.addEventListener('DOMContentLoaded', () => {
         })
         .catch((err) => console.error('Gagal cek session:', err));
 
-    // 2. LOAD STATISTIK (Fitur Lama Tetap Jalan)
+    // 2. LOAD STATISTIK PEGAWAI
     fetch('/api/dashboard/stats')
         .then((response) => response.json())
         .then((result) => {
             if (result.success) {
                 // Efek animasi angka naik
-                animateValue('stat_sppd', 0, result.data.total_sppd, 1000);
                 animateValue('stat_pegawai', 0, result.data.total_pegawai, 1000);
             }
         })
-        .catch((err) => console.error('Gagal load statistik:', err));
+        .catch((err) => console.error('Gagal load statistik pegawai:', err));
+
+    // 3. LOAD STATISTIK SPPD (Berdasarkan jumlah data di daftar.html)
+    fetch('/api/perjadin/all')
+        .then((response) => response.json())
+        .then((data) => {
+            // Menghitung berdasarkan jumlah data yang terinput
+            const totalSppd = data.length;
+            animateValue('stat_sppd', 0, totalSppd, 1000);
+        })
+        .catch((err) => console.error('Gagal load statistik SPPD:', err));
 });
 
 // Fungsi Animasi Angka

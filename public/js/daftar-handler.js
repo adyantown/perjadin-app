@@ -130,18 +130,18 @@ function renderTable(data) {
                         <a href="/perjadin.html?edit=${item.id}" class="btn btn-warning btn-sm text-dark fw-bold" title="Edit Data" style="font-size: 0.8rem;">
                             <i class="bi bi-pencil-square"></i>
                         </a>
+                        <a href="/cetak_surat_tugas.html?id=${item.id}" target="_blank" class="btn btn-sm btn-primary" title="Cetak Surat Tugas">
+                        <i class="bi bi-file-earmark-text"></i>
+                        </a>
+                        <a href="/cetak_sppd.html?id=${item.id}" target="_blank" class="btn btn-sm btn-secondary" title="Cetak SPPD">
+                        <i class="bi bi-file-earmark-text"></i>
+                        </a>
+                        <a href="/cetak_kuitansi.html?id=${item.id}" target="_blank" class="btn btn-sm btn-success" title="Cetak Kuitansi">
+                        <i class="bi bi-printer"></i>
+                        </a>
                         <button onclick="hapusData(${item.id})" class="btn btn-danger btn-sm fw-bold" title="Hapus Data" style="font-size: 0.8rem;">
                             <i class="bi bi-trash"></i>
                         </button>
-                        <a href="/cetak_surat_tugas.html?id=${item.id}" target="_blank" class="btn btn-sm btn-primary" title="Cetak Surat Tugas">
-                            <i class="bi bi-file-earmark-text"></i>
-                        </a>
-                        <a href="/cetak_sppd.html?id=${item.id}" target="_blank" class="btn btn-sm btn-secondary" title="Cetak SPPD">
-                            <i class="bi bi-file-earmark-text"></i>
-                        </a>
-                        <a href="/cetak_kuitansi.html?id=${item.id}" target="_blank" class="btn btn-sm btn-success" title="Cetak Kuitansi">
-                            <i class="bi bi-printer"></i>
-                        </a>
                     </div>
                 </td>
             </tr>
