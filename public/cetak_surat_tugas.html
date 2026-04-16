@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cetak Surat Tugas - KPU Tubaba</title>
+    <link rel="icon" href="/img/kpu_logo.png">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+        rel="stylesheet">
+    <link rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <style>
+        body {
+            background-color: #525659;
+            font-family: 'Arial', sans-serif;
+            /* 1. Mengubah font default menjadi Arial */
+            font-size: 12pt;
+        }
+
+        .kertas-spt {
+            background: white;
+            width: 210mm;
+            min-height: 297mm;
+            padding: 20mm;
+            margin: 20px auto;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+            position: relative;
+        }
+
+        /* 2. Format baru untuk Header Center */
+        .header-kpu {
+
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            text-align: center;
+            /* Memaksa semua isi header ke tengah */
+        }
+
+        .header-kpu img {
+            display: block;
+            margin: 0 auto 10px auto;
+            /* Logo di tengah, ada jarak sedikit di bawahnya */
+            width: 90px;
+        }
+
+        /* Class khusus untuk font Tahoma */
+        .font-tahoma {
+            font-family: 'Tahoma', sans-serif;
+        }
+
+        .judul-surat {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .judul-surat h5 {
+            margin: 0;
+            font-size: 14pt;
+        }
+
+        .tabel-spt {
+            width: 100%;
+        }
+
+        .tabel-spt td {
+            vertical-align: top;
+            padding-bottom: 15px;
+        }
+
+        .tabel-spt .label-kolom {
+            width: 100px;
+        }
+
+        .tabel-spt .titik-dua {
+            width: 20px;
+            text-align: center;
+        }
+
+        /* Penting agar enter di textarea terbaca di HTML */
+        .teks-dinamis {
+            white-space: pre-wrap;
+            text-align: justify;
+        }
+
+        @media print {
+            body {
+                background-color: white;
+            }
+
+            .kertas-spt {
+                margin: 0;
+                box-shadow: none;
+                padding: 0mm 15mm;
+            }
+
+            /* Paksa halaman lampiran di kertas baru */
+            .page-break {
+                page-break-before: always;
+            }
+
+            .no-print {
+                display: none !important;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="no-print container mt-3 text-center mb-4">
+        <button onclick="window.print()" class="btn btn-success rounded-pill px-4 shadow">
+            <i class="bi bi-printer"></i> Cetak Sekarang
+        </button>
+        <button onclick="window.close()" class="btn btn-danger rounded-pill px-4 shadow">
+            <i class="bi bi-x-octagon-fill"></i> Tutup
+        </button>
+    </div>
+
+    <div id="halaman-utama" class="kertas-spt">
+
+        <div class="header-kpu">
+            <img src="/img/kpu_logo.png" alt="Logo KPU">
+            <h4 class="m-0 font-tahoma">KOMISI PEMILIHAN UMUM</h4>
+            <h4 class="m-0 font-tahoma">KABUPATEN TULANG BAWANG BARAT</h4>
+        </div>
+
+        <div class="judul-surat">
+            <h5>SURAT TUGAS</h5>
+            <p class="m-0">Nomor: <span id="v_nomor_st">Memuat...</span></p>
+        </div>
+
+        <table class="tabel-spt">
+            <tr>
+                <td class="label-kolom">Menimbang</td>
+                <td class="titik-dua">:</td>
+                <td class="teks-dinamis" id="v_menimbang">Memuat...</td>
+            </tr>
+            <tr>
+                <td class="label-kolom">Dasar</td>
+                <td class="titik-dua">:</td>
+                <td class="teks-dinamis" id="v_dasar">Memuat...</td>
+            </tr>
+            <tr>
+                <td colspan="3" class="text-center py-3">Memberi Tugas:</td>
+            </tr>
+            <tr>
+                <td class="label-kolom">Kepada</td>
+                <td class="titik-dua">:</td>
+                <td>
+                    <div id="v_kepada" class="text-justify">Memuat...</div>
+                </td>
+            </tr>
+            <tr>
+                <td class="label-kolom">Untuk</td>
+                <td class="titik-dua">:</td>
+                <td class="teks-dinamis text-justify" id="v_untuk">Memuat...</td>
+            </tr>
+        </table>
+
+        <div class="mt-4" style="text-align: justify;">
+            <p>Dalam Pelaksanaan tugas dimaksud kepada yang bersangkutan diberikan biaya perjalanan
+                dinas sesuai dengan ketentuan yang berlaku yang dibebankan pada DIPA APBN KPU
+                Kabupaten Tulang Bawang Barat TA 2026.</p>
+            <p>Demikian Surat Tugas ini dibuat untuk dilaksanakan dengan penuh tanggung jawab.</p>
+        </div>
+
+        <div class="d-flex justify-content-end mt-5">
+            <div class="text-center" style="width: 50%;">
+                <p class="mb-0">Candra Mukti, <span id="v_tgl_st">...</span></p>
+                <p class="m-0">Plt.Sekretaris Komisi Pemilihan Umum <br> Kabupaten Tulang Bawang
+                    Barat,</p>
+                <div style="height: 80px;"></div>
+                <p class="m-0">WAHYU ARI BOWO</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="halaman-lampiran" class="kertas-spt page-break d-none">
+        <p class="text-end mb-4">
+            Lampiran Surat Tugas Nomor: <span id="v_lampiran_nomor"></span><br>
+            Tanggal: <span id="v_lampiran_tgl"></span>
+        </p>
+
+        <h6 class="text-center mb-4 text-decoration-underline">DAFTAR NAMA PEGAWAI YANG
+            DITUGASKAN</h6>
+
+        <table class="table table-bordered border-dark">
+            <thead>
+                <tr class="text-center text-nowrap align-middle">
+                    <th width="5%">No</th>
+                    <th width="35%">Nama</th>
+                    <th width="20%">Pangkat/Golongan</th>
+                    <th width="40%">Jabatan</th>
+                </tr>
+            </thead>
+            <tbody id="v_tbody_lampiran">
+            </tbody>
+        </table>
+
+        <div class="d-flex justify-content-end mt-5">
+            <div class="text-center" style="width: 50%;">
+                <p class="m-0">Plt.Sekretaris Komisi Pemilihan Umum <br> Kabupaten Tulang Bawang
+                    Barat,</p>
+                <div style="height: 80px;"></div>
+                <p class="m-0">WAHYU ARI BOWO</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const id = urlParams.get('id');
+
+            if (!id) {
+                alert('ID Surat tidak ditemukan!');
+                return;
+            }
+
+            try {
+                // Kita pinjam endpoint kuitansi karena isinya mengembalikan seluruh baris data Perjadin
+                const response = await fetch(`/api/perjadin/kuitansi/${id}`);
+                const res = await response.json();
+
+                if (res.success) {
+                    const data = res.data;
+
+                    // 1. ISI DATA STATIS (NOMOR, TANGGAL, MENIMBANG, DASAR)
+                    document.getElementById('v_nomor_st').innerText = data.no_surat_tugas || '-';
+                    document.getElementById('v_lampiran_nomor').innerText = data.no_surat_tugas || '-';
+                    document.getElementById('v_menimbang').innerText = data.menimbang || '-';
+                    document.getElementById('v_dasar').innerText = data.dasar || '-';
+
+                    // Format Tanggal
+                    const tglSt = new Date(data.tgl_surat_tugas).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+                    document.getElementById('v_tgl_st').innerText = tglSt;
+                    document.getElementById('v_lampiran_tgl').innerText = tglSt;
+
+                    // Rangkai Kalimat "Untuk"
+                    const tglBerangkat = new Date(data.tgl_berangkat).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+                    const tglPulang = new Date(data.tgl_pulang).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+                    let durasiTeks = (tglBerangkat === tglPulang) ? `pada tanggal ${tglBerangkat}` : `dari tanggal ${tglBerangkat} s.d ${tglPulang}`;
+
+                    const teksUntuk = `Melaksanakan Perjalanan Dinas dalam rangka ${data.uraian_tugas || data.maksud_dinas}, ${durasiTeks} bertempat di ${data.tujuan}.`;
+                    document.getElementById('v_untuk').innerText = teksUntuk;
+
+                    // 2. OLAH DATA PEGAWAI (Pecah |||)
+                    const listPegawai = data.listPegawai; // Array [{nama: '...'}, ...] dari controller
+                    const rawGolongan = data.golongan ? data.golongan.split('|||') : [];
+                    const rawJabatan = data.jabatan ? data.jabatan.split('|||') : [];
+
+                    let kepadaHTML = '';
+                    let lampiranHTML = '';
+
+                    // 3. LOGIKA THRESHOLD (MAX 5 ORANG)
+                    if (listPegawai.length <= 5) {
+                        // MODE INLINE: Muncul di Halaman 1
+                        kepadaHTML = '<ol class="m-0 ps-3">';
+                        listPegawai.forEach((pegawai, index) => {
+                            let namaClean = pegawai.nama.trim();
+                            let jabatanClean = rawJabatan[index] ? rawJabatan[index].trim() : '-';
+                            kepadaHTML += `<li class="mb-1">${namaClean} (${jabatanClean})</li>`;
+                        });
+                        kepadaHTML += '</ol>';
+
+                        document.getElementById('v_kepada').innerHTML = kepadaHTML;
+                    } else {
+                        // MODE LAMPIRAN: Muncul Teks Terlampir & Halaman 2 Muncul
+                        document.getElementById('v_kepada').innerHTML = `<span>Daftar Nama-nama Sebagaimana Terlampir</span>`;
+                        document.getElementById('halaman-lampiran').classList.remove('d-none');
+
+                        // Render Tabel Lampiran
+                        listPegawai.forEach((pegawai, index) => {
+                            let namaClean = pegawai.nama.trim();
+                            let golClean = rawGolongan[index] ? rawGolongan[index].trim() : '-';
+                            let jabClean = rawJabatan[index] ? rawJabatan[index].trim() : '-';
+
+                            lampiranHTML += `
+                                <tr>
+                                    <td class="text-center">${index + 1}</td>
+                                    <td>${namaClean}</td>
+                                    <td>${golClean}</td>
+                                    <td>${jabClean}</td>
+                                </tr>
+                            `;
+                        });
+                        document.getElementById('v_tbody_lampiran').innerHTML = lampiranHTML;
+                    }
+
+                } else {
+                    alert('Gagal memuat data: ' + res.message);
+                }
+            } catch (error) {
+                console.error(error);
+                alert('Terjadi kesalahan sistem.');
+            }
+        });
+    </script>
+</body>
+
+</html>

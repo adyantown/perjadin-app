@@ -62,38 +62,38 @@ window.dataPegawai = [];
 let sppdCache = [];
 
 // Fungsi untuk Load Dropdown Surat Tugas
-async function loadSppdDropdown() {
-    const select = document.getElementById('selectSppd');
-    try {
-        const res = await fetch('/api/sppd/all');
-        const json = await res.json();
+// async function loadSppdDropdown() {
+//     const select = document.getElementById('selectSppd');
+//     try {
+//         const res = await fetch('/api/sppd/all');
+//         const json = await res.json();
 
-        if (json.success && json.data) {
-            sppdCache = json.data; // Simpan ke wadah
-            select.innerHTML = '<option value="">-- Pilih Surat Tugas dari SPPD --</option>';
+//         if (json.success && json.data) {
+//             sppdCache = json.data; // Simpan ke wadah
+//             select.innerHTML = '<option value="">-- Pilih Surat Tugas dari SPPD --</option>';
 
-            const uniqueST = [];
+//             const uniqueST = [];
 
-            json.data.forEach((item) => {
-                if (!uniqueST.includes(item.nomor_st)) {
-                    uniqueST.push(item.nomor_st);
-                    
-                    const option = document.createElement('option');
-                    option.value = item.nomor_st;
-                    
-                    // Hitung jumlah rombongan
-                    const rombonganCount = json.data.filter(s => s.nomor_st === item.nomor_st).length;
-                    
-                    option.textContent = `${item.nomor_st} (Ke: ${item.tempat_tujuan} - ${rombonganCount} Orang)`;
-                    select.appendChild(option);
-                }
-            });
-        }
-    } catch (e) {
-        console.error('Gagal meload SPPD:', e);
-        select.innerHTML = '<option value="">Gagal memuat data</option>';
-    }
-}
+//             json.data.forEach((item) => {
+//                 if (!uniqueST.includes(item.nomor_st)) {
+//                     uniqueST.push(item.nomor_st);
+
+//                     const option = document.createElement('option');
+//                     option.value = item.nomor_st;
+
+//                     // Hitung jumlah rombongan
+//                     const rombonganCount = json.data.filter(s => s.nomor_st === item.nomor_st).length;
+
+//                     option.textContent = `${item.nomor_st} (Ke: ${item.tempat_tujuan} - ${rombonganCount} Orang)`;
+//                     select.appendChild(option);
+//                 }
+//             });
+//         }
+//     } catch (e) {
+//         console.error('Gagal meload SPPD:', e);
+//         select.innerHTML = '<option value="">Gagal memuat data</option>';
+//     }
+// }
 
 // Fungsi Auto-Fill saat Dropdown Dipilih
 window.autoFillSppd = function () {
@@ -118,14 +118,14 @@ window.autoFillSppd = function () {
         // Bersihkan daftar pegawai lama (hapus row kosong atau rombongan lama)
         const container = document.getElementById('pegawai-container');
         container.innerHTML = '';
-        
+
         // Loop tiap pegawai di rombongan SPPD ini, lalu masukkan ke dalam form
         allSppdUnderSt.forEach((item) => {
             // Bersihkan format "Nama / NIP" menjadi "Nama" saja
             const namaUtama = item.nama_pegawai ? item.nama_pegawai.split(' /')[0] : '';
             const golUtama = item.pangkat_gol || '';
             const jabUtama = item.jabatan || '';
-            
+
             tambahPegawai(namaUtama, golUtama, jabUtama);
         });
 
@@ -135,7 +135,7 @@ window.autoFillSppd = function () {
         document.getElementById('tgl_surat_tugas').value = '';
         document.querySelector('[name="maksud_dinas"]').value = '';
         document.querySelector('[name="tujuan"]').value = '';
-        
+
         // Reset wadah pegawai dan berikan 1 ruang input kosong manual
         const container = document.getElementById('pegawai-container');
         container.innerHTML = '';
@@ -202,7 +202,7 @@ window.tambahPegawaiOtomatis = function () {
 
 // --- 5. LOGIKA EDIT DATA (LOAD DARI SERVER) ---
 document.addEventListener('DOMContentLoaded', async () => {
-    await loadSppdDropdown();
+    // await loadSppdDropdown();
     const urlParams = new URLSearchParams(window.location.search);
     const editId = urlParams.get('edit');
     const formatDate = (d) => (d && d !== 'null' && !d.startsWith('0000') ? d.split('T')[0] : '');
@@ -225,6 +225,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 
                 setVal('no_surat_tugas', data.no_surat_tugas);
                 setVal('tgl_surat_tugas', formatDate(data.tgl_surat_tugas));
+                setVal('menimbang', data.menimbang || '');
+                setVal('dasar', data.dasar || '');
+                setVal('uraian_tugas', data.uraian_tugas || '');
                 setVal('maksud_dinas', data.maksud_dinas);
                 setVal('tujuan', data.tujuan);
                 setVal('jenis_transportasi', data.jenis_transportasi);

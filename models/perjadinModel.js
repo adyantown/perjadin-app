@@ -2,18 +2,20 @@ const db = require('../config/dbPromise');
 
 exports.insert = (params) => {
     const sql = `INSERT INTO perjadin (
-        no_surat_tugas, tgl_surat_tugas, nama_pegawai, golongan, jabatan, 
-        jumlah_sppd, tujuan, maksud_dinas, tgl_berangkat, tgl_pulang, 
+        no_surat_tugas, tgl_surat_tugas, menimbang, dasar,
+        nama_pegawai, golongan, jabatan, 
+        jumlah_sppd, tujuan, maksud_dinas, uraian_tugas, tgl_berangkat, tgl_pulang, 
         uang_harian, jenis_transportasi, biaya_transportasi, nama_hotel, 
         tarif_hotel, tgl_checkin, tgl_checkout, total_biaya
-    ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`;
+    ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`;
     return db.query(sql, params);
 };
 
 exports.update = (id, params) => {
     const sql = `UPDATE perjadin SET 
-        no_surat_tugas=?, tgl_surat_tugas=?, nama_pegawai=?, golongan=?, jabatan=?, 
-        jumlah_sppd=?, tujuan=?, maksud_dinas=?, tgl_berangkat=?, tgl_pulang=?, 
+        no_surat_tugas=?, tgl_surat_tugas=?, menimbang=?, dasar=?,
+        nama_pegawai=?, golongan=?, jabatan=?, 
+        jumlah_sppd=?, tujuan=?, maksud_dinas=?, uraian_tugas=?, tgl_berangkat=?, tgl_pulang=?, 
         uang_harian=?, jenis_transportasi=?, biaya_transportasi=?, nama_hotel=?, 
         tarif_hotel=?, tgl_checkin=?, tgl_checkout=?, total_biaya=? 
         WHERE id=?`;
@@ -58,13 +60,18 @@ exports.getKuitansiData = (id) => {
     const sql = `
         SELECT 
             id,
-            no_surat_tugas AS nomor_st, 
-            tgl_surat_tugas AS tgl_st, 
-            tujuan AS kota_tujuan,
-            maksud_dinas AS maksud_tujuan, 
+            no_surat_tugas, 
+            tgl_surat_tugas,
+            menimbang,
+            dasar,
+            tujuan,
+            maksud_dinas, 
+            uraian_tugas,
             nama_pegawai, 
             golongan, 
             jabatan,
+            tgl_berangkat,
+            tgl_pulang,
             (DATEDIFF(tgl_pulang, tgl_berangkat) + 1) AS lama_hari,
             uang_harian, 
             biaya_transportasi AS uang_transport, 
@@ -72,6 +79,5 @@ exports.getKuitansiData = (id) => {
         FROM perjadin 
         WHERE id = ?
     `;
-    // Memakai dbPromise yang sudah ada di file Mas Ady
     return db.query(sql, [id]);
 };

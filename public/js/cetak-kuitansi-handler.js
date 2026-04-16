@@ -67,7 +67,7 @@ function renderKuitansi(data, pegawai, index, pejabat) {
     }
 
     const totalStr = total.toLocaleString('id-ID');
-    const tglSurat = formatTanggalID(data.tgl_st);
+    const tglSurat = formatTanggalID(data.tgl_surat_tugas);
     const tglHariIni = formatTanggalID(new Date());
 
     return `
@@ -90,7 +90,7 @@ function renderKuitansi(data, pegawai, index, pejabat) {
         <div class="row mb-3">
             <div class="col-8">
                 <table>
-                    <tr><td width="150">Lampiran Nomor SPD</td><td>: ${data.nomor_st || '-'}</td></tr>
+                    <tr><td width="150">Lampiran Nomor SPD</td><td>: ${data.no_surat_tugas || '-'}</td></tr>
                     <tr><td>Tanggal</td><td>: ${tglSurat}</td></tr>
                 </table>
             </div>

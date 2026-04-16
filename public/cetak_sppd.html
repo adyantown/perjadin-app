@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cetak SPPD - KPU Tubaba</title>
+    <link rel="icon" href="/img/kpu_logo.png">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+        rel="stylesheet">
+    <link rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <style>
+        body {
+            background-color: #525659;
+            font-family: Cambria, Georgia, serif;
+            font-size: 11pt;
+        }
+
+        /* === KERTAS PREVIEW DI LAYAR === */
+        .halaman {
+            background: white;
+            width: 210mm;
+            min-height: 297mm;
+            padding: 1cm 1.5cm;
+            margin: 20px auto;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+            position: relative;
+        }
+
+        /* === HEADER KOP SURAT === */
+        .header-cetak-wrapper img {
+            display: block;
+            margin: 0;
+        }
+
+        .header-cetak-wrapper .col-7 .d-flex {
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+
+        /* === TABEL UTAMA HALAMAN DEPAN === */
+        .table-sppd-main {
+            border-collapse: collapse;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .table-sppd-main>tbody>tr>td,
+        .table-sppd-main>tr>td {
+            border: 1px solid black;
+            padding: 4px;
+            vertical-align: top;
+        }
+
+        /* === TABEL HALAMAN BELAKANG === */
+        .table-belakang {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 10pt;
+            margin-top: 20px;
+        }
+
+        .table-belakang td {
+            border: 1px solid black;
+            padding: 5px;
+            vertical-align: top;
+            width: 50%;
+        }
+
+        .box-ttd {
+            height: 100px;
+        }
+
+        hr {
+            border-top: 2px solid black !important;
+            opacity: 1 !important;
+        }
+
+        /* === TABEL PENGIKUT (NESTED) === */
+        .table-sppd-main .nested-table td {
+            border: none;
+            padding: 4px 6px;
+        }
+
+        .garis-kanan {
+            border-right: 1px solid black !important;
+        }
+
+        .garis-bawah {
+            border-bottom: 1px solid black !important;
+        }
+
+        .td-container-8 {
+            padding: 0 !important;
+            border: 1px solid black !important;
+        }
+
+        /* === PRINT SETTINGS === */
+        @media print {
+            @page {
+                size: auto;
+                margin: 1cm 1.5cm;
+            }
+
+            body {
+                background-color: white !important;
+                margin: 0 !important;
+                padding: 0 !important;
+            }
+
+            .no-print {
+                display: none !important;
+            }
+
+            .halaman {
+                width: 100%;
+                height: 100vh;
+                margin: 0;
+                padding: 0;
+                box-shadow: none;
+                page-break-after: always;
+                overflow: hidden;
+            }
+
+            .halaman:last-child {
+                page-break-after: auto;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- TOMBOL CETAK & TUTUP -->
+    <div class="no-print container mt-3 text-center mb-4">
+        <button onclick="window.print()" class="btn btn-success rounded-pill px-4 shadow">
+            <i class="bi bi-printer"></i> Cetak Sekarang
+        </button>
+        <button onclick="window.close()" class="btn btn-danger rounded-pill px-4 shadow">
+            <i class="bi bi-x-octagon-fill"></i> Tutup
+        </button>
+    </div>
+
+    <div id="render-container"></div>
+
+    <script>
+        // Helper format tanggal Indonesia
+        function fmtTgl(dateStr) {
+            if (!dateStr) return '-';
+            return new Date(dateStr).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+        }
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const id = urlParams.get('id');
+            if (!id) return alert('ID Tidak Ditemukan');
+
+            try {
+                // Fetch data perjadin
+                const response = await fetch(`/api/perjadin/kuitansi/${id}`);
+                const res = await response.json();
+
+                // Fetch settings (PPK)
+                const resSet = await fetch('/api/settings');
+                const setObj = await resSet.json();
+                let ppkNama = 'FIKRIADI, S.I.P.';
+                let ppkNip = '198009262010121001';
+                if (setObj.success && setObj.data) {
+                    ppkNama = setObj.data.ppk_nama || ppkNama;
+                    ppkNip = setObj.data.ppk_nip || ppkNip;
+                }
+
+                if (res.success) {
+                    const data = res.data;
+                    const container = document.getElementById('render-container');
+
+                    // Data Rombongan
+                    const listPegawai = data.listPegawai;
+                    const rawGolongan = data.golongan ? data.golongan.split('|||') : [];
+                    const rawJabatan = data.jabatan ? data.jabatan.split('|||') : [];
+
+                    // Hitung Durasi
+                    const tglB = new Date(data.tgl_berangkat);
+                    const tglP = new Date(data.tgl_pulang);
+                    const lamaHari = Math.ceil((tglP - tglB) / (1000 * 60 * 60 * 24)) + 1;
+
+                    const tglBerangkatStr = fmtTgl(data.tgl_berangkat);
+                    const tglPulangStr = fmtTgl(data.tgl_pulang);
+                    const tglSuratStr = fmtTgl(data.tgl_surat_tugas);
+
+                    let allHTML = '';
+
+                    // === LOOP PER PEGAWAI: 2 halaman (Depan + Belakang) ===
+                    listPegawai.forEach((pegawai, index) => {
+                        const namaClean = pegawai.nama.trim();
+                        const golClean = rawGolongan[index] ? rawGolongan[index].trim() : '-';
+                        const jabClean = rawJabatan[index] ? rawJabatan[index].trim() : '-';
+
+                        // =============================================
+                        // HALAMAN DEPAN
+                        // =============================================
+                        allHTML += `
+                        <div class="halaman">
+                            <div class="header-cetak-wrapper">
+                                <div class="row align-items-start">
+                                    <div class="col-7">
+                                        <div class="d-flex flex-column align-items-center text-center">
+                                            <img src="img/kpu_logo.png" alt="Logo KPU" style="width: 55px; height: auto;" class="mb-2">
+                                            <div>
+                                                <h6 class="mb-0 fw-bold" style="letter-spacing: 0.5px; font-size: 14px;">KOMISI PEMILIHAN UMUM</h6>
+                                                <h6 class="mb-0 fw-bold" style="font-size: 14px;">KABUPATEN TULANG BAWANG BARAT</h6>
+                                            </div>
+                                            <div class="mt-1" style="font-size: 10px;">Jl. KH. Ahmad Dahlan, Candra Mukti Kec. Tulang Bawang Tengah</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-5">
+                                        <table class="table table-borderless table-sm w-100 mt-2" style="font-size: 12px; line-height: 1.1;">
+                                            <tr>
+                                                <td width="35%" class="p-0">Lembar ke</td>
+                                                <td width="5%" class="p-0">:</td>
+                                                <td class="p-0"></td>
+                                            </tr>
+                                            <tr>
+                                                <td class="p-0">Kode No.</td>
+                                                <td class="p-0">:</td>
+                                                <td class="p-0"></td>
+                                            </tr>
+                                            <tr>
+                                                <td class="p-0">Nomor</td>
+                                                <td class="p-0">:</td>
+                                                <td class="p-0 fw-bold">${data.no_surat_tugas || '-'}</td>
+                                            </tr>
+                                        </table>
+                                    </div>
+                                </div>
+                                <hr class="border-2 border-dark opacity-100 my-2" style="border-top: 2px solid black !important;">
+                            </div>
+
+                            <div class="text-center my-3">
+                                <h6 class="text-decoration-underline fw-bold mb-0">SURAT PERJALANAN DINAS</h6>
+                            </div>
+
+                            <table class="table-sppd-main">
+                                <tr>
+                                    <td width="5%" class="text-center">1</td>
+                                    <td width="45%">Pejabat Pembuat Komitmen</td>
+                                    <td width="50%">${ppkNama}</td>
+                                </tr>
+                                <tr>
+                                    <td class="text-center">2</td>
+                                    <td>Nama/NIP Pegawai yang diperintahkan</td>
+                                    <td class="fw-bold">${namaClean}</td>
+                                </tr>
+                                <tr>
+                                    <td class="text-center">3</td>
+                                    <td>a. Pangkat dan Golongan<br>b. Jabatan<br>c. Tingkat Biaya Perjalanan Dinas</td>
+                                    <td>a. ${golClean}<br>b. ${jabClean}<br>c. Biasa</td>
+                                </tr>
+                                <tr>
+                                    <td class="text-center">4</td>
+                                    <td>Maksud Perjalanan Dinas</td>
+                                    <td>${data.maksud_dinas || '-'}</td>
+                                </tr>
+                                <tr>
+                                    <td class="text-center">5</td>
+                                    <td>Alat angkutan yang dipergunakan</td>
+                                    <td>${data.jenis_transportasi || 'Angkutan Darat'}</td>
+                                </tr>
+                                <tr>
+                                    <td class="text-center">6</td>
+                                    <td>a. Tempat Berangkat<br>b. Tempat Tujuan</td>
+                                    <td>a. Candra Mukti, Tulang Bawang Barat<br>b. ${data.tujuan || '-'}</td>
+                                </tr>
+                                <tr>
+                                    <td class="text-center">7</td>
+                                    <td>a. Lamanya Perjalanan Dinas<br>b. Tanggal Berangkat<br>c. Tanggal harus kembali</td>
+                                    <td>a. ${lamaHari} (hari)<br>b. ${tglBerangkatStr}<br>c. ${tglPulangStr}</td>
+                                </tr>
+
+                                <tr>
+                                    <td colspan="3" class="td-container-8" style="padding: 0 !important;">
+                                        <table style="width: 100%; border-collapse: collapse; border: none; margin: 0;" class="nested-table">
+                                            <tr>
+                                                <td colspan="3" class="text-center fw-bold garis-bawah" style="padding: 5px; font-size: 11pt;">8. Pengikut</td>
+                                            </tr>
+                                            <tr style="background-color: #eee;">
+                                                <td class="text-center fw-bold garis-kanan garis-bawah" style="width: 40%; font-size: 11px; padding: 4px;">Nama Pengikut</td>
+                                                <td class="text-center fw-bold garis-kanan garis-bawah" style="width: 30%; font-size: 11px; padding: 4px;">NIP / Jabatan</td>
+                                                <td class="text-center fw-bold garis-bawah" style="width: 30%; font-size: 11px; padding: 4px;">Keterangan</td>
+                                            </tr>
+                                            <tr>
+                                                <td class="px-2 py-3 garis-kanan" style="vertical-align: top; min-height: 40px;"></td>
+                                                <td class="px-2 py-3 garis-kanan" style="vertical-align: top;"></td>
+                                                <td class="px-2 py-3" style="vertical-align: top;"></td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+
+                                <tr>
+                                    <td class="text-center">9</td>
+                                    <td>Pembebanan Anggaran:<br>a. Instansi<br>b. Akun</td>
+                                    <td><br>a. DIPA KPU Tulang Bawang Barat TA 2026<br>b. 524111</td>
+                                </tr>
+                                <tr>
+                                    <td class="text-center">10</td>
+                                    <td>Keterangan Lain-lain</td>
+                                    <td>-</td>
+                                </tr>
+                            </table>
+
+                            <div class="row mt-5" style="display: flex;">
+                                <div style="flex: 0 0 60%;"></div>
+                                <div style="flex: 0 0 40%;">
+                                    <p class="mb-0">Dikeluarkan di: Candra Mukti</p>
+                                    <p>Pada tanggal: ${tglSuratStr}</p>
+                                    <p class="fw-bold mt-3 mb-5">Pejabat Pembuat Komitmen</p>
+                                    <p class="fw-bold mb-0 text-decoration-underline">${ppkNama}</p>
+                                    <p>NIP. ${ppkNip}</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- =============================================
+                             HALAMAN BELAKANG
+                             ============================================= -->
+                        <div class="halaman">
+                            <div class="d-flex justify-content-between mb-2 mt-3" style="font-weight: bold; font-size: 11pt;">
+                                <div style="text-align: left;">Lampiran SPPD Tanggal &nbsp;: ${tglSuratStr}</div>
+                                <div style="text-align: right;">Nomor &nbsp;: ${data.no_surat_tugas || '-'}</div>
+                            </div>
+
+                            <table class="table-belakang">
+                                <tr>
+                                    <td></td>
+                                    <td>
+                                        I. Berangkat dari : <span class="fw-bold">Candra Mukti, Tulang Bawang Barat</span><br>
+                                        Ke : <span class="fw-bold">${data.tujuan || '-'}</span><br>
+                                        Pada Tanggal : <span class="fw-bold">${tglBerangkatStr}</span><br>
+                                        <br>
+                                        <div class="text-center">
+                                            <strong>Plt. Sekretaris<br>Komisi Pemilihan Umum<br>Kab. Tulang Bawang Barat</strong>
+                                            <div class="box-ttd"></div>
+                                            <strong class="text-decoration-underline">Wahyu Ari Bowo, S.H.</strong><br>
+                                            NIP. 19820512 200902 1 003
+                                        </div>
+                                    </td>
+                                </tr>
+
+                                <tr>
+                                    <td>
+                                        II. Tiba di : <span class="fw-bold">${data.tujuan || '-'}</span><br>
+                                        Pada Tanggal : <span class="fw-bold">${tglBerangkatStr}</span><br>
+                                        Kepala : ...................................
+                                        <div class="box-ttd"></div><br>
+                                        (...................................................)<br>
+                                        NIP.
+                                    </td>
+                                    <td>
+                                        Berangkat dari : <span class="fw-bold">${data.tujuan || '-'}</span><br>
+                                        Ke : <span class="fw-bold">Tulang Bawang Barat</span><br>
+                                        Pada Tanggal : <span class="fw-bold">${tglPulangStr}</span><br>
+                                        Kepala : ...................................
+                                        <div class="box-ttd"></div>
+                                        (...................................................)<br>
+                                        NIP.
+                                    </td>
+                                </tr>
+
+                                <tr>
+                                    <td>
+                                        III. Tiba di : ...............................<br>
+                                        Pada Tanggal : ...............................<br>
+                                        Kepala : ...................................
+                                        <br><br><br><br><br>
+                                        (...................................................)<br>
+                                        NIP.
+                                    </td>
+                                    <td>
+                                        Berangkat dari : ...............................<br>
+                                        Ke : ...............................<br>
+                                        Pada Tanggal : ...............................<br>
+                                        Kepala : ...................................
+                                        <br><br><br><br>
+                                        (...................................................)<br>
+                                        NIP.
+                                    </td>
+                                </tr>
+
+                                <tr>
+                                    <td>
+                                        IV. Tiba di : <span class="fw-bold">Tulang Bawang Barat</span><br>
+                                        (Tempat Kedudukan)<br>
+                                        Pada Tanggal : <span class="fw-bold">${tglPulangStr}</span><br><br>
+                                        <strong>Pejabat Pembuat Komitmen<br>Komisi Pemilihan Umum<br>Kab. Tulang Bawang Barat</strong>
+                                        <div class="box-ttd"></div>
+                                        <strong class="text-decoration-underline">${ppkNama}</strong><br>
+                                        NIP. ${ppkNip}
+                                    </td>
+                                    <td>
+                                        Telah diperiksa dengan keterangan bahwa perjalanan tersebut atas perintahnya dan semata-mata untuk kepentingan jabatan dalam waktu yang sesingkat-singkatnya.<br><br>
+                                        <strong>Pejabat Pembuat Komitmen<br>Komisi Pemilihan Umum<br>Kab. Tulang Bawang Barat</strong>
+                                        <div class="box-ttd"></div>
+                                        <strong class="text-decoration-underline">${ppkNama}</strong><br>
+                                        NIP. ${ppkNip}
+                                    </td>
+                                </tr>
+
+                                <tr>
+                                    <td colspan="2" style="text-align: justify;">V. PPK yang menerbitkan SPD, Pegawai yang melakukan perjalanan dinas, para pejabat yang mengesahkan tanggal berangkat/tiba, serta bendahara pengeluaran bertanggung jawab berdasarkan peraturan-peraturan Keuangan Negara apabila Negara menderita rugi akibat kesalahan, dan kealpaannya.</td>
+                                </tr>
+                            </table>
+                        </div>
+                        `;
+                    });
+
+                    container.innerHTML = allHTML;
+                }
+            } catch (err) {
+                console.error('Gagal cetak SPPD:', err);
+                alert('Terjadi kesalahan sistem.');
+            }
+        });
+    </script>
+</body>
+
+</html>

@@ -97,22 +97,25 @@ exports.save = async (req, res) => {
         const params = [
             d.no_surat_tugas, // 1
             d.tgl_surat_tugas, // 2
-            namaPegawaiAll, // 3
-            golonganAll, // 4
-            jabatanAll, // 5
-            jumlahPegawai, // 6
-            d.tujuan, // 7
-            d.maksud_dinas, // 8
-            d.tgl_berangkat, // 9
-            d.tgl_pulang, // 10
-            uangHarianClean, // 11
-            d.jenis_transportasi, // 12
-            biayaTransClean, // 13
-            d.nama_hotel, // 14
-            tarifHotelClean, // 15
-            fixCheckin, // 16
-            fixCheckout, // 17
-            grandTotal, // 18
+            d.menimbang || '', // 3 (NEW)
+            d.dasar || '', // 4 (NEW)
+            namaPegawaiAll, // 5
+            golonganAll, // 6
+            jabatanAll, // 7
+            jumlahPegawai, // 8
+            d.tujuan, // 9
+            d.maksud_dinas, // 10
+            d.uraian_tugas || '', // 11 (NEW)
+            d.tgl_berangkat, // 12
+            d.tgl_pulang, // 13
+            uangHarianClean, // 14
+            d.jenis_transportasi, // 15
+            biayaTransClean, // 16
+            d.nama_hotel, // 17
+            tarifHotelClean, // 18
+            fixCheckin, // 19
+            fixCheckout, // 20
+            grandTotal, // 21
         ];
 
         // 8. EKSEKUSI SQL
