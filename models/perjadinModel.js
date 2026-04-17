@@ -70,6 +70,7 @@ exports.getKuitansiData = (id) => {
             nama_pegawai, 
             golongan, 
             jabatan,
+            jenis_transportasi,
             tgl_berangkat,
             tgl_pulang,
             (DATEDIFF(tgl_pulang, tgl_berangkat) + 1) AS lama_hari,

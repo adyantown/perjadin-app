@@ -54,6 +54,17 @@ document.addEventListener('DOMContentLoaded', () => {
             animateValue('stat_sppd', 0, totalSppd, 1000);
         })
         .catch((err) => console.error('Gagal load statistik SPPD:', err));
+
+    // 4. LOAD STATISTIK SPJ (Sudah ACC)
+    fetch('/api/dokumentasi/semua')
+        .then((response) => response.json())
+        .then((json) => {
+            if (json.success && json.data) {
+                const totalAcc = json.data.filter(spj => spj.status === 'ACC').length;
+                animateValue('stat_spj_acc', 0, totalAcc, 1000);
+            }
+        })
+        .catch((err) => console.error('Gagal load statistik SPJ:', err));
 });
 
 // Fungsi Animasi Angka

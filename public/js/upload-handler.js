@@ -1,50 +1,47 @@
 document.addEventListener('DOMContentLoaded', async () => {
-    // 1. Ambil data SPPD dan SPJ secara bersamaan
+    // 1. Ambil data Perjadin dan SPJ secara bersamaan
     try {
-        const resSppd = await fetch('/api/sppd/all');
-        const jsonSppd = await resSppd.json();
+        const resPerjadin = await fetch('/api/perjadin/all');
+        const dataPerjadin = await resPerjadin.json();
 
         const resSpj = await fetch('/api/dokumentasi/semua');
         const jsonSpj = await resSpj.json();
 
-        // 2. Kumpulkan ID SPPD yang status SPJ-nya sudah "ACC"
-        const accSppdIds = [];
+        // 2. Kumpulkan Nomor ST yang status SPJ-nya sudah "ACC"
+        const accSTs = [];
         if (jsonSpj.success) {
             jsonSpj.data.forEach(spj => {
-                if (spj.status === 'ACC') {
-                    accSppdIds.push(spj.sppd_id); // Masukkan ke daftar hitam (disembunyikan)
+                if (spj.status === 'ACC' && spj.nomor_st) {
+                    accSTs.push(spj.nomor_st); // Masukkan ke daftar hitam (disembunyikan)
                 }
             });
         }
 
-        // 3. Render Dropdown Surat Tugas (Grouping)
+        // 3. Render Dropdown Surat Tugas dari Perjadin
         const select = document.getElementById('nomor_st');
         select.innerHTML = '<option value="">-- Pilih Surat Tugas Rombongan --</option>';
 
-        if (jsonSppd.success) {
-            const groupedSppd = {};
-            
-            jsonSppd.data.forEach(item => {
-                // TAMPILKAN HANYA JIKA SPPD INI BELUM DI-ACC
-                if (!accSppdIds.includes(item.id)) {
-                    if (!groupedSppd[item.nomor_st]) {
-                        groupedSppd[item.nomor_st] = {
-                            nomor_st: item.nomor_st,
-                            maksud_dinas: item.maksud_dinas,
-                            tgl_berangkat: item.tgl_berangkat ? item.tgl_berangkat.split('T')[0] : '-',
-                            pegawai_list: []
-                        };
+        if (Array.isArray(dataPerjadin)) {
+            dataPerjadin.forEach(item => {
+                // TAMPILKAN HANYA JIKA ST INI BELUM DI-ACC
+                if (!accSTs.includes(item.no_surat_tugas)) {
+                    let namaArray = [];
+                    if (item.nama_pegawai) {
+                        if (item.nama_pegawai.includes('|||')) {
+                            namaArray = item.nama_pegawai.split('|||').map(n => n.trim()).filter(n => n !== '');
+                        } else {
+                            namaArray = [item.nama_pegawai.trim()];
+                        }
                     }
-                    // Ambil nama sebelum slash atau gelar agar tidak terlalu panjang
-                    const namaPendek = item.nama_pegawai ? item.nama_pegawai.split(' /')[0] : 'Tanpa Nama';
-                    groupedSppd[item.nomor_st].pegawai_list.push(namaPendek);
-                }
-            });
 
-            // Render ke dropdown
-            Object.values(groupedSppd).forEach(group => {
-                const namaNama = group.pegawai_list.join(', ');
-                select.innerHTML += `<option value="${group.nomor_st}">[${group.tgl_berangkat}] ${group.maksud_dinas} (${group.pegawai_list.length} Orang: ${namaNama})</option>`;
+                    // Ambil nama sebelum slash atau koma agar tidak terlalu panjang
+                    const shortNames = namaArray.map(n => n.split(/[\/,]/)[0].trim());
+                    const namaNama = shortNames.join(', ');
+                    
+                    const tglBerangkat = item.tgl_berangkat ? item.tgl_berangkat.split('T')[0] : '-';
+
+                    select.innerHTML += `<option value="${item.no_surat_tugas}">[${tglBerangkat}] ${item.maksud_dinas} (${namaArray.length} Orang: ${namaNama})</option>`;
+                }
             });
         }
     } catch (err) {

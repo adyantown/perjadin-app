@@ -22,7 +22,7 @@ exports.insertSpjBulk = (values) => {
 
 exports.getAllSpjWithSppd = () => {
     const sql = `
-        SELECT doc.*, s.nama_pegawai, s.maksud_dinas, s.tgl_berangkat, s.tgl_kembali 
+        SELECT doc.*, s.nomor_st, s.nama_pegawai, s.maksud_dinas, s.tgl_berangkat, s.tgl_kembali 
         FROM dokumen_spj doc
         JOIN sppd_kpu s ON doc.sppd_id = s.id
         ORDER BY doc.waktu_upload DESC`;

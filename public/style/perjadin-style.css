@@ -172,6 +172,19 @@ tr:hover {
     display: none; /* Default sembunyi di layar */
 }
 
+/* Custom button "Hapus" */
+.btn-merah-terang {
+    background-color: #e00000 !important; /* Merah Terang */
+    color: white !important;
+    border: none;
+    transition: background-color 0.3s ease;
+}
+
+.btn-merah-terang:hover {
+    background-color: var(--kpu-dark) !important; /* Merah Gelap/Maroon */
+    color: white !important;
+}
+
 @media print {
     /* Sembunyikan elemen navigasi saat print */
     .no-print,

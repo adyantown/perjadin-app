@@ -13,7 +13,7 @@ function tambahPegawai(nama = '', gol = '', jab = '') {
                     <h6 class="fw-bold text-danger m-0">
                         <i class="bi bi-person-badge-fill me-1"></i> Data Pegawai
                     </h6>
-                    <button type="button" class="btn btn-outline-danger btn-sm btn-remove" onclick="hapusBaris(this)" title="Hapus Baris Ini">
+                    <button type="button" class="btn btn-merah-terang btn-sm btn-remove" onclick="hapusBaris(this)" title="Hapus Baris Ini">
                         <i class="bi bi-trash"></i> Hapus
                     </button>
                 </div>
@@ -290,6 +290,62 @@ document.addEventListener('input', (e) => {
 // --- 7. SUBMIT FORM (SIMPAN) ---
 document.getElementById('perjadinForm').onsubmit = async function (e) {
     e.preventDefault();
+
+    // 1. AMBIL NILAI UNTUK VALIDASI LOGIKA
+    const tglBerangkat = document.querySelector('input[name="tgl_berangkat"]').value;
+    const tglPulang = document.querySelector('input[name="tgl_pulang"]').value;
+    const tglCheckin = document.querySelector('input[name="tgl_checkin"]').value;
+    const tglCheckout = document.querySelector('input[name="tgl_checkout"]').value;
+    const noSurat = document.querySelector('input[name="no_surat_tugas"]').value;
+    const listPegawai = document.querySelectorAll('input[name="nama_pegawai[]"]');
+
+    // --- MULAI BLOK VALIDASI ---
+
+    // A. Cek Nomor Surat
+    if (!noSurat.trim()) {
+        return Swal.fire('Oops...', 'Nomor Surat Tugas tidak boleh kosong!', 'warning');
+    }
+
+    // B. Cek Minimal 1 Pegawai
+    let adaPegawai = false;
+    listPegawai.forEach((input) => {
+        if (input.value.trim() !== '') adaPegawai = true;
+    });
+    if (!adaPegawai) {
+        return Swal.fire('Oops...', 'Minimal harus ada 1 nama pegawai yang berangkat!', 'warning');
+    }
+
+    // C. Logika Tanggal Perjalanan (Pulang gak boleh sebelum berangkat)
+    if (tglBerangkat && tglPulang) {
+        if (new Date(tglPulang) < new Date(tglBerangkat)) {
+            return Swal.fire('Tanggal Salah!', 'Tanggal Pulang tidak boleh lebih awal dari Tanggal Berangkat!', 'error');
+        }
+    }
+
+    // D. Logika Tanggal Hotel (Checkout gak boleh sebelum Checkin)
+    if (tglCheckin && tglCheckout) {
+        if (new Date(tglCheckout) < new Date(tglCheckin)) {
+            return Swal.fire('Tanggal Salah!', 'Tanggal Check-out hotel tidak boleh lebih awal dari Check-in!', 'error');
+        }
+    }
+
+    // --- AKHIR BLOK VALIDASI ---
+
+    // Konfirmasi sebelum simpan
+    const confirm = await Swal.fire({
+        title: 'Simpan Data Perjadin?',
+        text: 'Pastikan data rincian biaya dan tanggal sudah benar.',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#6c757d',
+        confirmButtonText: 'Ya, Simpan!',
+        cancelButtonText: 'Batal',
+    });
+
+    if (!confirm.isConfirmed) return; // Kalau user klik batal, hentikan proses
+
+    // 2. PROSES PENGIRIMAN DATA
     const formData = new FormData(this);
     const searchParams = new URLSearchParams();
 
@@ -306,7 +362,6 @@ document.getElementById('perjadinForm').onsubmit = async function (e) {
         const result = await response.json();
 
         if (result.success) {
-            // Pakai SweetAlert2 biar keren
             Swal.fire({
                 title: 'Berhasil!',
                 text: result.message,

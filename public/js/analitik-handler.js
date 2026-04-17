@@ -44,7 +44,9 @@ async function loadPegawaiKategori(kategori) {
 
 // 2. Fungsi Utama saat Pegawai Dipilih
 async function loadDataAnalitik() {
-    const pegawaiId = document.getElementById('selectPegawai').value;
+    const select = document.getElementById('selectPegawai');
+    const pegawaiId = select.value;
+    const pegawaiName = select.options[select.selectedIndex].text;
     const wadah = document.getElementById('wadahAnalitik');
 
     if (!pegawaiId) {
@@ -58,8 +60,8 @@ async function loadDataAnalitik() {
 
         if (result.success) {
             wadah.style.display = 'block'; // Tampilkan dashboard
-            kalkulasiData(result.data);
-            renderTabelRiwayat(result.data);
+            kalkulasiData(result.data, pegawaiName);
+            renderTabelRiwayat(result.data, pegawaiName);
             renderGrafik(result.data);
         }
     } catch (e) {
@@ -69,8 +71,7 @@ async function loadDataAnalitik() {
 }
 
 // 3. Kalkulasi Angka untuk Scorecards
-// 3. Kalkulasi Angka untuk Scorecards
-function kalkulasiData(data) {
+function kalkulasiData(data, pegawaiName) {
     let uangHarian = 0;
     let transport = 0;
     let grandTotal = 0;
@@ -89,15 +90,39 @@ function kalkulasiData(data) {
         }
         durasi = durasi > 0 ? durasi : 1; // Minimal 1 hari
 
+        // Cek apakah pegawai ini adalah nama pertama (Ketua Rombongan)
+        let isFirstPerson = false;
+        if (item.nama_pegawai) {
+            let list = [];
+            if (item.nama_pegawai.includes('|||')) {
+                list = item.nama_pegawai.split('|||').map(n => n.trim());
+            } else {
+                list = item.nama_pegawai.split(',').map(n => n.trim());
+            }
+            if (list.length > 0 && list[0] === pegawaiName.trim()) {
+                isFirstPerson = true;
+            }
+        }
+
         // 2. Hitung Hak Individu
         // Uang Harian = Tarif utuh per orang dikali jumlah hari
         const uangHarianIndividu = (parseInt(item.uang_harian) || 0) * durasi;
 
-        // Transport = Total biaya sewa mobil/bensin dibagi rata jumlah orang yang ikut
-        const transportIndividu = (parseInt(item.biaya_transportasi) || 0) / jmlRombongan;
+        // Transport = Cek Jenis Transportasi
+        const jenisTransport = item.jenis_transportasi || 'Kendaraan/Pribadi';
+        const totalTransport = parseInt(item.biaya_transportasi) || 0;
+        
+        let transportIndividu = 0;
+        if (jenisTransport.includes('Angkutan Umum')) {
+            transportIndividu = totalTransport / jmlRombongan;
+        } else {
+            transportIndividu = isFirstPerson ? totalTransport : 0;
+        }
 
-        // Grand Total Individu = Total biaya rombongan di database dibagi rata
-        const biayaIndividu = (parseInt(item.total_biaya) || 0) / jmlRombongan;
+        // Grand Total Individu = Uang harian + Transport (jika ada) + (Sisa biaya / jmlRombongan)
+        const totalSemua = parseInt(item.total_biaya) || 0;
+        const biayaSisaBagiRata = (totalSemua - totalTransport) / jmlRombongan;
+        const biayaIndividu = biayaSisaBagiRata + transportIndividu;
 
         uangHarian += uangHarianIndividu;
         transport += transportIndividu;
@@ -113,7 +138,7 @@ function kalkulasiData(data) {
 }
 
 // 4. Render Tabel Jejak Langkah
-function renderTabelRiwayat(data) {
+function renderTabelRiwayat(data, pegawaiName) {
     const tbody = document.getElementById('tabelRiwayat');
     tbody.innerHTML = '';
 
@@ -124,7 +149,33 @@ function renderTabelRiwayat(data) {
 
     data.forEach((item) => {
         const jmlRombongan = item.jumlah_sppd || 1;
-        const biayaIndividu = (parseInt(item.total_biaya) || 0) / jmlRombongan;
+        
+        let isFirstPerson = false;
+        if (item.nama_pegawai) {
+            let list = [];
+            if (item.nama_pegawai.includes('|||')) {
+                list = item.nama_pegawai.split('|||').map(n => n.trim());
+            } else {
+                list = item.nama_pegawai.split(',').map(n => n.trim());
+            }
+            if (list.length > 0 && list[0] === pegawaiName.trim()) {
+                isFirstPerson = true;
+            }
+        }
+
+        const totalSemua = parseInt(item.total_biaya) || 0;
+        const totalTransport = parseInt(item.biaya_transportasi) || 0;
+        const jenisTransport = item.jenis_transportasi || 'Kendaraan/Pribadi';
+        
+        let transportIndividu = 0;
+        if (jenisTransport.includes('Angkutan Umum')) {
+            transportIndividu = totalTransport / jmlRombongan;
+        } else {
+            transportIndividu = isFirstPerson ? totalTransport : 0;
+        }
+
+        const biayaSisaBagiRata = (totalSemua - totalTransport) / jmlRombongan;
+        const biayaIndividu = biayaSisaBagiRata + transportIndividu;
 
         tbody.innerHTML += `
             <tr>

@@ -52,12 +52,26 @@ function renderKuitansi(data, pegawai, index, pejabat) {
         'Uang Harian'
     );
 
-    // 2. Transport (hanya orang pertama yang kena biaya penuh)
-    if (index === 0 && data.uang_transport > 0) {
-        total += parseInt(data.uang_transport);
-        htmlRincian += buatBarisRincian(noUrut++, 'Biaya Transport/Tiket', parseInt(data.uang_transport), 'Transport');
-    } else if (index > 0 && data.uang_transport > 0) {
-        htmlRincian += buatBarisRincian(noUrut++, 'Biaya Transport/Tiket', 0, 'Ikut Kend. Dinas / Ketua');
+    // 2. Transport
+    const jenisTransport = data.jenis_transportasi || 'Kendaraan/Pribadi'; // fallback
+    const uangTransport = parseInt(data.uang_transport) || 0;
+
+    if (uangTransport > 0) {
+        // Jika Angkutan Umum -> Dibagi rata ke semua pegawai
+        if (jenisTransport.includes('Angkutan Umum')) {
+            const jmlPegawai = data.listPegawai ? data.listPegawai.length : 1;
+            const transportRata = uangTransport / jmlPegawai;
+            total += transportRata;
+            htmlRincian += buatBarisRincian(noUrut++, 'Biaya Transport/Tiket', transportRata, 'Tiket Perjalanan');
+        } else {
+            // Kendaraan Dinas/Pribadi -> Hanya orang pertama yang menanggung full
+            if (index === 0) {
+                total += uangTransport;
+                htmlRincian += buatBarisRincian(noUrut++, 'Biaya Transport/Tiket', uangTransport, 'Transport Kend. Dinas/Pribadi');
+            } else {
+                htmlRincian += buatBarisRincian(noUrut++, 'Biaya Transport/Tiket', 0, 'Ikut Kend. Dinas / Ketua');
+            }
+        }
     }
 
     // 3. Penginapan
