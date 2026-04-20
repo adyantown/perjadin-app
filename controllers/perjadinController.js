@@ -187,6 +187,12 @@ exports.getById = async (req, res) => {
 
 exports.delete = async (req, res) => {
     try {
+        // GUARD: Cek apakah perjadin ini sudah di-SPJ-kan
+        const rows = await PerjadinModel.getById(req.params.id);
+        if (rows.length > 0 && rows[0].status_spj) {
+            return res.status(403).json({ success: false, message: 'Data terkunci! Perjadin ini sudah memiliki SPJ dan tidak bisa dihapus.' });
+        }
+
         await PerjadinModel.delete(req.params.id);
 
         // ---> PASANG CCTV DI SINI <---

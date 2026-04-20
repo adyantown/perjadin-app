@@ -1,4 +1,5 @@
 const DokumentasiModel = require('../models/dokumentasiModel');
+const PerjadinModel = require('../models/perjadinModel');
 const logController = require('./logController');
 
 // ==========================================
@@ -56,6 +57,13 @@ exports.uploadSpj = async (req, res) => {
 
         await Promise.all(promises);
 
+        // Tandai perjadin bahwa SPJ sudah diupload
+        try {
+            await PerjadinModel.updateStatusSpj(nomor_st, 1);
+        } catch (e) {
+            console.error('Gagal update status_spj:', e);
+        }
+
         logController.catatLog(req, 'Upload SPJ Rombongan', `Upload SPJ untuk Surat Tugas: ${nomor_st}`);
         res.json({ success: true, message: 'File SPJ Rombongan berhasil diupload dan menunggu verifikasi!' });
     } catch (error) {
@@ -103,7 +111,31 @@ exports.verifikasiSpj = async (req, res) => {
 exports.deleteSpj = async (req, res) => {
     try {
         const id = req.params.id;
+
+        // Ambil nomor_st sebelum dihapus, supaya bisa reset status_spj
+        const stResult = await DokumentasiModel.getNomorStBySpjId(id);
+        const nomorSt = stResult.length > 0 ? stResult[0].nomor_st : null;
+
         await DokumentasiModel.deleteSpj(id);
+
+        // Reset status_spj di perjadin jika sudah tidak ada SPJ lagi untuk nomor_st ini
+        if (nomorSt) {
+            try {
+                const remaining = await DokumentasiModel.getSppdIdsByNomorSt(nomorSt);
+                const remainingIds = remaining.map(r => r.id);
+                let hasSpj = false;
+                if (remainingIds.length > 0) {
+                    const existingSpj = await DokumentasiModel.getExistingSpjBySppdIds(remainingIds);
+                    hasSpj = existingSpj.length > 0;
+                }
+                if (!hasSpj) {
+                    await PerjadinModel.updateStatusSpj(nomorSt, 0);
+                }
+            } catch (e) {
+                console.error('Gagal reset status_spj:', e);
+            }
+        }
+
         logController.catatLog(req, 'Hapus SPJ', `Menghapus file SPJ ID: ${id}`);
         res.json({ success: true, message: 'Data SPJ berhasil dihapus!' });
     } catch (err) {

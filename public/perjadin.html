@@ -35,9 +35,10 @@
                 <div
                     class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-3">
                     <div>
-                        <h4 class="fw-bold text-danger m-0">Form Rincian Biaya Perjalanan Dinas</h4>
-                        <small class="text-muted">Input detail pengeluaran riil untuk laporan
-                            keuangan.</small>
+                        <h4 class="fw-bold text-danger m-0">Form Input Terpadu Perjalanan Dinas</h4>
+                        <small class="text-muted">Single Entry: Lengkapi data penugasan, rombongan,
+                            dan biaya untuk
+                            mencetak dokumen Perjadin.</small>
                     </div>
                     <a href="/daftar.html" class="btn btn-success text-white shadow-sm">
                         <i class="bi bi-table me-1"></i> Lihat Data Rekapitulasi
@@ -81,136 +82,139 @@
                         </div>
                     </div>
 
-            <div class="form-group-title">II. Data Pegawai Terlibat</div>
+                    <div class="form-group-title">II. Data Pegawai Terlibat</div>
 
-            <div class="p-3 mb-3 bg-light border rounded">
-                <label class="form-label fw-bold text-danger">⚡ Tambah Pegawai Cepat (Pilih
-                    dari Database):</label>
+                    <div class="p-3 mb-3 bg-light border rounded">
+                        <label class="form-label fw-bold text-danger">⚡ Tambah Pegawai Cepat (Pilih
+                            dari Database):</label>
 
-                <div class="d-flex align-items-center mb-2">
-                    <div class="form-check me-3">
-                        <input class="form-check-input" type="radio" name="kat" id="pns" value="PNS"
-                            onclick="loadPegawai('PNS')">
-                        <label class="form-check-label" for="pns">PNS</label>
+                        <div class="d-flex align-items-center mb-2">
+                            <div class="form-check me-3">
+                                <input class="form-check-input" type="radio" name="kat" id="pns"
+                                    value="PNS" onclick="loadPegawai('PNS')">
+                                <label class="form-check-label" for="pns">PNS</label>
+                            </div>
+                            <div class="form-check me-3">
+                                <input class="form-check-input" type="radio" name="kat" id="pppk"
+                                    value="PPPK" onclick="loadPegawai('PPPK')">
+                                <label class="form-check-label" for="pppk">PPPK</label>
+                            </div>
+                            <div class="form-check me-3">
+                                <input class="form-check-input" type="radio" name="kat" id="kom"
+                                    value="Komisioner" onclick="loadPegawai('Komisioner')">
+                                <label class="form-check-label" for="kom">Komisioner</label>
+                            </div>
+                        </div>
+
+                        <select id="selectNama" class="form-select"
+                            onchange="tambahPegawaiOtomatis()">
+                            <option value="">-- Pilih Kategori Dulu --</option>
+                        </select>
                     </div>
-                    <div class="form-check me-3">
-                        <input class="form-check-input" type="radio" name="kat" id="pppk"
-                            value="PPPK" onclick="loadPegawai('PPPK')">
-                        <label class="form-check-label" for="pppk">PPPK</label>
+
+                    <div id="pegawai-container">
                     </div>
-                    <div class="form-check me-3">
-                        <input class="form-check-input" type="radio" name="kat" id="kom"
-                            value="Komisioner" onclick="loadPegawai('Komisioner')">
-                        <label class="form-check-label" for="kom">Komisioner</label>
+
+                    <div class="mb-4">
+                        <button type="button" onclick="tambahPegawai()"
+                            class="btn btn-secondary btn-sm">
+                            <i class="bi bi-plus-circle me-1"></i> Input Manual Pegawai Luar
+                        </button>
+                        <div class="form-text">*Gunakan tombol ini jika orang tersebut tidak ada di
+                            database Satker.</div>
                     </div>
-                </div>
 
-                <select id="selectNama" class="form-select" onchange="tambahPegawaiOtomatis()">
-                    <option value="">-- Pilih Kategori Dulu --</option>
-                </select>
-            </div>
-
-            <div id="pegawai-container">
-            </div>
-
-            <div class="mb-4">
-                <button type="button" onclick="tambahPegawai()" class="btn btn-secondary btn-sm">
-                    <i class="bi bi-plus-circle me-1"></i> Input Manual Pegawai Luar
-                </button>
-                <div class="form-text">*Gunakan tombol ini jika orang tersebut tidak ada di
-                    database Satker.</div>
-            </div>
-
-            <div class="form-group-title">III. Detail Perjalanan</div>
-            <div class="mb-3">
-                <label class="form-label fw-bold">Maksud Perjalanan Dinas</label>
-                <textarea name="maksud_dinas" class="form-control" rows="2"
-                    placeholder="Uraian kegiatan..." required></textarea>
-            </div>
-            <div class="row g-3">
-                <div class="col-md-6">
-                    <label class="form-label fw-bold">Daerah Tujuan</label>
-                    <input type="text" name="tujuan" class="form-control" required>
-                </div>
-                <div class="col-md-6">
-                    <label class="form-label fw-bold">Transportasi</label>
-                    <select name="jenis_transportasi" class="form-select">
-                        <option value="Kendaraan Dinas/Pribadi">Kendaraan Dinas/Pribadi
-                            (BBM)</option>
-                        <option value="Angkutan Umum">Angkutan Umum (Tiket)</option>
-                    </select>
-                </div>
-                <div class="col-md-6">
-                    <label class="form-label fw-bold">Tanggal Berangkat</label>
-                    <input type="date" name="tgl_berangkat" id="tgl_berangkat" class="form-control"
-                        required>
-                </div>
-                <div class="col-md-6">
-                    <label class="form-label fw-bold">Tanggal Pulang</label>
-                    <input type="date" name="tgl_pulang" id="tgl_pulang" class="form-control"
-                        required>
-                </div>
-            </div>
-
-            <div class="form-group-title">IV. Biaya & Akomodasi</div>
-            <div class="row g-3 mb-3">
-                <div class="col-md-6">
-                    <label class="form-label fw-bold">Uang Harian (Per Orang/Hari)</label>
-                    <div class="input-group">
-                        <span class="input-group-text">Rp</span>
-                        <input type="number" name="uang_harian" class="form-control" placeholder="0"
-                            required>
+                    <div class="form-group-title">III. Detail Perjalanan</div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Maksud Perjalanan Dinas</label>
+                        <textarea name="maksud_dinas" class="form-control" rows="2"
+                            placeholder="Uraian kegiatan..." required></textarea>
                     </div>
-                </div>
-                <div class="col-md-6">
-                    <label class="form-label fw-bold">Biaya Transport (Total Riil)</label>
-                    <div class="input-group">
-                        <span class="input-group-text">Rp</span>
-                        <input type="number" name="biaya_transportasi" class="form-control"
-                            placeholder="0">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Daerah Tujuan</label>
+                            <input type="text" name="tujuan" class="form-control" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Transportasi</label>
+                            <select name="jenis_transportasi" class="form-select">
+                                <option value="Kendaraan Dinas/Pribadi">Kendaraan Dinas/Pribadi
+                                    (BBM)</option>
+                                <option value="Angkutan Umum">Angkutan Umum (Tiket)</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Tanggal Berangkat</label>
+                            <input type="date" name="tgl_berangkat" id="tgl_berangkat"
+                                class="form-control" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Tanggal Pulang</label>
+                            <input type="date" name="tgl_pulang" id="tgl_pulang"
+                                class="form-control" required>
+                        </div>
                     </div>
-                </div>
-            </div>
 
-            <h6 class="fw-bold text-danger mt-4 border-bottom pb-2">Data Penginapan (Jika
-                Menginap)</h6>
-            <div class="row g-3">
-                <div class="col-md-8">
-                    <label class="form-label">Nama Hotel</label>
-                    <input type="text" name="nama_hotel" class="form-control"
-                        placeholder="Nama Hotel">
-                </div>
-                <div class="col-md-4">
-                    <label class="form-label">Tarif Per Malam</label>
-                    <div class="input-group">
-                        <span class="input-group-text">Rp</span>
-                        <input type="number" name="tarif_hotel" class="form-control"
-                            placeholder="0">
+                    <div class="form-group-title">IV. Biaya & Akomodasi</div>
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Uang Harian (Per Orang/Hari)</label>
+                            <div class="input-group">
+                                <span class="input-group-text">Rp</span>
+                                <input type="number" name="uang_harian" class="form-control"
+                                    placeholder="0" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Biaya Transport (Total Riil)</label>
+                            <div class="input-group">
+                                <span class="input-group-text">Rp</span>
+                                <input type="number" name="biaya_transportasi" class="form-control"
+                                    placeholder="0">
+                            </div>
+                        </div>
                     </div>
-                </div>
-                <div class="col-md-6">
-                    <label class="form-label">Tanggal Check-in</label>
-                    <input type="date" name="tgl_checkin" class="form-control">
-                </div>
-                <div class="col-md-6">
-                    <label class="form-label">Tanggal Check-out</label>
-                    <input type="date" name="tgl_checkout" class="form-control">
-                </div>
-            </div>
 
-            <div class="alert alert-warning mt-4 d-flex justify-content-between align-items-center">
-                <div class="text-muted fw-bold">Estimasi Total Biaya:</div>
-                <h3 id="preview-total" class="m-0 text-danger fw-bold">Rp 0</h3>
-            </div>
+                    <h6 class="fw-bold text-danger mt-4 border-bottom pb-2">Data Penginapan (Jika
+                        Menginap)</h6>
+                    <div class="row g-3">
+                        <div class="col-md-8">
+                            <label class="form-label">Nama Hotel</label>
+                            <input type="text" name="nama_hotel" class="form-control"
+                                placeholder="Nama Hotel">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Tarif Per Malam</label>
+                            <div class="input-group">
+                                <span class="input-group-text">Rp</span>
+                                <input type="number" name="tarif_hotel" class="form-control"
+                                    placeholder="0">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Tanggal Check-in</label>
+                            <input type="date" name="tgl_checkin" class="form-control">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Tanggal Check-out</label>
+                            <input type="date" name="tgl_checkout" class="form-control">
+                        </div>
+                    </div>
 
-            <div class="d-grid gap-2 mt-4">
-                <button type="submit" class="btn btn-danger btn-lg fw-bold">Simpan Data
-                    Perjadin 💾</button>
-            </div>
+                    <div
+                        class="alert alert-warning mt-4 d-flex justify-content-between align-items-center">
+                        <div class="text-muted fw-bold">Estimasi Total Biaya:</div>
+                        <h3 id="preview-total" class="m-0 text-danger fw-bold">Rp 0</h3>
+                    </div>
 
-            </form>
+                    <div class="d-grid gap-2 mt-4">
+                        <button type="submit" class="btn btn-danger btn-lg fw-bold">Simpan Data
+                            Perjadin 💾</button>
+                    </div>
+
+                </form>
+            </div>
         </div>
-    </div>
     </div>
 
     <script

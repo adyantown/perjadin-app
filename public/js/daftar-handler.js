@@ -127,9 +127,15 @@ function renderTable(data) {
 
                 <td class="no-print align-middle text-center">
                     <div class="d-flex justify-content-center gap-1">
-                        <a href="/perjadin.html?edit=${item.id}" class="btn btn-warning btn-sm text-dark fw-bold" title="Edit Data" style="font-size: 0.8rem;">
-                            <i class="bi bi-pencil-square"></i>
-                        </a>
+                        ${item.status_spj ? `
+                            <button class="btn btn-secondary btn-sm fw-bold" disabled title="Data terkunci (SPJ sudah diupload)" style="font-size: 0.8rem; cursor: not-allowed;">
+                                <i class="bi bi-lock-fill"></i>
+                            </button>
+                        ` : `
+                            <a href="/perjadin.html?edit=${item.id}" class="btn btn-warning btn-sm text-dark fw-bold" title="Edit Data" style="font-size: 0.8rem;">
+                                <i class="bi bi-pencil-square"></i>
+                            </a>
+                        `}
                         <a href="/cetak_surat_tugas.html?id=${item.id}" target="_blank" class="btn btn-sm btn-primary" title="Cetak Surat Tugas">
                         <i class="bi bi-file-earmark-text"></i>
                         </a>
@@ -139,10 +145,17 @@ function renderTable(data) {
                         <a href="/cetak_kuitansi.html?id=${item.id}" target="_blank" class="btn btn-sm btn-success" title="Cetak Kuitansi">
                         <i class="bi bi-printer"></i>
                         </a>
-                        <button onclick="hapusData(${item.id})" class="btn btn-danger btn-sm fw-bold" title="Hapus Data" style="font-size: 0.8rem;">
-                            <i class="bi bi-trash"></i>
-                        </button>
+                        ${item.status_spj ? `
+                            <button class="btn btn-secondary btn-sm fw-bold" disabled title="Data terkunci (SPJ sudah diupload)" style="font-size: 0.8rem; cursor: not-allowed;">
+                                <i class="bi bi-lock-fill"></i>
+                            </button>
+                        ` : `
+                            <button onclick="hapusData(${item.id})" class="btn btn-danger btn-sm fw-bold" title="Hapus Data" style="font-size: 0.8rem;">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        `}
                     </div>
+                    ${item.status_spj ? '<span class="badge bg-success mt-1" style="font-size: 0.65rem;"><i class="bi bi-check-circle-fill me-1"></i>SPJ</span>' : ''}
                 </td>
             </tr>
         `;

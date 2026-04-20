@@ -217,6 +217,20 @@ document.addEventListener('DOMContentLoaded', async () => {
             .then((data) => {
                 if (!data) return alert('Data tidak ditemukan!');
 
+                // GUARD: Blokir edit jika SPJ sudah diupload
+                if (data.status_spj) {
+                    Swal.fire({
+                        title: 'Data Terkunci! 🔒',
+                        text: 'Perjadin ini sudah memiliki SPJ yang diupload. Data tidak bisa diedit.',
+                        icon: 'warning',
+                        confirmButtonColor: '#d33',
+                        confirmButtonText: 'Kembali ke Daftar',
+                    }).then(() => {
+                        window.location.href = '/daftar.html';
+                    });
+                    return;
+                }
+
                 // Helper isi form
                 const setVal = (name, val) => {
                     const el = document.getElementsByName(name)[0];

@@ -55,6 +55,10 @@ exports.getAnalitikByPegawai = (pegawaiId) => {
     return db.query(sql, [pegawaiId]);
 };
 
+exports.updateStatusSpj = (noSuratTugas, status) => {
+    return db.query('UPDATE perjadin SET status_spj = ? WHERE no_surat_tugas = ?', [status, noSuratTugas]);
+};
+
 exports.getKuitansiData = (id) => {
     // Kita panggil langsung nama kolom asli dari tabel perjadin Mas Ady
     const sql = `
