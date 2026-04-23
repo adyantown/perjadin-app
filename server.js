@@ -173,7 +173,7 @@ const rabRoutes = require('./routes/rabRoutes');
 app.use('/api/perjadin', cekLogin, perjadinRoutes);
 app.use('/api/pegawai', cekLogin, pegawaiRoutes);
 app.use('/api/sppd', cekLogin, sppdRoutes);
-app.use('/api/settings', cekLogin, settingRoutes);
+app.use('/api/settings', cekLogin, hanyaAdmin, settingRoutes);
 app.use('/api/dashboard', cekLogin, dashboardRoutes);
 app.use('/api/dokumentasi', cekLogin, dokumentasiRoutes);
 app.use('/api/logs', cekLogin, hanyaAdmin, logRoutes);
