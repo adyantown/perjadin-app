@@ -92,7 +92,7 @@ async function editPegawai(id) {
             modal.show();
         }
     } catch (error) {
-        alert('Gagal mengambil data edit');
+        Swal.fire('Error!', 'Gagal mengambil data edit.', 'error');
     }
 }
 
@@ -118,36 +118,54 @@ async function handleFormSubmit(e) {
         const result = await response.json();
 
         if (result.success) {
-            alert(result.message);
             // Tutup Modal
             const modalEl = document.getElementById('modalPegawai');
             const modal = bootstrap.Modal.getInstance(modalEl);
             modal.hide();
 
+            Swal.fire({
+                title: 'Berhasil!',
+                text: result.message,
+                icon: 'success',
+                confirmButtonColor: '#198754'
+            });
+
             // Refresh Tabel
             loadDataPegawai();
         } else {
-            alert('Gagal: ' + result.message);
+            Swal.fire('Gagal!', result.message, 'warning');
         }
     } catch (error) {
-        alert('Terjadi kesalahan sistem');
+        Swal.fire('Error!', 'Terjadi kesalahan sistem.', 'error');
     }
 }
 
 // 5. FUNGSI HAPUS
 async function hapusPegawai(id, nama) {
-    if (confirm(`Yakin ingin menghapus pegawai "${nama}"? Data yang sudah dihapus tidak bisa kembali.`)) {
+    const konfirmasi = await Swal.fire({
+        title: 'Hapus Pegawai?',
+        html: `Yakin ingin menghapus pegawai <b>"${nama}"</b>? Data yang sudah dihapus tidak bisa kembali.`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#bb2d3b',
+        cancelButtonColor: '#6c757d',
+        confirmButtonText: 'Ya, Hapus!',
+        cancelButtonText: 'Batal'
+    });
+
+    if (konfirmasi.isConfirmed) {
         try {
             const response = await fetch(`/api/pegawai/delete/${id}`, { method: 'DELETE' });
             const result = await response.json();
 
             if (result.success) {
+                Swal.fire('Terhapus!', 'Data pegawai berhasil dihapus.', 'success');
                 loadDataPegawai(); // Refresh tabel
             } else {
-                alert('Gagal menghapus: ' + result.message);
+                Swal.fire('Gagal!', 'Gagal menghapus: ' + result.message, 'warning');
             }
         } catch (error) {
-            alert('Error saat menghapus data');
+            Swal.fire('Error!', 'Error saat menghapus data.', 'error');
         }
     }
 }
