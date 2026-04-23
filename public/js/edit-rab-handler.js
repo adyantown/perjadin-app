@@ -52,7 +52,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // 2. MESIN KALKULATOR LIVE
     const calcTriggers = document.querySelectorAll('.calc-trigger');
-    calcTriggers.forEach(input => {
+    calcTriggers.forEach((input) => {
         input.addEventListener('input', hitungTotal);
     });
 
@@ -110,7 +110,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     title: 'Revisi Berhasil!',
                     text: result.message,
                     icon: 'success',
-                    confirmButtonColor: '#198754'
+                    confirmButtonColor: '#198754',
                 }).then(() => {
                     window.location.href = '/riwayat_rab.html';
                 });
