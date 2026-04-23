@@ -1,5 +1,13 @@
 document.addEventListener('DOMContentLoaded', loadAntrean);
 
+// HELPER: Format nama pegawai dari separator ||| menjadi daftar bernomor
+function formatNamaPegawai(str) {
+    if (!str) return '-';
+    const arr = str.split('|||').map(s => s.trim()).filter(Boolean);
+    if (arr.length <= 1) return arr[0] || '-';
+    return arr.map((nama, i) => `<span class="d-block mb-1"><b>${i + 1}.</b> ${nama}</span>`).join('');
+}
+
 // FUNGSI 1: AMBIL DATA ANTREAN DARI BACKEND
 async function loadAntrean() {
     try {
@@ -46,7 +54,7 @@ async function loadAntrean() {
                         </span>
                     </td>
                     <td>
-                        <div class="fw-bold text-primary mb-1"><i class="bi bi-person-fill me-1"></i> ${item.nama_pegawai}</div>
+                        <div class="fw-bold text-primary mb-1"><i class="bi bi-people-fill me-1"></i> ${formatNamaPegawai(item.nama_pegawai)}</div>
                         <div class="small text-secondary fw-medium">${item.maksud_dinas}</div>
                     </td>
                     <td class="text-center">
