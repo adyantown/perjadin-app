@@ -149,7 +149,7 @@ exports.save = async (req, res) => {
 
             // ---> PASANG CCTV DI SINI <---
             try {
-                logController.catatLog(req, 'Tambah Data Perjadin', `Berhasil Menambah Data Perjadin`);
+                logController.catatLog(req, 'Tambah Data Perjadin', `Menambah data perjadin Surat Tugas: ${d.no_surat_tugas}`);
             } catch (e) {}
 
             const newId = result.insertId;
@@ -198,7 +198,8 @@ exports.delete = async (req, res) => {
 
         // ---> PASANG CCTV DI SINI <---
         try {
-            logController.catatLog(req, 'Hapus Perjadin', `Menghapus data rekap biaya dengan ID: ${req.params.id}`);
+            const noSurat = rows.length > 0 ? rows[0].no_surat_tugas : 'Tidak Diketahui';
+            logController.catatLog(req, 'Hapus Perjadin', `Menghapus data perjadin Surat Tugas: ${noSurat}`);
         } catch (e) {}
 
         res.json({ success: true, message: 'Data Berhasil Dihapus!' });
