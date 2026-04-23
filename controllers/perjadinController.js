@@ -1,6 +1,7 @@
 // --- ENDPOINT SIMPAN & UPDATE ---
 const PerjadinModel = require('../models/perjadinModel');
 const logController = require('./logController');
+const db = require('../config/dbPromise');
 
 const cleanMoney = (val) => {
     if (!val) return 0;
@@ -256,17 +257,28 @@ exports.getKuitansiDetail = async (req, res) => {
                 individualNames = [rawNama];
             }
 
-            individualNames.forEach((item) => {
+            for (const item of individualNames) {
                 let nama = item.trim();
                 if (nama !== '') {
-                    listPegawai.push({ nama: nama });
+                    // Cari NIP dari master_pegawai berdasarkan nama
+                    let nip = '-';
+                    try {
+                        const pegawaiRows = await PerjadinModel.findPegawaiByNama(nama);
+                        if (pegawaiRows.length > 0) {
+                            const detailRows = await db.query('SELECT nip_nik FROM master_pegawai WHERE id = ?', [pegawaiRows[0].id]);
+                            if (detailRows.length > 0 && detailRows[0].nip_nik) {
+                                nip = detailRows[0].nip_nik;
+                            }
+                        }
+                    } catch (e) {}
+                    listPegawai.push({ nama: nama, nip: nip });
                 }
-            });
+            }
         }
 
         // Fallback jika kosong
         if (listPegawai.length === 0) {
-            listPegawai.push({ nama: '-' });
+            listPegawai.push({ nama: '-', nip: '-' });
         }
 
         data.listPegawai = listPegawai;

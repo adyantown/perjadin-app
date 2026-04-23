@@ -58,6 +58,14 @@ document.addEventListener('DOMContentLoaded', async () => {
             document.getElementById('c_satuan_tr').innerText = formatRp(d.transport_satuan);
             document.getElementById('c_biaya_tr').innerText = formatRp(d.transport_total);
 
+            // Penginapan (tampilkan hanya jika ada)
+            if (d.penginapan_vol && d.penginapan_vol > 0) {
+                document.getElementById('baris_penginapan').style.display = '';
+                document.getElementById('c_vol_inn').innerText = d.penginapan_vol;
+                document.getElementById('c_satuan_inn').innerText = formatRp(d.penginapan_satuan);
+                document.getElementById('c_biaya_inn').innerText = formatRp(d.penginapan_total);
+            }
+
             setTimeout(() => { window.print(); }, 800);
         }
     } catch (error) {
