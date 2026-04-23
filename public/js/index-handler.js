@@ -60,7 +60,7 @@ document.addEventListener('DOMContentLoaded', () => {
         .then((response) => response.json())
         .then((json) => {
             if (json.success && json.data) {
-                const totalAcc = json.data.filter(spj => spj.status === 'ACC').length;
+                const totalAcc = json.data.filter((spj) => spj.status === 'ACC').length;
                 animateValue('stat_spj_acc', 0, totalAcc, 1000);
             }
         })
@@ -99,7 +99,7 @@ async function loadExecutiveSummary(namaUser) {
         });
 
         // Tampilkan di layar
-        document.getElementById('teksSapaanAdmin').innerHTML = `Hingga saat ini, terdapat <b>${jumlahPerjadin}</b> kegiatan Perjalanan Dinas (SPPD) yang telah direkap dalam sistem.`;
+        document.getElementById('teksSapaanAdmin').innerHTML = `Hingga saat ini, terdapat <b>${jumlahPerjadin}</b> kegiatan Perjalanan Dinas yang telah direkap dalam sistem.`;
 
         document.getElementById('totalAnggaranHero').innerText = 'Rp ' + totalAnggaran.toLocaleString('id-ID');
     } catch (error) {
