@@ -57,7 +57,7 @@ exports.getById = (id) => {
 
 exports.getRabForRefund = (id) => {
     const sql = `
-        SELECT r.total_rab, k.pagu_id 
+        SELECT r.total_rab, k.pagu_id, k.judul_kegiatan 
         FROM dokumen_rab r
         JOIN dokumen_kak k ON r.kak_id = k.id
         WHERE r.id = ?`;

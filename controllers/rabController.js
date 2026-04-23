@@ -34,7 +34,10 @@ exports.saveRab = async (req, res) => {
         }
 
         // Tetap kita anggap sukses karena RAB-nya berhasil dibuat
-        logController.catatLog(req, 'Buat RAB', `Membuat RAB untuk KAK ID: ${data.kak_id}`);
+        const db = require('../config/dbPromise');
+        const kakRows = await db.query('SELECT judul_kegiatan FROM dokumen_kak WHERE id = ?', [data.kak_id]);
+        const namaKak = kakRows.length > 0 ? kakRows[0].judul_kegiatan : 'Tidak Diketahui';
+        logController.catatLog(req, 'Buat RAB', `Membuat RAB untuk KAK: ${namaKak}`);
         res.json({ success: true, message: 'RAB Berhasil Disimpan & Saldo Terpotong!' });
     } catch (err) {
         console.error('Error insert RAB:', err);
@@ -96,7 +99,7 @@ exports.deleteRab = async (req, res) => {
         // C. Setelah uang aman dikembalikan, barulah HAPUS data RAB-nya!
         await RabModel.delete(rabId);
 
-        logController.catatLog(req, 'Hapus RAB', `Menghapus data RAB ID: ${rabId}`);
+        logController.catatLog(req, 'Hapus RAB', `Menghapus RAB dari KAK: ${results[0].judul_kegiatan}`);
         res.json({ success: true, message: 'RAB dibatalkan dan Saldo berhasil dikembalikan ke Brankas!' });
     } catch (err) {
         console.error('Error proses hapus RAB:', err);
@@ -140,7 +143,7 @@ exports.updateRab = async (req, res) => {
         // E. Simpan Rincian RAB yang Baru ke Database
         await RabModel.update(rabId, data);
 
-        logController.catatLog(req, 'Edit RAB', `Mengubah data RAB ID: ${rabId}`);
+        logController.catatLog(req, 'Edit RAB', `Mengubah RAB dari KAK: ${results[0].judul_kegiatan}`);
         res.json({ success: true, message: 'Revisi berhasil disimpan dan Saldo Pagu otomatis disesuaikan!' });
     } catch (err) {
         console.error('Error update RAB:', err);

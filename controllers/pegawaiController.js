@@ -42,7 +42,7 @@ exports.updatePegawai = async (req, res) => {
         const id = req.params.id;
         const data = req.body;
         await PegawaiModel.update(id, data);
-        logController.catatLog(req, 'Master Pegawai', `Mengubah data pegawai ID: ${id}`);
+        logController.catatLog(req, 'Master Pegawai', `Mengubah data pegawai: ${data.nama_pegawai || 'Tanpa Nama'}`);
         res.json({ success: true, message: 'Data pegawai berhasil diperbarui!' });
     } catch (err) {
         res.status(500).json({ success: false, message: err.message });
@@ -65,8 +65,10 @@ exports.getPegawaiByKategori = async (req, res) => {
 exports.deletePegawai = async (req, res) => {
     try {
         const id = req.params.id;
+        const rows = await PegawaiModel.getById(id);
+        const nama = rows.length > 0 ? rows[0].nama_pegawai : 'Tidak Diketahui';
         await PegawaiModel.delete(id);
-        logController.catatLog(req, 'Master Pegawai', `Menghapus pegawai ID: ${id}`);
+        logController.catatLog(req, 'Master Pegawai', `Menghapus pegawai: ${nama}`);
         res.json({ success: true, message: 'Pegawai berhasil dihapus!' });
     } catch (err) {
         res.status(500).json({ success: false, message: err.message });

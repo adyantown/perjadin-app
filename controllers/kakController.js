@@ -65,8 +65,10 @@ exports.getKakById = async (req, res) => {
 exports.deleteKak = async (req, res) => {
     try {
         const kakId = req.params.id;
+        const rows = await KakModel.getById(kakId);
+        const namaKak = rows.length > 0 ? rows[0].judul_kegiatan : 'Tidak Diketahui';
         await KakModel.delete(kakId);
-        logController.catatLog(req, 'Hapus KAK', `Menghapus data KAK ID: ${kakId}`);
+        logController.catatLog(req, 'Hapus KAK', `Menghapus KAK: ${namaKak}`);
         res.json({ success: true, message: 'Data KAK berhasil dihapus!' });
     } catch (err) {
         res.status(500).json({ success: false, message: 'Gagal menghapus KAK.' });
@@ -81,7 +83,7 @@ exports.updateKak = async (req, res) => {
         const kakId = req.params.id;
         const data = req.body;
         await KakModel.update(kakId, data);
-        logController.catatLog(req, 'Edit KAK', `Mengubah data KAK ID: ${kakId}`);
+        logController.catatLog(req, 'Edit KAK', `Mengubah KAK: ${data.judul_kegiatan || 'Tidak Diketahui'}`);
         res.json({ success: true, message: 'Data KAK berhasil diperbarui!' });
     } catch (err) {
         console.error('Error update KAK:', err);
