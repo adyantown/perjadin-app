@@ -1,3 +1,11 @@
+// HELPER: Format nama pegawai dari separator ||| menjadi daftar bernomor
+function formatNamaPegawai(str) {
+    if (!str) return '-';
+    const arr = str.split('|||').map(s => s.trim()).filter(Boolean);
+    if (arr.length <= 1) return arr[0] || '-';
+    return arr.map((nama, i) => `<span class="d-block mb-1"><b>${i + 1}.</b> ${nama}</span>`).join('');
+}
+
 document.addEventListener('DOMContentLoaded', async () => {
     // 1. Ambil data Perjadin dan SPJ secara bersamaan
     try {
@@ -99,8 +107,8 @@ async function loadStatusSpj() {
             tbody.innerHTML += `
                 <tr>
                     <td class="px-4 py-3">
-                        <div class="fw-bold text-dark">${item.maksud_dinas}</div>
-                        <div class="text-muted small"><i class="bi bi-person"></i> ${item.nama_pegawai} | <i class="bi bi-file-earmark-pdf"></i> <a href="${item.file_pdf}" target="_blank">Lihat Berkas</a></div>
+                        <div class="fw-bold text-dark">${formatNamaPegawai(item.nama_pegawai)}</div>
+                        <div class="text-muted small"><i class="bi bi-briefcase"></i> ${item.maksud_dinas} | <i class="bi bi-file-earmark-pdf"></i> <a href="${item.file_pdf}" target="_blank">Lihat Berkas</a></div>
                         ${catatan}
                     </td>
                     <td class="text-end px-4"><span class="badge ${badge} rounded-pill px-3 py-2">${item.status}</span></td>
