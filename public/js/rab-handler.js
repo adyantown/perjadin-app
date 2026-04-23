@@ -84,8 +84,16 @@ document.addEventListener('DOMContentLoaded', async () => {
         document.getElementById('tr_total_tampil').innerText = formatRp(trTotal);
         document.getElementById('tr_total').value = trTotal;
 
+        // Hitung Penginapan
+        const innVol = parseInt(document.getElementById('inn_vol').value) || 0;
+        const innSatuan = parseFloat(document.getElementById('inn_satuan').value) || 0;
+        const innTotal = innVol * innSatuan;
+        document.getElementById('rumus_inn').innerText = `Total: ${innVol} Malam x Rp ${formatRp(innSatuan)}`;
+        document.getElementById('inn_total_tampil').innerText = formatRp(innTotal);
+        document.getElementById('inn_total').value = innTotal;
+
         // GRAND TOTAL
-        const grandTotal = uhTotal + trTotal;
+        const grandTotal = uhTotal + trTotal + innTotal;
         const tampilGrandTotal = document.getElementById('grand_total_tampil');
         const teksPesan = document.getElementById('pesan_validasi');
         tampilGrandTotal.innerText = 'Rp ' + formatRp(grandTotal);

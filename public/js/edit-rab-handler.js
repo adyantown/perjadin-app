@@ -37,6 +37,10 @@ document.addEventListener('DOMContentLoaded', async () => {
             document.getElementById('tr_vol').value = d.transport_vol;
             document.getElementById('tr_satuan').value = d.transport_satuan;
 
+            // Isi Rincian Penginapan
+            document.getElementById('inn_vol').value = d.penginapan_vol || 0;
+            document.getElementById('inn_satuan').value = d.penginapan_satuan || 0;
+
             // Panggil fungsi hitung untuk pertama kali biar totalnya nampil
             hitungTotal();
         } else {
@@ -72,7 +76,15 @@ document.addEventListener('DOMContentLoaded', async () => {
         document.getElementById('tr_total_tampil').innerText = formatRp(trTotal);
         document.getElementById('tr_total').value = trTotal;
 
-        const grandTotal = uhTotal + trTotal;
+        // Hitung Penginapan
+        const innVol = parseInt(document.getElementById('inn_vol').value) || 0;
+        const innSatuan = parseFloat(document.getElementById('inn_satuan').value) || 0;
+        const innTotal = innVol * innSatuan;
+        document.getElementById('rumus_inn').innerText = `Total: ${innVol} Malam x Rp ${formatRp(innSatuan)}`;
+        document.getElementById('inn_total_tampil').innerText = formatRp(innTotal);
+        document.getElementById('inn_total').value = innTotal;
+
+        const grandTotal = uhTotal + trTotal + innTotal;
         document.getElementById('grand_total_tampil').innerText = 'Rp ' + formatRp(grandTotal);
         document.getElementById('grand_total').value = grandTotal;
     }

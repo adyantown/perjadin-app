@@ -15,12 +15,14 @@ exports.create = (data) => {
     const sql = `INSERT INTO dokumen_rab 
         (kak_id, snapshot_pagu, snapshot_realisasi, jml_orang, jml_hari, jml_kegiatan, 
         uang_harian_satuan, uang_harian_total, jenis_transport, transport_vol, 
-        transport_satuan, transport_total, total_rab, tgl_rab) 
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+        transport_satuan, transport_total, penginapan_vol, penginapan_satuan, 
+        penginapan_total, total_rab, tgl_rab) 
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
     const values = [
         data.kak_id, data.snapshot_pagu, data.snapshot_realisasi, data.jml_orang,
         data.jml_hari, data.jml_kegiatan, data.uang_harian_satuan, data.uang_harian_total,
         data.jenis_transport, data.transport_vol, data.transport_satuan, data.transport_total,
+        data.penginapan_vol, data.penginapan_satuan, data.penginapan_total,
         data.total_rab, data.tgl_rab
     ];
     return db.query(sql, values);
@@ -84,12 +86,14 @@ exports.update = (id, data) => {
             jml_orang=?, jml_hari=?, jml_kegiatan=?, 
             uang_harian_satuan=?, uang_harian_total=?, 
             jenis_transport=?, transport_vol=?, transport_satuan=?, transport_total=?, 
+            penginapan_vol=?, penginapan_satuan=?, penginapan_total=?,
             total_rab=? 
         WHERE id=?`;
     const values = [
         data.jml_orang, data.jml_hari, data.jml_kegiatan,
         data.uang_harian_satuan, data.uang_harian_total,
         data.jenis_transport, data.transport_vol, data.transport_satuan, data.transport_total,
+        data.penginapan_vol, data.penginapan_satuan, data.penginapan_total,
         data.total_rab, id
     ];
     return db.query(sql, values);

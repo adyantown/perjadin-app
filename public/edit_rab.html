@@ -136,6 +136,28 @@
                         </div>
                     </div>
 
+                    <h6 class="fw-bold text-secondary mb-3 border-bottom pb-2">D. Penginapan</h6>
+                    <div class="row g-3 mb-4 align-items-end">
+                        <div class="col-md-3">
+                            <label class="form-label fw-bold small">Volume (Malam)</label>
+                            <input type="number" id="inn_vol" name="penginapan_vol"
+                                class="form-control calc-trigger" value="0" min="0" required>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label fw-bold small">Harga Satuan (Rp)</label>
+                            <input type="number" id="inn_satuan" name="penginapan_satuan"
+                                class="form-control calc-trigger" value="0" required>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="p-2 bg-light rounded border text-end">
+                                <small class="text-muted d-block" id="rumus_inn">Total: 0 Malam x Rp 0</small>
+                                <h5 class="fw-bold text-dark mb-0">Rp <span
+                                        id="inn_total_tampil">0</span></h5>
+                                <input type="hidden" id="inn_total" name="penginapan_total" value="0">
+                            </div>
+                        </div>
+                    </div>
+
                 </div>
             </div>
 
