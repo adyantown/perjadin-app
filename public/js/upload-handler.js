@@ -107,7 +107,7 @@ async function loadStatusSpj() {
             // Tombol hapus hanya muncul jika belum ACC
             let aksiHapus = '';
             if (item.status !== 'ACC') {
-                aksiHapus = `<button onclick="hapusSpj(${item.id})" class="btn btn-sm btn-outline-danger rounded-pill px-3" title="Hapus SPJ"><i class="bi bi-trash me-1"></i>Hapus</button>`;
+                aksiHapus = `<button onclick="hapusSpj(${item.id})" class="btn btn-sm btn-merah-terang rounded-pill px-3" title="Hapus SPJ"><i class="bi bi-trash me-1"></i>Hapus</button>`;
             } else {
                 aksiHapus = `<span class="text-success small fw-bold"><i class="bi bi-check-circle-fill me-1"></i>Selesai</span>`;
             }
