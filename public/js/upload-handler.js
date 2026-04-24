@@ -1,7 +1,10 @@
 // HELPER: Format nama pegawai dari separator ||| menjadi daftar bernomor
 function formatNamaPegawai(str) {
     if (!str) return '-';
-    const arr = str.split('|||').map(s => s.trim()).filter(Boolean);
+    const arr = str
+        .split('|||')
+        .map((s) => s.trim())
+        .filter(Boolean);
     if (arr.length <= 1) return arr[0] || '-';
     return arr.map((nama, i) => `<span class="d-block mb-1"><b>${i + 1}.</b> ${nama}</span>`).join('');
 }
@@ -18,7 +21,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         // 2. Kumpulkan Nomor ST yang status SPJ-nya sudah "ACC"
         const accSTs = [];
         if (jsonSpj.success) {
-            jsonSpj.data.forEach(spj => {
+            jsonSpj.data.forEach((spj) => {
                 if (spj.status === 'ACC' && spj.nomor_st) {
                     accSTs.push(spj.nomor_st); // Masukkan ke daftar hitam (disembunyikan)
                 }
@@ -30,22 +33,25 @@ document.addEventListener('DOMContentLoaded', async () => {
         select.innerHTML = '<option value="">-- Pilih Surat Tugas Rombongan --</option>';
 
         if (Array.isArray(dataPerjadin)) {
-            dataPerjadin.forEach(item => {
+            dataPerjadin.forEach((item) => {
                 // TAMPILKAN HANYA JIKA ST INI BELUM DI-ACC
                 if (!accSTs.includes(item.no_surat_tugas)) {
                     let namaArray = [];
                     if (item.nama_pegawai) {
                         if (item.nama_pegawai.includes('|||')) {
-                            namaArray = item.nama_pegawai.split('|||').map(n => n.trim()).filter(n => n !== '');
+                            namaArray = item.nama_pegawai
+                                .split('|||')
+                                .map((n) => n.trim())
+                                .filter((n) => n !== '');
                         } else {
                             namaArray = [item.nama_pegawai.trim()];
                         }
                     }
 
                     // Ambil nama sebelum slash atau koma agar tidak terlalu panjang
-                    const shortNames = namaArray.map(n => n.split(/[\/,]/)[0].trim());
+                    const shortNames = namaArray.map((n) => n.split(/[\/,]/)[0].trim());
                     const namaNama = shortNames.join(', ');
-                    
+
                     const tglBerangkat = item.tgl_berangkat ? item.tgl_berangkat.split('T')[0] : '-';
 
                     select.innerHTML += `<option value="${item.no_surat_tugas}">[${tglBerangkat}] ${item.maksud_dinas} (${namaArray.length} Orang: ${namaNama})</option>`;
@@ -65,9 +71,11 @@ document.getElementById('file_pdf').addEventListener('change', function () {
     const btn = document.getElementById('btnSubmit');
     const errorTxt = document.getElementById('errorSize');
     if (this.files.size > 10 * 1024 * 1024) {
-        btn.disabled = true; errorTxt.style.display = 'block';
+        btn.disabled = true;
+        errorTxt.style.display = 'block';
     } else {
-        btn.disabled = false; errorTxt.style.display = 'none';
+        btn.disabled = false;
+        errorTxt.style.display = 'none';
     }
 });
 
@@ -85,8 +93,12 @@ document.getElementById('formUploadSpj').addEventListener('submit', async (e) =>
             Swal.fire('Berhasil!', result.message, 'success');
             e.target.reset();
             loadStatusSpj(); // Refresh tabel
-        } else { Swal.fire('Gagal!', result.message, 'error'); }
-    } catch (err) { Swal.fire('Error', 'Gagal menghubungi server.', 'error'); }
+        } else {
+            Swal.fire('Gagal!', result.message, 'error');
+        }
+    } catch (err) {
+        Swal.fire('Error', 'Gagal menghubungi server.', 'error');
+    }
 });
 
 async function loadStatusSpj() {
@@ -94,10 +106,10 @@ async function loadStatusSpj() {
         const res = await fetch('/api/dokumentasi/semua');
         const json = await res.json();
         const tbody = document.getElementById('tabelStatusUser');
-        if (json.data.length === 0) return tbody.innerHTML = '<tr><td colspan="3" class="text-center text-muted py-3">Belum ada SPJ yang diupload.</td></tr>';
+        if (json.data.length === 0) return (tbody.innerHTML = '<tr><td colspan="3" class="text-center text-muted py-3">Belum ada SPJ yang diupload.</td></tr>');
 
         tbody.innerHTML = '';
-        json.data.forEach(item => {
+        json.data.forEach((item) => {
             let badge = 'bg-warning text-dark';
             if (item.status === 'ACC') badge = 'bg-success';
             if (item.status === 'Revisi') badge = 'bg-danger';
@@ -116,7 +128,8 @@ async function loadStatusSpj() {
                 <tr>
                     <td class="px-4 py-3">
                         <div class="fw-bold text-dark">${formatNamaPegawai(item.nama_pegawai)}</div>
-                        <div class="text-muted small"><i class="bi bi-briefcase"></i> ${item.maksud_dinas} | <i class="bi bi-file-earmark-pdf"></i> <a href="${item.file_pdf}" target="_blank">Lihat Berkas</a></div>
+                        <div class="text-muted small mt-1"><i class="bi bi-briefcase"></i> ${item.maksud_dinas}</div>
+                        <div class="small mt-1"><i class="bi bi-file-earmark-pdf text-danger"></i> <a href="${item.file_pdf}" target="_blank">Lihat Berkas</a></div>
                         ${catatan}
                     </td>
                     <td class="text-center"><span class="badge ${badge} rounded-pill px-3 py-2">${item.status}</span></td>
@@ -124,7 +137,9 @@ async function loadStatusSpj() {
                 </tr>
             `;
         });
-    } catch (err) { console.error(err); }
+    } catch (err) {
+        console.error(err);
+    }
 }
 
 // FUNGSI HAPUS SPJ (Hanya untuk status selain ACC)
