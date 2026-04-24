@@ -94,7 +94,7 @@ async function loadStatusSpj() {
         const res = await fetch('/api/dokumentasi/semua');
         const json = await res.json();
         const tbody = document.getElementById('tabelStatusUser');
-        if (json.data.length === 0) return tbody.innerHTML = '<tr><td class="text-center text-muted py-3">Belum ada SPJ yang diupload.</td></tr>';
+        if (json.data.length === 0) return tbody.innerHTML = '<tr><td colspan="3" class="text-center text-muted py-3">Belum ada SPJ yang diupload.</td></tr>';
 
         tbody.innerHTML = '';
         json.data.forEach(item => {
@@ -104,6 +104,14 @@ async function loadStatusSpj() {
 
             let catatan = item.status === 'Revisi' && item.catatan_admin ? `<div class="alert alert-danger p-2 mt-2 mb-0 small"><i class="bi bi-info-circle-fill"></i> <b>Catatan Admin:</b> ${item.catatan_admin}</div>` : '';
 
+            // Tombol hapus hanya muncul jika belum ACC
+            let aksiHapus = '';
+            if (item.status !== 'ACC') {
+                aksiHapus = `<button onclick="hapusSpj(${item.id})" class="btn btn-sm btn-outline-danger rounded-pill px-3" title="Hapus SPJ"><i class="bi bi-trash me-1"></i>Hapus</button>`;
+            } else {
+                aksiHapus = `<span class="text-success small fw-bold"><i class="bi bi-check-circle-fill me-1"></i>Selesai</span>`;
+            }
+
             tbody.innerHTML += `
                 <tr>
                     <td class="px-4 py-3">
@@ -111,9 +119,40 @@ async function loadStatusSpj() {
                         <div class="text-muted small"><i class="bi bi-briefcase"></i> ${item.maksud_dinas} | <i class="bi bi-file-earmark-pdf"></i> <a href="${item.file_pdf}" target="_blank">Lihat Berkas</a></div>
                         ${catatan}
                     </td>
-                    <td class="text-end px-4"><span class="badge ${badge} rounded-pill px-3 py-2">${item.status}</span></td>
+                    <td class="text-center"><span class="badge ${badge} rounded-pill px-3 py-2">${item.status}</span></td>
+                    <td class="text-center">${aksiHapus}</td>
                 </tr>
             `;
         });
     } catch (err) { console.error(err); }
+}
+
+// FUNGSI HAPUS SPJ (Hanya untuk status selain ACC)
+async function hapusSpj(id) {
+    const confirm = await Swal.fire({
+        title: 'Hapus Berkas SPJ?',
+        text: 'File yang sudah dihapus tidak bisa dikembalikan. Anda bisa upload ulang nanti.',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#dc3545',
+        cancelButtonColor: '#6c757d',
+        confirmButtonText: '<i class="bi bi-trash me-1"></i> Ya, Hapus!',
+        cancelButtonText: 'Batal',
+        reverseButtons: true,
+    });
+
+    if (!confirm.isConfirmed) return;
+
+    try {
+        const res = await fetch(`/api/dokumentasi/delete/${id}`, { method: 'DELETE' });
+        const result = await res.json();
+        if (result.success) {
+            Swal.fire({ title: 'Terhapus!', text: 'Berkas SPJ berhasil dihapus.', icon: 'success', timer: 1500, showConfirmButton: false });
+            loadStatusSpj(); // Refresh tabel
+        } else {
+            Swal.fire('Gagal!', result.message, 'error');
+        }
+    } catch (err) {
+        Swal.fire('Error', 'Gagal menghubungi server.', 'error');
+    }
 }
