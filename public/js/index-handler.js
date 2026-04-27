@@ -49,12 +49,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // Fungsi Animasi Angka
 function animateValue(id, start, end, duration) {
-    if (start === end) return;
+    const obj = document.getElementById(id);
+    if (!obj) return;
+    
+    if (start === end) {
+        obj.innerHTML = end;
+        return;
+    }
+    
     const range = end - start;
     let current = start;
     const increment = end > start ? 1 : -1;
     const stepTime = Math.abs(Math.floor(duration / range));
-    const obj = document.getElementById(id);
     const timer = setInterval(function () {
         current += increment;
         obj.innerHTML = current;
