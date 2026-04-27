@@ -2,18 +2,16 @@ const DashboardModel = require('../models/dashboardModel');
 
 exports.getStats = async (req, res) => {
     try {
-        // Kita jalankan 2 query sekaligus (Parallel) biar cepat
-        const [resSPPD, resPegawai] = await Promise.all([
-            DashboardModel.countSppd(),
-            DashboardModel.countPegawai()
-        ]);
+        const rows = await DashboardModel.getStats();
+        const stats = rows[0];
 
-        // Kirim hasil perhitungan ke frontend
         res.json({
             success: true,
             data: {
-                total_sppd: resSPPD[0].total,
-                total_pegawai: resPegawai[0].total,
+                total_sppd: stats.total_sppd,
+                total_pegawai: stats.total_pegawai,
+                total_spj_acc: stats.total_spj_acc,
+                total_anggaran: Math.round(Number(stats.total_anggaran) || 0),
             },
         });
     } catch (err) {

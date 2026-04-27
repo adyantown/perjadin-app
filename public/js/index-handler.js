@@ -34,37 +34,17 @@ document.addEventListener('DOMContentLoaded', () => {
         })
         .catch((err) => console.error('Gagal cek session:', err));
 
-    // 2. LOAD STATISTIK PEGAWAI
+    // 2. LOAD SEMUA STATISTIK (1 API call, bukan 3!)
     fetch('/api/dashboard/stats')
         .then((response) => response.json())
         .then((result) => {
             if (result.success) {
-                // Efek animasi angka naik
                 animateValue('stat_pegawai', 0, result.data.total_pegawai, 1000);
+                animateValue('stat_sppd', 0, result.data.total_sppd, 1000);
+                animateValue('stat_spj_acc', 0, result.data.total_spj_acc, 1000);
             }
         })
-        .catch((err) => console.error('Gagal load statistik pegawai:', err));
-
-    // 3. LOAD STATISTIK SPPD (Berdasarkan jumlah data di daftar.html)
-    fetch('/api/perjadin/all')
-        .then((response) => response.json())
-        .then((data) => {
-            // Menghitung berdasarkan jumlah data yang terinput
-            const totalSppd = data.length;
-            animateValue('stat_sppd', 0, totalSppd, 1000);
-        })
-        .catch((err) => console.error('Gagal load statistik SPPD:', err));
-
-    // 4. LOAD STATISTIK SPJ (Sudah ACC)
-    fetch('/api/dokumentasi/semua')
-        .then((response) => response.json())
-        .then((json) => {
-            if (json.success && json.data) {
-                const totalAcc = json.data.filter((spj) => spj.status === 'ACC').length;
-                animateValue('stat_spj_acc', 0, totalAcc, 1000);
-            }
-        })
-        .catch((err) => console.error('Gagal load statistik SPJ:', err));
+        .catch((err) => console.error('Gagal load statistik:', err));
 });
 
 // Fungsi Animasi Angka
@@ -87,21 +67,16 @@ function animateValue(id, start, end, duration) {
 // FUNGSI LOAD EXECUTIVE SUMMARY (KHUSUS ADMIN)
 async function loadExecutiveSummary(namaUser) {
     try {
-        const res = await fetch('/api/perjadin/all');
-        const data = await res.json();
+        const res = await fetch('/api/dashboard/stats');
+        const result = await res.json();
 
-        let totalAnggaran = 0;
-        let jumlahPerjadin = data.length;
+        if (result.success) {
+            const jumlahPerjadin = result.data.total_sppd;
+            const totalAnggaran = result.data.total_anggaran;
 
-        // Hitung akumulasi semua total_biaya
-        data.forEach((item) => {
-            totalAnggaran += parseInt(item.total_biaya) || 0;
-        });
-
-        // Tampilkan di layar
-        document.getElementById('teksSapaanAdmin').innerHTML = `Hingga saat ini, terdapat <b>${jumlahPerjadin}</b> kegiatan Perjalanan Dinas yang telah direkap dalam sistem.`;
-
-        document.getElementById('totalAnggaranHero').innerText = 'Rp ' + totalAnggaran.toLocaleString('id-ID');
+            document.getElementById('teksSapaanAdmin').innerHTML = `Hingga saat ini, terdapat <b>${jumlahPerjadin}</b> kegiatan Perjalanan Dinas yang telah direkap dalam sistem.`;
+            document.getElementById('totalAnggaranHero').innerText = 'Rp ' + totalAnggaran.toLocaleString('id-ID');
+        }
     } catch (error) {
         console.error('Gagal memuat summary:', error);
         document.getElementById('teksSapaanAdmin').innerText = 'Gagal memuat data ringkasan (Periksa koneksi server).';
