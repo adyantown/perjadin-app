@@ -34,5 +34,9 @@ if (process.env.DB_HOST) {
     });
 }
 
-// ... kode tes koneksi ...
+// Export pool callback (untuk server.js login & express-mysql-session)
+// Export juga pool.promise() native dari mysql2 (menggantikan dbPromise.js)
+const promisePool = pool.promise();
+
 module.exports = pool;
+module.exports.promisePool = promisePool;

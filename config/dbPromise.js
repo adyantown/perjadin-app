@@ -1,16 +1,13 @@
-const db = require('./db');
+const { promisePool } = require('./db');
 
 /**
- * Promise wrapper untuk db.query().
- * Agar Model bisa menggunakan async/await tanpa callback hell.
+ * Promise wrapper menggunakan mysql2 native .promise() pool.
+ * mysql2 pool.promise().query() mengembalikan [rows, fields].
+ * Kita hanya kembalikan rows agar kompatibel dengan semua Model yang sudah ada.
  */
-const query = (sql, params) => {
-    return new Promise((resolve, reject) => {
-        db.query(sql, params, (err, results) => {
-            if (err) reject(err);
-            else resolve(results);
-        });
-    });
+const query = async (sql, params) => {
+    const [rows] = await promisePool.query(sql, params);
+    return rows;
 };
 
 module.exports = { query };
