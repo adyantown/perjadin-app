@@ -121,7 +121,7 @@ function renderTable(data) {
                 
                 <td class="text-end">
                     ${item.nama_hotel || '-'}
-                    ${item.tarif_hotel ? '<br>' + rp(item.tarif_hotel) : ''}
+                    ${Number(item.tarif_hotel) > 0 ? '<br>' + rp(item.tarif_hotel) : ''}
                 </td>
                 
                 <td class="text-end fw-bold bg-light text-nowrap" style="color: #bb2d3b;">
