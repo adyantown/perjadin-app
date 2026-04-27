@@ -81,7 +81,10 @@ function renderTable(data) {
 
         const jml = item.jumlah_sppd || 1;
         const pengali = jml > 1 ? `<div class="badge bg-warning text-dark mt-1" style="font-size: 0.75rem;">x${jml} Org</div>` : '';
-        const rp = (num) => 'Rp ' + Math.round(Number(num) || 0).toLocaleString('id-ID');
+        const rp = (num) => {
+            const val = Math.round(Number(num) || 0);
+            return val > 0 ? 'Rp ' + val.toLocaleString('id-ID') : '-';
+        };
 
         // ---> GUNAKAN HELPER PEMOTONG PIPA DI SINI <---
         const namaFormatted = formatPipaAman(item.nama_pegawai) || 'Tidak ada nama';
