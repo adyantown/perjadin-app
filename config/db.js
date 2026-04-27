@@ -13,7 +13,7 @@ if (process.env.DB_HOST) {
         database: process.env.DB_NAME,
         port: process.env.DB_PORT || 17184,
         waitForConnections: true,
-        connectionLimit: 5,
+        connectionLimit: 10,
         queueLimit: 0,
         ssl: {
             ca: process.env.DB_SSL_CA,

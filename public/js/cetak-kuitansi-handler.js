@@ -31,7 +31,7 @@ function formatTanggalID(dateStr) {
 //  HELPER: Render 1 baris rincian biaya
 // ═══════════════════════════════════════════════════════
 function buatBarisRincian(noUrut, uraian, jumlah, keterangan) {
-    return `<tr><td class="text-center">${noUrut}</td><td>${uraian}</td><td>Rp ${jumlah.toLocaleString('id-ID')}</td><td>${keterangan}</td></tr>`;
+    return `<tr><td class="text-center">${noUrut}</td><td>${uraian}</td><td>Rp ${Math.round(Number(jumlah) || 0).toLocaleString('id-ID')}</td><td>${keterangan}</td></tr>`;
 }
 
 // ═══════════════════════════════════════════════════════
@@ -43,18 +43,19 @@ function renderKuitansi(data, pegawai, index, pejabat) {
     let noUrut = 1;
 
     // 1. Uang Harian
-    const harianTotal = data.uang_harian * data.lama_hari;
+    const uangHarian = Math.round(Number(data.uang_harian) || 0);
+    const harianTotal = uangHarian * data.lama_hari;
     total += harianTotal;
     htmlRincian += buatBarisRincian(
         noUrut++,
-        `Uang Harian (${data.lama_hari} hari x Rp ${parseInt(data.uang_harian).toLocaleString('id-ID')})`,
+        `Uang Harian (${data.lama_hari} hari x Rp ${uangHarian.toLocaleString('id-ID')})`,
         harianTotal,
         'Uang Harian'
     );
 
     // 2. Transport
     const jenisTransport = data.jenis_transportasi || 'Kendaraan/Pribadi'; // fallback
-    const uangTransport = parseInt(data.uang_transport) || 0;
+    const uangTransport = Math.round(Number(data.uang_transport) || 0);
 
     if (uangTransport > 0) {
         // Jika Angkutan Umum -> Dibagi rata ke semua pegawai
@@ -76,11 +77,12 @@ function renderKuitansi(data, pegawai, index, pejabat) {
 
     // 3. Penginapan
     if (data.uang_penginapan > 0) {
-        total += parseInt(data.uang_penginapan);
-        htmlRincian += buatBarisRincian(noUrut++, 'Biaya Penginapan', parseInt(data.uang_penginapan), 'Hotel/Losmen');
+        const penginapan = Math.round(Number(data.uang_penginapan) || 0);
+        total += penginapan;
+        htmlRincian += buatBarisRincian(noUrut++, 'Biaya Penginapan', penginapan, 'Hotel/Losmen');
     }
 
-    const totalStr = total.toLocaleString('id-ID');
+    const totalStr = Math.round(total).toLocaleString('id-ID');
     const tglSurat = formatTanggalID(data.tgl_surat_tugas);
     const tglHariIni = formatTanggalID(new Date());
 

@@ -137,7 +137,7 @@ app.post('/api/auth/login', (req, res) => {
 // API Logout
 app.get('/api/auth/logout', (req, res) => {
     req.session.destroy(() => {
-        res.clearCookie('connect.sid'); // Hapus cookie sesi
+        res.clearCookie('session_cookie_name'); // Hapus cookie sesi (harus sama dengan key di session config)
         res.redirect('/login.html');
     });
 });

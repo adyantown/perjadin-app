@@ -77,11 +77,11 @@ function renderTable(data) {
     let grandTotal = 0;
 
     data.forEach((item) => {
-        grandTotal += parseInt(item.total_biaya) || 0;
+        grandTotal += Math.round(Number(item.total_biaya)) || 0;
 
         const jml = item.jumlah_sppd || 1;
         const pengali = jml > 1 ? `<div class="badge bg-warning text-dark mt-1" style="font-size: 0.75rem;">x${jml} Org</div>` : '';
-        const rp = (num) => 'Rp ' + (num || 0).toLocaleString('id-ID');
+        const rp = (num) => 'Rp ' + Math.round(Number(num) || 0).toLocaleString('id-ID');
 
         // ---> GUNAKAN HELPER PEMOTONG PIPA DI SINI <---
         const namaFormatted = formatPipaAman(item.nama_pegawai) || 'Tidak ada nama';
@@ -177,7 +177,7 @@ function renderTable(data) {
                 Total Pengeluaran (Data Ditampilkan):
             </td>
             <td class="text-end fw-bold text-dark fs-6 text-nowrap align-middle" style="background-color: #d1d5db;">
-                Rp ${grandTotal.toLocaleString('id-ID')}
+                Rp ${Math.round(grandTotal).toLocaleString('id-ID')}
             </td>
             <td class="no-print bg-white border-0"></td> 
         </tr>
