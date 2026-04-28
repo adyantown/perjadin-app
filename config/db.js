@@ -16,8 +16,8 @@ if (process.env.DB_HOST) {
         connectionLimit: 10,
         queueLimit: 0,
         ssl: {
-            ca: process.env.DB_SSL_CA,
-            rejectUnauthorized: true,
+            ca: process.env.DB_SSL_CA?.replace(/\\n/g, '\n'),
+            rejectUnauthorized: false, // Aiven pakai self-signed CA
         },
     });
 } else {

@@ -137,3 +137,32 @@ body {
 .skeleton-wide { width: 90%; }
 .skeleton-med { width: 65%; }
 .skeleton-short { width: 40%; }
+
+/* ═══════════════════════════════════════ */
+/*  3-BAR EQUALIZER LOADER (Hero Card)    */
+/* ═══════════════════════════════════════ */
+.loader-anggaran {
+    width: 40px;
+    aspect-ratio: 1;
+    --c: linear-gradient(rgba(255,255,255,0.9) 0 0);
+    --r1: radial-gradient(farthest-side at bottom, rgba(255,255,255,0.9) 93%, #0000);
+    --r2: radial-gradient(farthest-side at top, rgba(255,255,255,0.9) 93%, #0000);
+    background:
+        var(--c), var(--r1), var(--r2),
+        var(--c), var(--r1), var(--r2),
+        var(--c), var(--r1), var(--r2);
+    background-repeat: no-repeat;
+    animation: loaderBars 1s infinite alternate;
+    margin-left: auto;
+}
+
+@keyframes loaderBars {
+    0%, 10% {
+        background-size: 8px 0, 8px 4px, 8px 4px;
+        background-position: 0 50%, 0 calc(50% - 2px), 0 calc(50% + 2px), 50% 50%, 50% calc(50% - 2px), 50% calc(50% + 2px), 100% 50%, 100% calc(50% - 2px), 100% calc(50% + 2px);
+    }
+    90%, 100% {
+        background-size: 8px 100%, 8px 4px, 8px 4px;
+        background-position: 0 50%, 0 -2px, 0 calc(100% + 2px), 50% 50%, 50% -2px, 50% calc(100% + 2px), 100% 50%, 100% -2px, 100% calc(100% + 2px);
+    }
+}

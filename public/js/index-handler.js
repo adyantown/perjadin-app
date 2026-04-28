@@ -81,7 +81,17 @@ async function loadExecutiveSummary(namaUser) {
             const totalAnggaran = result.data.total_anggaran;
 
             document.getElementById('teksSapaanAdmin').innerHTML = `Hingga saat ini, terdapat <b>${jumlahPerjadin}</b> kegiatan Perjalanan Dinas yang telah direkap dalam sistem.`;
-            document.getElementById('totalAnggaranHero').innerText = 'Rp ' + totalAnggaran.toLocaleString('id-ID');
+            
+            const heroEl = document.getElementById('totalAnggaranHero');
+            heroEl.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+            heroEl.style.opacity = '0';
+            heroEl.style.transform = 'translateY(8px)';
+            heroEl.innerText = 'Rp ' + totalAnggaran.toLocaleString('id-ID');
+            // Trigger reflow lalu fade-in
+            requestAnimationFrame(() => {
+                heroEl.style.opacity = '1';
+                heroEl.style.transform = 'translateY(0)';
+            });
         }
     } catch (error) {
         console.error('Gagal memuat summary:', error);
