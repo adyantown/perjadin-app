@@ -239,7 +239,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                         confirmButtonColor: '#d33',
                         confirmButtonText: 'Kembali ke Daftar',
                     }).then(() => {
-                        window.location.href = '/daftar.html';
+                        window.location.href = '/daftar_perjadin.html';
                     });
                     return;
                 }
@@ -416,7 +416,7 @@ document.getElementById('perjadinForm').onsubmit = async function (e) {
                 timer: 1500,
                 showConfirmButton: false,
             }).then(() => {
-                window.location.href = '/daftar.html'; // Pindah halaman setelah animasi selesai
+                window.location.href = '/daftar_perjadin.html'; // Pindah halaman setelah animasi selesai
             });
         } else {
             Swal.fire('Gagal!', result.message, 'error');

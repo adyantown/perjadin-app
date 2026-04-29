@@ -54,7 +54,7 @@ body {
 }
 
 /* ============================================================
-   3. STYLE KHUSUS HALAMAN DAFTAR (daftar.html - Legacy)
+   3. STYLE KHUSUS HALAMAN DAFTAR (daftar_perjadin.html - Legacy)
    ============================================================ */
 
 /* Header Halaman Daftar (Judul & Tombol Atas) */
@@ -77,7 +77,7 @@ body {
 }
 
 /* --- TABEL DATA (PENTING BUAT DAFTAR.HTML) --- */
-/* Kita target tag 'table' langsung karena daftar.html pake tag ini */
+/* Kita target tag 'table' langsung karena daftar_perjadin.html pake tag ini */
 table {
     width: 100%;
     border-collapse: collapse;
