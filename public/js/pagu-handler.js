@@ -39,8 +39,16 @@ async function loadDataPagu() {
     }
 }
 
+// Helper: format rupiah dengan pemisah titik
+function formatRupiahPagu(str) {
+    const angka = str.toString().replace(/[^\d]/g, '');
+    return angka.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+}
+
 // Pop-Up Cantik untuk Input Revisi
 function modalRevisi(id, namaKamar, paguSaatIni) {
+    const paguFormatted = formatRupiahPagu(Math.round(Number(paguSaatIni) || 0).toString());
+
     Swal.fire({
         title: 'Revisi Pagu DIPA',
         html: `
@@ -50,7 +58,10 @@ function modalRevisi(id, namaKamar, paguSaatIni) {
                 </div>
                 <div class="text-start">
                     <label class="form-label fw-bold">Nominal Pagu DIPA Baru:</label>
-                    <input type="number" id="inputPaguBaru" class="form-control form-control-lg text-end fw-bold" value="${paguSaatIni}">
+                    <div class="input-group input-group-lg">
+                        <span class="input-group-text">Rp</span>
+                        <input type="text" inputmode="numeric" id="inputPaguBaru" class="form-control text-end fw-bold" value="${paguFormatted}">
+                    </div>
                     <small class="text-muted mt-2 d-block"><i class="bi bi-magic text-warning me-1"></i> Sisa anggaran rill saat ini akan disesuaikan secara otomatis oleh sistem.</small>
                 </div>
             `,
@@ -60,13 +71,25 @@ function modalRevisi(id, namaKamar, paguSaatIni) {
         cancelButtonColor: '#6c757d',
         confirmButtonText: 'Simpan Revisi',
         cancelButtonText: 'Batal',
+        didOpen: () => {
+            // Attach live formatter setelah popup render
+            const input = document.getElementById('inputPaguBaru');
+            input.addEventListener('input', function () {
+                const pos = this.selectionStart;
+                const oldLen = this.value.length;
+                this.value = formatRupiahPagu(this.value);
+                const newLen = this.value.length;
+                this.setSelectionRange(pos + (newLen - oldLen), pos + (newLen - oldLen));
+            });
+        },
         preConfirm: () => {
-            const val = document.getElementById('inputPaguBaru').value;
-            if (!val || val === '') {
+            const raw = document.getElementById('inputPaguBaru').value;
+            const val = raw.replace(/\./g, ''); // Bersihkan titik pemisah
+            if (!val || val === '' || val === '0') {
                 Swal.showValidationMessage('Nominal Pagu tidak boleh kosong!');
                 return false;
             }
-            return val;
+            return val; // Kirim angka bersih ke server
         }
     }).then(async (result) => {
         if (result.isConfirmed) {
