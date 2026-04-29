@@ -30,6 +30,38 @@
             background-color: #800000 !important;
             color: white !important;
         }
+
+        /* Skeleton Loading */
+        .skeleton {
+            background: linear-gradient(90deg, #e9ecef 25%, #f8f9fa 50%, #e9ecef 75%);
+            background-size: 200% 100%;
+            animation: skeleton-shimmer 1.5s ease-in-out infinite;
+            border-radius: 6px;
+            height: 14px;
+            display: inline-block;
+        }
+
+        .skeleton-line {
+            height: 12px;
+            margin-bottom: 8px;
+        }
+
+        .skeleton-badge {
+            width: 70px;
+            height: 26px;
+            border-radius: 50px;
+        }
+
+        .skeleton-btn {
+            width: 80px;
+            height: 30px;
+            border-radius: 50px;
+        }
+
+        @keyframes skeleton-shimmer {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
     </style>
 </head>
 
@@ -102,8 +134,32 @@
                                     </tr>
                                 </thead>
                                 <tbody id="tabelStatusUser">
-                                    <tr>
-                                        <td class="text-center text-muted py-4">Memuat data...</td>
+                                    <tr class="skeleton-row">
+                                        <td class="px-4 py-3">
+                                            <div class="skeleton skeleton-line" style="width: 60%"></div>
+                                            <div class="skeleton skeleton-line" style="width: 80%"></div>
+                                            <div class="skeleton skeleton-line" style="width: 40%"></div>
+                                        </td>
+                                        <td class="text-center"><div class="skeleton skeleton-badge mx-auto"></div></td>
+                                        <td class="text-center"><div class="skeleton skeleton-btn mx-auto"></div></td>
+                                    </tr>
+                                    <tr class="skeleton-row">
+                                        <td class="px-4 py-3">
+                                            <div class="skeleton skeleton-line" style="width: 55%"></div>
+                                            <div class="skeleton skeleton-line" style="width: 70%"></div>
+                                            <div class="skeleton skeleton-line" style="width: 35%"></div>
+                                        </td>
+                                        <td class="text-center"><div class="skeleton skeleton-badge mx-auto"></div></td>
+                                        <td class="text-center"><div class="skeleton skeleton-btn mx-auto"></div></td>
+                                    </tr>
+                                    <tr class="skeleton-row">
+                                        <td class="px-4 py-3">
+                                            <div class="skeleton skeleton-line" style="width: 65%"></div>
+                                            <div class="skeleton skeleton-line" style="width: 75%"></div>
+                                            <div class="skeleton skeleton-line" style="width: 45%"></div>
+                                        </td>
+                                        <td class="text-center"><div class="skeleton skeleton-badge mx-auto"></div></td>
+                                        <td class="text-center"><div class="skeleton skeleton-btn mx-auto"></div></td>
                                     </tr>
                                 </tbody>
                             </table>
