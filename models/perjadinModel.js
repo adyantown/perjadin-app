@@ -46,6 +46,17 @@ exports.insertPivot = (perjadinId, pegawaiId) => {
     return db.query('INSERT INTO perjadin_pegawai (perjadin_id, pegawai_id) VALUES (?, ?)', [perjadinId, pegawaiId]);
 };
 
+exports.getPegawaiByPerjadinId = (perjadinId) => {
+    const sql = `
+        SELECT mp.id, mp.nama_pegawai, mp.nip_nik AS nip, 
+               mp.pangkat, mp.golongan, mp.jabatan
+        FROM perjadin_pegawai pp
+        JOIN master_pegawai mp ON pp.pegawai_id = mp.id
+        WHERE pp.perjadin_id = ?
+        ORDER BY pp.id ASC`;
+    return db.query(sql, [perjadinId]);
+};
+
 exports.getAnalitikByPegawai = (pegawaiId) => {
     const sql = `
         SELECT p.* FROM perjadin p

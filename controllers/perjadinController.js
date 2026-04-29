@@ -9,19 +9,15 @@ const cleanMoney = (val) => {
     return parseFloat(val.toString().replace(/\./g, '')) || 0;
 };
 
-const syncPegawaiPivot = async (perjadinId, namaArray) => {
-    if (!namaArray || namaArray.length === 0) return;
+const syncPegawaiPivot = async (perjadinId, pegawaiIdArray) => {
+    if (!pegawaiIdArray || pegawaiIdArray.length === 0) return;
 
-    // Cari pegawai berdasarkan nama
-    for (const nama of namaArray) {
-        const cleanNama = nama.trim();
-        if (!cleanNama) continue;
+    for (const rawId of pegawaiIdArray) {
+        const pegawaiId = parseInt(rawId);
+        // Skip jika kosong atau bukan angka (pegawai manual luar satker)
+        if (!pegawaiId || isNaN(pegawaiId)) continue;
 
         try {
-            const rows = await PerjadinModel.findPegawaiByNama(cleanNama);
-            if (rows.length === 0) continue;
-
-            const pegawaiId = rows[0].id;
             await PerjadinModel.insertPivot(perjadinId, pegawaiId);
         } catch (err) {
             // Silently continue if a single pivot insert fails
@@ -35,6 +31,8 @@ exports.save = async (req, res) => {
     const rawNama = d['nama_pegawai[]'] || d.nama_pegawai || [];
     const rawGol = d['golongan[]'] || d.golongan || [];
     const rawJab = d['jabatan[]'] || d.jabatan || [];
+    const rawPegawaiId = d['pegawai_id[]'] || d.pegawai_id || [];
+    const pegawaiIdArray = Array.isArray(rawPegawaiId) ? rawPegawaiId : [rawPegawaiId].filter(Boolean);
 
     try {
         // 1. DATA PEGAWAI (Gunakan pembersihan array yang konsisten)
@@ -129,9 +127,9 @@ exports.save = async (req, res) => {
                 await PerjadinModel.deletePivot(editId);
             } catch (e) {}
 
-            // 2️⃣ Insert ulang relasi pegawai baru
+            // 2️⃣ Insert ulang relasi pegawai baru (pakai ID langsung)
             try {
-                await syncPegawaiPivot(editId, namaArray);
+                await syncPegawaiPivot(editId, pegawaiIdArray);
             } catch (e) {
                 console.error('Gagal sync pivot:', e);
             }
@@ -154,9 +152,9 @@ exports.save = async (req, res) => {
 
             const newId = result.insertId;
 
-            // Sinkronkan ke pivot
+            // Sinkronkan ke pivot (pakai ID langsung)
             try {
-                await syncPegawaiPivot(newId, namaArray);
+                await syncPegawaiPivot(newId, pegawaiIdArray);
             } catch (e) {
                 console.error('Gagal sync pivot:', e);
             }
@@ -180,7 +178,13 @@ exports.getAll = async (req, res) => {
 exports.getById = async (req, res) => {
     try {
         const rows = await PerjadinModel.getById(req.params.id);
-        res.json(rows[0]);
+        const data = rows[0];
+        if (data) {
+            // Sertakan data pegawai dari pivot table untuk mode edit
+            const pegawaiList = await PerjadinModel.getPegawaiByPerjadinId(req.params.id);
+            data.pegawai_list = pegawaiList;
+        }
+        res.json(data);
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
@@ -232,59 +236,62 @@ exports.getKuitansiDetail = async (req, res) => {
         const data = rows[0];
 
         // ==========================================
-        // 🚀 LOGIKA PEMISAH NAMA (ANTI-GELAR & ANTI-BUG)
+        // 🚀 AMBIL SEMUA PEGAWAI DARI TEKS + ENRICHMENT NIP DARI PIVOT
         // ==========================================
-        let rawNama = data.nama_pegawai || '';
         let listPegawai = [];
 
-        // Jaga-jaga kalau formatnya array JSON (konversi ke string |||)
+        // 1. Ambil data NIP dari pivot table (1 query JOIN, untuk enrichment)
+        let pivotMap = {};
+        try {
+            const pivotRows = await PerjadinModel.getPegawaiByPerjadinId(id);
+            if (pivotRows && pivotRows.length > 0) {
+                pivotRows.forEach(p => {
+                    // Map nama → nip untuk lookup cepat
+                    pivotMap[p.nama_pegawai.trim().toUpperCase()] = p.nip || '-';
+                });
+            }
+        } catch (e) {
+            console.error('Gagal ambil pivot pegawai:', e);
+        }
+
+        // 2. Baca SEMUA nama dari kolom teks (termasuk pegawai manual)
+        let rawNama = data.nama_pegawai || '';
         try {
             const parsed = JSON.parse(rawNama);
-            if (Array.isArray(parsed)) {
-                rawNama = parsed.join('|||');
-            }
+            if (Array.isArray(parsed)) rawNama = parsed.join('|||');
         } catch (e) {}
 
         if (typeof rawNama === 'string' && rawNama.trim() !== '') {
-            let individualNames = [];
+            const names = rawNama.includes('|||') ? rawNama.split('|||') : [rawNama];
+            for (const item of names) {
+                const nama = item.trim();
+                if (!nama) continue;
 
-            // HANYA pecah jika ada separator |||
-            // Kita buang pemisah koma (,) karena bentrok dengan gelar (S.T., S.Kom)
-            if (rawNama.includes('|||')) {
-                individualNames = rawNama.split('|||');
-            } else {
-                // Jika tidak ada |||, maka anggap itu adalah SATU orang utuh
-                // Meskipun di dalamnya ada koma (seperti: HENDY SYUHADA, S.T.)
-                individualNames = [rawNama];
-            }
+                // Cek NIP dari pivot map dulu (O(1) lookup)
+                const namaKey = nama.toUpperCase();
+                let nip = pivotMap[namaKey] || '-';
 
-            for (const item of individualNames) {
-                let nama = item.trim();
-                if (nama !== '') {
-                    // Cari NIP dari master_pegawai berdasarkan nama
-                    let nip = '-';
+                // Fallback LIKE search hanya jika pivot tidak punya data
+                if (nip === '-') {
                     try {
                         const pegawaiRows = await PerjadinModel.findPegawaiByNama(nama);
                         if (pegawaiRows.length > 0) {
                             const detailRows = await db.query('SELECT nip_nik FROM master_pegawai WHERE id = ?', [pegawaiRows[0].id]);
-                            if (detailRows.length > 0 && detailRows[0].nip_nik) {
-                                nip = detailRows[0].nip_nik;
-                            }
+                            if (detailRows.length > 0 && detailRows[0].nip_nik) nip = detailRows[0].nip_nik;
                         }
                     } catch (e) {}
-                    listPegawai.push({ nama: nama, nip: nip });
                 }
+
+                listPegawai.push({ nama, nip });
             }
         }
 
-        // Fallback jika kosong
+        // Final fallback
         if (listPegawai.length === 0) {
             listPegawai.push({ nama: '-', nip: '-' });
         }
 
         data.listPegawai = listPegawai;
-        // ==========================================
-        // ==========================================
 
         res.json({ success: true, data: data });
     } catch (err) {

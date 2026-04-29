@@ -2,7 +2,7 @@
 // VERSI FINAL & RAPI
 
 // --- 1. FUNGSI TAMBAH PEGAWAI (TAMPILAN BOOTSTRAP CARD) ---
-function tambahPegawai(nama = '', gol = '', jab = '') {
+function tambahPegawai(nama = '', gol = '', jab = '', pegawaiId = '') {
     const container = document.getElementById('pegawai-container');
 
     // HTML Template dengan Card Bootstrap (Ini yang bikin rapi!)
@@ -17,7 +17,7 @@ function tambahPegawai(nama = '', gol = '', jab = '') {
                         <i class="bi bi-trash"></i> Hapus
                     </button>
                 </div>
-                
+                <input type="hidden" name="pegawai_id[]" value="${pegawaiId}">
                 <div class="row g-2">
                     <div class="col-md-5">
                         <label class="form-label small text-muted fw-bold">Nama Pegawai</label>
@@ -190,9 +190,10 @@ window.tambahPegawaiOtomatis = function () {
             firstRow.querySelector('[name="nama_pegawai[]"]').value = p.nama_pegawai;
             firstRow.querySelector('[name="golongan[]"]').value = displayGol || '';
             firstRow.querySelector('[name="jabatan[]"]').value = p.jabatan || '';
+            firstRow.querySelector('[name="pegawai_id[]"]').value = p.id || '';
         } else {
             // Kalau sudah ada isinya, BUAT baris baru
-            tambahPegawai(p.nama_pegawai, displayGol || '', p.jabatan || '');
+            tambahPegawai(p.nama_pegawai, displayGol || '', p.jabatan || '', p.id || '');
         }
 
         dropdown.value = ''; // Reset pilihan
@@ -202,6 +203,18 @@ window.tambahPegawaiOtomatis = function () {
 
 // --- 5. LOGIKA EDIT DATA (LOAD DARI SERVER) ---
 document.addEventListener('DOMContentLoaded', async () => {
+    // Inisialisasi Flatpickr pada semua input tanggal
+    flatpickr('.flatpickr-date', {
+        dateFormat: 'Y-m-d',       // Value internal (untuk server/database)
+        altInput: true,             // Tampilkan input alternatif ke user
+        altFormat: 'd/m/Y',        // Format tampilan: dd/mm/yyyy
+        locale: 'id',              // Bahasa Indonesia
+        allowInput: true,           // Boleh ketik manual
+        onChange: function () {
+            hitungOtomatis();       // Trigger recalculate saat tanggal berubah
+        }
+    });
+
     // await loadSppdDropdown();
     const urlParams = new URLSearchParams(window.location.search);
     const editId = urlParams.get('edit');
@@ -237,40 +250,51 @@ document.addEventListener('DOMContentLoaded', async () => {
                     if (el) el.value = val;
                 };
 
+                // Helper: set tanggal via Flatpickr API
+                const setFlatpickrDate = (name, val) => {
+                    const el = document.getElementsByName(name)[0];
+                    if (el && el._flatpickr && val) {
+                        el._flatpickr.setDate(val, true);
+                    }
+                };
+
                 setVal('no_surat_tugas', data.no_surat_tugas);
-                setVal('tgl_surat_tugas', formatDate(data.tgl_surat_tugas));
+                setFlatpickrDate('tgl_surat_tugas', formatDate(data.tgl_surat_tugas));
                 setVal('menimbang', data.menimbang || '');
                 setVal('dasar', data.dasar || '');
                 setVal('uraian_tugas', data.uraian_tugas || '');
                 setVal('maksud_dinas', data.maksud_dinas);
                 setVal('tujuan', data.tujuan);
                 setVal('jenis_transportasi', data.jenis_transportasi);
-                setVal('tgl_berangkat', formatDate(data.tgl_berangkat));
-                setVal('tgl_pulang', formatDate(data.tgl_pulang));
+                setFlatpickrDate('tgl_berangkat', formatDate(data.tgl_berangkat));
+                setFlatpickrDate('tgl_pulang', formatDate(data.tgl_pulang));
 
-                setVal('uang_harian', formatRupiah((data.uang_harian || 0).toString()));
-                setVal('biaya_transportasi', formatRupiah((data.biaya_transportasi || 0).toString()));
-                setVal('tarif_hotel', formatRupiah((data.tarif_hotel || 0).toString()));
+                setVal('uang_harian', formatRupiah(Math.round(Number(data.uang_harian) || 0).toString()));
+                setVal('biaya_transportasi', formatRupiah(Math.round(Number(data.biaya_transportasi) || 0).toString()));
+                setVal('tarif_hotel', formatRupiah(Math.round(Number(data.tarif_hotel) || 0).toString()));
 
                 setVal('nama_hotel', data.nama_hotel || '');
-                setVal('tgl_checkin', formatDate(data.tgl_checkin));
-                setVal('tgl_checkout', formatDate(data.tgl_checkout));
+                setFlatpickrDate('tgl_checkin', formatDate(data.tgl_checkin));
+                setFlatpickrDate('tgl_checkout', formatDate(data.tgl_checkout));
 
                 // Bersihkan baris pegawai lama, isi dengan yang baru
                 const container = document.getElementById('pegawai-container');
                 container.innerHTML = '';
 
+                // Buat map dari pivot table untuk enrichment ID
+                const pivotMap = {};
+                if (data.pegawai_list && data.pegawai_list.length > 0) {
+                    data.pegawai_list.forEach((peg) => {
+                        pivotMap[peg.nama_pegawai.trim().toUpperCase()] = peg;
+                    });
+                }
+
+                // Baca SEMUA nama dari kolom teks (termasuk manual)
                 const splitAman = (str) => {
                     if (!str) return [];
-
-                    // 1. Cek format baru yang paling aman (3 Pipa)
                     if (str.includes('|||')) return str.split('|||').map((s) => s.trim());
-
-                    // 2. Cek format transisi (yang bikin ngacak di gambar ke-2)
                     if (str.includes('|')) return str.split('|').map((s) => s.trim());
-
-                    // 3. Cek format paling jadul (Koma)
-                    return str.split(', ');
+                    return [str.trim()];
                 };
 
                 const namaArr = splitAman(data.nama_pegawai);
@@ -279,7 +303,16 @@ document.addEventListener('DOMContentLoaded', async () => {
 
                 if (namaArr.length > 0 && namaArr[0] !== '') {
                     namaArr.forEach((n, i) => {
-                        tambahPegawai(n, golArr[i] || '', jabArr[i] || '');
+                        const key = n.trim().toUpperCase();
+                        const pivotData = pivotMap[key];
+                        if (pivotData) {
+                            // Pegawai dari database → punya ID
+                            const displayGol = pivotData.pangkat ? `${pivotData.pangkat} (${pivotData.golongan})` : (golArr[i] || '');
+                            tambahPegawai(n, displayGol, pivotData.jabatan || jabArr[i] || '', pivotData.id);
+                        } else {
+                            // Pegawai manual → tanpa ID
+                            tambahPegawai(n, golArr[i] || '', jabArr[i] || '');
+                        }
                     });
                 } else {
                     tambahPegawai();
