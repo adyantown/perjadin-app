@@ -1,6 +1,26 @@
 document.addEventListener('DOMContentLoaded', async () => {
     const formatRp = (angka) => new Intl.NumberFormat('id-ID').format(angka);
 
+    // Helper: format input rupiah dengan pemisah titik
+    const formatRupiahInput = (str) => {
+        const angka = str.replace(/[^\d]/g, '');
+        return angka.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+    };
+
+    // Helper: bersihkan string rupiah jadi angka
+    const bersihRupiah = (str) => parseFloat(str.replace(/\./g, '')) || 0;
+
+    // Live formatter untuk semua input rupiah
+    document.querySelectorAll('.rupiah-input').forEach(input => {
+        input.addEventListener('input', function () {
+            const pos = this.selectionStart;
+            const oldLen = this.value.length;
+            this.value = formatRupiahInput(this.value);
+            const newLen = this.value.length;
+            this.setSelectionRange(pos + (newLen - oldLen), pos + (newLen - oldLen));
+        });
+    });
+
     // Ambil ID dari URL (Contoh: edit_rab.html?id=5)
     const urlParams = new URLSearchParams(window.location.search);
     const rabId = urlParams.get('id');
@@ -29,17 +49,17 @@ document.addEventListener('DOMContentLoaded', async () => {
             document.getElementById('jml_kegiatan').value = d.jml_kegiatan;
             document.getElementById('jml_hari').value = d.jml_hari;
 
-            // Isi Rincian Uang Harian
-            document.getElementById('uh_satuan').value = d.uang_harian_satuan;
+            // Isi Rincian Uang Harian (format dengan titik)
+            document.getElementById('uh_satuan').value = formatRupiahInput(Math.round(Number(d.uang_harian_satuan) || 0).toString());
 
             // Isi Rincian Transport
             document.getElementById('jenis_transport').value = d.jenis_transport;
             document.getElementById('tr_vol').value = d.transport_vol;
-            document.getElementById('tr_satuan').value = d.transport_satuan;
+            document.getElementById('tr_satuan').value = formatRupiahInput(Math.round(Number(d.transport_satuan) || 0).toString());
 
             // Isi Rincian Penginapan
             document.getElementById('inn_vol').value = d.penginapan_vol || 0;
-            document.getElementById('inn_satuan').value = d.penginapan_satuan || 0;
+            document.getElementById('inn_satuan').value = formatRupiahInput(Math.round(Number(d.penginapan_satuan) || 0).toString());
 
             // Panggil fungsi hitung untuk pertama kali biar totalnya nampil
             hitungTotal();
@@ -62,7 +82,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const hari = parseInt(document.getElementById('jml_hari').value) || 0;
         const volHarian = org * keg * hari;
 
-        const uhSatuan = parseFloat(document.getElementById('uh_satuan').value) || 0;
+        const uhSatuan = bersihRupiah(document.getElementById('uh_satuan').value);
         const uhTotal = volHarian * uhSatuan;
 
         document.getElementById('rumus_uh').innerText = `Total: (${org} ORG x ${keg} KEG x ${hari} HR) x Rp ${formatRp(uhSatuan)}`;
@@ -70,7 +90,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         document.getElementById('uh_total').value = uhTotal;
 
         const trVol = parseInt(document.getElementById('tr_vol').value) || 0;
-        const trSatuan = parseFloat(document.getElementById('tr_satuan').value) || 0;
+        const trSatuan = bersihRupiah(document.getElementById('tr_satuan').value);
         const trTotal = trVol * trSatuan;
 
         document.getElementById('tr_total_tampil').innerText = formatRp(trTotal);
@@ -78,7 +98,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         // Hitung Penginapan
         const innVol = parseInt(document.getElementById('inn_vol').value) || 0;
-        const innSatuan = parseFloat(document.getElementById('inn_satuan').value) || 0;
+        const innSatuan = bersihRupiah(document.getElementById('inn_satuan').value);
         const innTotal = innVol * innSatuan;
         document.getElementById('rumus_inn').innerText = `Total: ${innVol} Malam x Rp ${formatRp(innSatuan)}`;
         document.getElementById('inn_total_tampil').innerText = formatRp(innTotal);
