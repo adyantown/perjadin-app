@@ -27,7 +27,7 @@ if (process.env.DB_HOST) {
         host: 'localhost', // Host XAMPP
         user: 'root', // User Default XAMPP
         password: '', // Password Default XAMPP (biasanya kosong)
-        database: 'db_kpu', // Pastikan nama DB di phpMyAdmin sama
+        database: 'kpu_db', // Pastikan nama DB di phpMyAdmin sama
         waitForConnections: true,
         connectionLimit: 10,
         queueLimit: 0,
