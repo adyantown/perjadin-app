@@ -28,6 +28,8 @@ exports.getPegawaiById = async (req, res) => {
 exports.createPegawai = async (req, res) => {
     try {
         const data = req.body;
+        // Hapus field 'id' jika kosong agar MySQL auto-increment bisa jalan
+        if (!data.id) delete data.id;
         await PegawaiModel.create(data);
         logController.catatLog(req, 'Master Pegawai', `Menambahkan pegawai baru: ${data.nama_pegawai || 'Tanpa Nama'}`);
         res.json({ success: true, message: 'Pegawai berhasil ditambahkan!' });

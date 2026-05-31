@@ -159,15 +159,30 @@ document.addEventListener('DOMContentLoaded', async () => {
             const result = await response.json();
 
             if (result.success) {
-                alert('MANTAP! RAB tersimpan dan Saldo Pagu otomatis terpotong! 💸');
-                // Nanti kita arahkan ke riwayat_rab.html, untuk sekarang refresh aja
+                await Swal.fire({
+                    title: 'Berhasil! 💸',
+                    text: 'RAB tersimpan dan Saldo Pagu otomatis terpotong!',
+                    icon: 'success',
+                    confirmButtonColor: '#f59e0b',
+                    confirmButtonText: 'OK'
+                });
                 window.location.reload();
             } else {
-                alert('Gagal: ' + result.message);
+                Swal.fire({
+                    title: 'Gagal!',
+                    text: result.message,
+                    icon: 'warning',
+                    confirmButtonColor: '#f59e0b'
+                });
             }
         } catch (error) {
             console.error('Error:', error);
-            alert('Terjadi kesalahan sistem saat menyimpan RAB.');
+            Swal.fire({
+                title: 'Error!',
+                text: 'Terjadi kesalahan sistem saat menyimpan RAB.',
+                icon: 'error',
+                confirmButtonColor: '#f59e0b'
+            });
         }
     });
 });
