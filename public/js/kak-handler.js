@@ -4,9 +4,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('tgl_kak').value = today;
 
     // 2. ISI DASAR HUKUM OTOMATIS (Sesuai Standar KPU)
-    const dasarHukumDefault = `a. Peraturan Menteri Keuangan Republik Indonesia Nomor 39 Tahun 2024 Tentang Standar Biaya Masukan TA 2025.
-b. Peraturan Menteri Keuangan Republik Indonesia Nomor 113/PMK.05/2012 Tentang Perjalanan Dinas Jabatan Dalam Negeri Bagi Pejabat Negara, Pegawai Negeri, dan Pegawai Tidak Tetap.
-c. Keputusan Komisi Pemilihan Umum Nomor 409 Tahun 2022 Tentang Pedoman Teknis Pelaksanaan Perjalanan Dinas Dalam Negeri di Lingkungan Komisi Pemilihan Umum.`;
+    const dasarHukumDefault = `a. Peraturan Menteri Keuangan Republik Indonesia Nomor 32 Tahun 2025 Tentang Standar Biaya Masukan Tahun Anggaran 2026.
+b. Peraturan Menteri Keuangan Republik Indonesia Nomor 119 Tahun 2023 Tentang Perubahan Atas Peraturan Menteri Keuangan Republik Indonesia Nomor 113/PMK.05/2012 Tentang Perjalanan Dinas Jabatan Dalam Negeri Bagi Pejabat Negara, Pegawai Negeri, dan Pegawai Tidak Tetap.
+c. Keputusan Komisi Pemilihan Umum Nomor 409 Tahun 2022 Tentang Pedoman Teknis Pelaksanaan Perjalanan Dinas Dalam Negeri di Lingkungan Komisi Pemilihan Umum, Komisi Pemilihan Umum Provinsi dan Komisi Pemilihan Umum Kabupaten/Kota.`;
     document.getElementById('dasar_hukum').value = dasarHukumDefault;
 
     // 3. TARIK DATA PPK DARI SETTING (Otomatis masuk ke form readonly)
@@ -66,15 +66,31 @@ if (formKak) {
             const result = await response.json();
 
             if (result.success) {
-                alert('Berhasil! KAK telah tersimpan di sistem.');
+                await Swal.fire({
+                    title: 'Berhasil!',
+                    text: 'KAK telah tersimpan di sistem.',
+                    icon: 'success',
+                    confirmButtonColor: '#f59e0b',
+                    confirmButtonText: 'OK',
+                });
                 // Arahkan user ke halaman riwayat KAK setelah berhasil
                 window.location.href = '/riwayat_kak.html';
             } else {
-                alert('Gagal: ' + result.message);
+                Swal.fire({
+                    title: 'Gagal!',
+                    text: result.message,
+                    icon: 'warning',
+                    confirmButtonColor: '#f59e0b',
+                });
             }
         } catch (error) {
             console.error('Error:', error);
-            alert('Terjadi kesalahan sistem saat menyimpan KAK.');
+            Swal.fire({
+                title: 'Error!',
+                text: 'Terjadi kesalahan sistem saat menyimpan KAK.',
+                icon: 'error',
+                confirmButtonColor: '#f59e0b',
+            });
         }
     });
 }

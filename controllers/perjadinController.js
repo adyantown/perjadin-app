@@ -136,7 +136,7 @@ exports.save = async (req, res) => {
 
             // 3️⃣ Log aktivitas
             try {
-                logController.catatLog(req, 'Edit Perjadin', `Mengubah data rekap biaya Surat Tugas: ${d.no_surat_tugas}`);
+                logController.catatLog(req, 'Edit Perjadin', `Mengubah data perjadin Surat Tugas: ${d.no_surat_tugas}`);
             } catch (e) {}
 
             // 4️⃣ Response ke frontend
@@ -245,7 +245,7 @@ exports.getKuitansiDetail = async (req, res) => {
         try {
             const pivotRows = await PerjadinModel.getPegawaiByPerjadinId(id);
             if (pivotRows && pivotRows.length > 0) {
-                pivotRows.forEach(p => {
+                pivotRows.forEach((p) => {
                     // Map nama → nip untuk lookup cepat
                     pivotMap[p.nama_pegawai.trim().toUpperCase()] = p.nip || '-';
                 });
