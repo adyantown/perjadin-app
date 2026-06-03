@@ -116,6 +116,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         const formData = new FormData(document.getElementById('formEditRab'));
         const data = Object.fromEntries(formData.entries());
 
+        // Bersihkan field satuan dari format titik ribuan (contoh: "250.000" → "250000")
+        ['uang_harian_satuan', 'transport_satuan', 'penginapan_satuan'].forEach(key => {
+            if (data[key]) data[key] = data[key].replace(/\./g, '');
+        });
+
         try {
             const response = await fetch(`/api/rab/update/${rabId}`, {
                 method: 'PUT',
