@@ -1,8 +1,23 @@
 // public/js/daftar-handler.js
 
 let allData = []; // Wadah data mentah
+let isAdmin = false; // Flag role admin
 
 document.addEventListener('DOMContentLoaded', () => {
+    // Cek role user dari session
+    fetch('/api/auth/check')
+        .then(res => res.json())
+        .then(data => {
+            isAdmin = data.role === 'admin';
+            if (isAdmin) {
+                const btnExcel = document.getElementById('btnExcel');
+                const btnCetak = document.getElementById('btnCetakLaporan');
+                if (btnExcel) btnExcel.style.display = '';
+                if (btnCetak) btnCetak.style.display = '';
+            }
+        })
+        .catch(() => { isAdmin = false; });
+
     loadData();
 
     // Event Listener: Jalankan filter setiap kali user ngetik atau ganti bulan
@@ -173,19 +188,21 @@ function renderTable(data) {
         body.innerHTML += row;
     });
 
-    // Baris Sub-Total (Abu-abu & Print Friendly)
-    const totalRow = `
-        <tr style="background-color: #e2e6ea; border-top: 3px solid #333;">
-            <td colspan="8" class="text-end text-uppercase pe-3 align-middle text-dark fw-bold">
-                Total Pengeluaran (Data Ditampilkan):
-            </td>
-            <td class="text-end fw-bold text-dark fs-6 text-nowrap align-middle" style="background-color: #d1d5db;">
-                Rp ${Math.round(grandTotal).toLocaleString('id-ID')}
-            </td>
-            <td class="no-print bg-white border-0"></td> 
-        </tr>
-    `;
-    body.innerHTML += totalRow;
+    // Baris Sub-Total (Abu-abu & Print Friendly) — Hanya tampil untuk Admin
+    if (isAdmin) {
+        const totalRow = `
+            <tr style="background-color: #e2e6ea; border-top: 3px solid #333;">
+                <td colspan="8" class="text-end text-uppercase pe-3 align-middle text-dark fw-bold">
+                    Total Pengeluaran (Data Ditampilkan):
+                </td>
+                <td class="text-end fw-bold text-dark fs-6 text-nowrap align-middle" style="background-color: #d1d5db;">
+                    Rp ${Math.round(grandTotal).toLocaleString('id-ID')}
+                </td>
+                <td class="no-print bg-white border-0"></td> 
+            </tr>
+        `;
+        body.innerHTML += totalRow;
+    }
 }
 
 // 4. FUNGSI RESET FILTER (Tombol X)
