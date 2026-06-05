@@ -50,7 +50,7 @@ app.use(
             // KALAU LOCAL (LAPTOP) = FALSE (HTTP BIASA)
             secure: isProduction,
             httpOnly: true,
-            maxAge: 1000 * 60 * 60 * 24, // 1 Hari
+            maxAge: 1000 * 60 * 60 * 3, // 3 Jam (sinkron dengan sessionStore.expiration)
         },
     }),
 );
