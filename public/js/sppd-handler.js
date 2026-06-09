@@ -52,17 +52,24 @@ document.addEventListener('DOMContentLoaded', () => {
                     setTimeout(() => {
                         window.print();
                         if (currentEditId) {
-                            if (confirm('Cetak selesai. Kembali ke Riwayat?')) {
-                                window.location.href = '/riwayat_sppd.html';
-                            }
+                            Swal.fire({
+                                title: 'Cetak Selesai',
+                                text: 'Kembali ke halaman Riwayat SPPD?',
+                                icon: 'question',
+                                showCancelButton: true,
+                                confirmButtonText: 'Ya, Kembali',
+                                cancelButtonText: 'Tetap di Sini'
+                            }).then((r) => {
+                                if (r.isConfirmed) window.location.href = '/riwayat_sppd.html';
+                            });
                         }
                     }, 500);
                 } else {
-                    alert('Gagal: ' + result.message);
+                    Swal.fire('Gagal!', result.message, 'error');
                 }
             } catch (error) {
                 console.error('Error:', error);
-                alert('Terjadi kesalahan sistem.');
+                Swal.fire('Error!', 'Terjadi kesalahan sistem.', 'error');
             }
         });
     }
@@ -277,7 +284,7 @@ function hitungLamaPerjalanan() {
         const tglAkhir = new Date(inputKembali.value);
 
         if (tglAkhir < tglAwal) {
-            alert('Tanggal Kembali tidak boleh sebelum Tanggal Berangkat!');
+            Swal.fire('Tanggal Salah!', 'Tanggal Kembali tidak boleh sebelum Tanggal Berangkat!', 'error');
             inputKembali.value = '';
             inputLama.value = '';
             return;

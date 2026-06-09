@@ -228,7 +228,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         fetch(`/api/perjadin/view/${editId}`)
             .then((res) => res.json())
             .then((data) => {
-                if (!data) return alert('Data tidak ditemukan!');
+                if (!data) return Swal.fire('Error!', 'Data tidak ditemukan!', 'error');
 
                 // GUARD: Blokir edit jika SPJ sudah diupload
                 if (data.status_spj) {

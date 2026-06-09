@@ -1,7 +1,7 @@
 document.addEventListener('DOMContentLoaded', async () => {
     const urlParams = new URLSearchParams(window.location.search);
     const idRab = urlParams.get('id');
-    if (!idRab) { alert('ID RAB tidak ditemukan!'); return; }
+    if (!idRab) { Swal.fire('Error!', 'ID RAB tidak ditemukan!', 'error'); return; }
 
     const formatRp = (angka) => new Intl.NumberFormat('id-ID').format(angka);
 

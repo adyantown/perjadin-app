@@ -199,7 +199,7 @@ function renderKuitansi(data, pegawai, index, pejabat) {
 document.addEventListener('DOMContentLoaded', async () => {
     const params = new URLSearchParams(window.location.search);
     const id = params.get('id');
-    if (!id) return alert("ID Perjadin tidak ditemukan!");
+    if (!id) return Swal.fire('Error!', 'ID Perjadin tidak ditemukan!', 'error');
 
     try {
         const res = await fetch(`/api/perjadin/kuitansi/${id}`);

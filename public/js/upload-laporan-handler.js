@@ -99,7 +99,7 @@ async function kirimLaporan(e) {
     // Validasi: Wajib ada lokasi!
     const lat = document.getElementById('inputLat').value;
     if (!lat) {
-        alert('⚠️ Wajib ambil lokasi dulu sebagai bukti kehadiran!');
+        Swal.fire('Lokasi Diperlukan!', 'Wajib ambil lokasi dulu sebagai bukti kehadiran!', 'warning');
         return;
     }
 
@@ -121,15 +121,15 @@ async function kirimLaporan(e) {
 
         if (json.success) {
             // Sukses
-            alert('✅ ' + json.message);
+            await Swal.fire({ title: 'Berhasil!', text: json.message, icon: 'success', timer: 1500, showConfirmButton: false });
             window.location.href = '/index.html'; // Balik ke dashboard
         } else {
-            alert('❌ Gagal: ' + json.message);
+            Swal.fire('Gagal!', json.message, 'error');
             btn.disabled = false;
             btn.innerHTML = txtAwal;
         }
     } catch (error) {
-        alert('❌ Terjadi kesalahan sistem.');
+        Swal.fire('Error!', 'Terjadi kesalahan sistem.', 'error');
         console.error(error);
         btn.disabled = false;
         btn.innerHTML = txtAwal;

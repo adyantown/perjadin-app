@@ -28,7 +28,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 body: JSON.stringify(data)
             });
             const json = await res.json();
-            alert(json.message);
-        } catch (err) { alert('Gagal menyimpan'); }
+            Swal.fire({ title: json.success ? 'Berhasil!' : 'Info', text: json.message, icon: json.success ? 'success' : 'info', timer: 1500, showConfirmButton: false });
+        } catch (err) { Swal.fire('Gagal!', 'Gagal menyimpan pengaturan.', 'error'); }
     });
 });

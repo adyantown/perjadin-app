@@ -4,7 +4,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const idKak = urlParams.get('id');
 
     if (!idKak) {
-        alert('ID KAK tidak ditemukan!');
+        Swal.fire('Error!', 'ID KAK tidak ditemukan!', 'error');
         return;
     }
 
@@ -37,10 +37,10 @@ document.addEventListener('DOMContentLoaded', async () => {
             }, 1000);
 
         } else {
-            alert('Gagal mengambil data KAK.');
+            Swal.fire('Gagal!', 'Gagal mengambil data KAK.', 'error');
         }
     } catch (error) {
         console.error('Error:', error);
-        alert('Terjadi kesalahan sistem.');
+        Swal.fire('Error!', 'Terjadi kesalahan sistem.', 'error');
     }
 });

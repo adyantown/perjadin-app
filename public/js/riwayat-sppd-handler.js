@@ -61,18 +61,30 @@ async function loadRiwayat() {
 }
 
 async function hapusSppd(id) {
-    if (confirm('Yakin ingin menghapus data SPPD ini?')) {
+    const result = await Swal.fire({
+        title: 'Hapus Data SPPD?',
+        text: 'Data yang dihapus tidak bisa dikembalikan!',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#bb2d3b',
+        cancelButtonColor: '#6c757d',
+        confirmButtonText: 'Ya, Hapus!',
+        cancelButtonText: 'Batal',
+        reverseButtons: true
+    });
+
+    if (result.isConfirmed) {
         try {
             const res = await fetch(`/api/sppd/delete/${id}`, { method: 'DELETE' });
-            const result = await res.json();
-            if (result.success) {
-                alert('Terhapus!');
-                loadRiwayat(); // Reload tabel
+            const data = await res.json();
+            if (data.success) {
+                Swal.fire({ title: 'Terhapus!', text: 'Data SPPD berhasil dihapus.', icon: 'success', timer: 1500, showConfirmButton: false });
+                loadRiwayat();
             } else {
-                alert('Gagal: ' + result.message);
+                Swal.fire('Gagal!', data.message, 'error');
             }
         } catch (err) {
-            alert('Error koneksi');
+            Swal.fire('Error!', 'Terjadi kesalahan koneksi.', 'error');
         }
     }
 }
