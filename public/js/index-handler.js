@@ -1,10 +1,8 @@
 document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('tahunAnggaranSistem').innerText = new Date().getFullYear();
     // 1. CEK USER LOGIN (Fitur Baru)
-    fetch('/api/auth/check')
-        .then((res) => res.json())
-        .then((data) => {
-            document.getElementById('welcomeMsg').innerHTML = `Selamat Datang, ${data.user}! 👋`;
+    getUserSession().then((data) => {
+        document.getElementById('welcomeMsg').innerHTML = `Selamat Datang, ${data.user}! 👋`;
 
             // LOGIKA TAMPILAN MENU BERDASARKAN ROLE
             const role = data.role; // 'admin' atau 'user'

@@ -3,7 +3,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const idRab = urlParams.get('id');
     if (!idRab) { Swal.fire('Error!', 'ID RAB tidak ditemukan!', 'error'); return; }
 
-    const formatRp = (angka) => new Intl.NumberFormat('id-ID').format(angka);
+    // formatRp dipanggil dari utils.js
 
     try {
         const response = await fetch(`/api/rab/view/${idRab}`);

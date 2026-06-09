@@ -5,10 +5,8 @@ let isAdmin = false; // Flag role admin
 
 document.addEventListener('DOMContentLoaded', () => {
     // Cek role user dari session
-    fetch('/api/auth/check')
-        .then(res => res.json())
-        .then(data => {
-            isAdmin = data.role === 'admin';
+    getUserSession().then(data => {
+        isAdmin = data.role === 'admin';
             if (isAdmin) {
                 const btnExcel = document.getElementById('btnExcel');
                 const btnCetak = document.getElementById('btnCetakLaporan');

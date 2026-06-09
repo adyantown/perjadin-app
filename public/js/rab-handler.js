@@ -11,23 +11,14 @@ document.addEventListener('DOMContentLoaded', async () => {
     let currentSisaPagu = 0; // Menyimpan memori sisa uang
 
     // 1. FUNGSI FORMAT RUPIAH
-    const formatRp = (angka) => new Intl.NumberFormat('id-ID').format(angka);
-
-    // Helper: format input rupiah dengan pemisah titik
-    const formatRupiahInput = (str) => {
-        const angka = str.replace(/[^\d]/g, '');
-        return angka.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
-    };
-
-    // Helper: bersihkan string rupiah jadi angka
-    const bersihRupiah = (str) => parseFloat(str.replace(/\./g, '')) || 0;
+    // Memanggil fungsi dari utils.js: formatRp, formatRupiah, dan bersihAngka
 
     // Live formatter untuk semua input rupiah
     document.querySelectorAll('.rupiah-input').forEach(input => {
         input.addEventListener('input', function () {
             const pos = this.selectionStart;
             const oldLen = this.value.length;
-            this.value = formatRupiahInput(this.value);
+            this.value = formatRupiah(this.value);
             const newLen = this.value.length;
             this.setSelectionRange(pos + (newLen - oldLen), pos + (newLen - oldLen));
         });
@@ -91,7 +82,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const volHarian = org * keg * hari;
 
         // Hitung Uang Harian
-        const uhSatuan = bersihRupiah(document.getElementById('uh_satuan').value);
+        const uhSatuan = bersihAngka(document.getElementById('uh_satuan').value);
         const uhTotal = volHarian * uhSatuan;
         document.getElementById('rumus_uh').innerText = `Total: (${org} ORG x ${keg} KEG x ${hari} HR) x Rp ${formatRp(uhSatuan)}`;
         document.getElementById('uh_total_tampil').innerText = formatRp(uhTotal);
@@ -99,14 +90,14 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         // Hitung Transport
         const trVol = parseInt(document.getElementById('tr_vol').value) || 0;
-        const trSatuan = bersihRupiah(document.getElementById('tr_satuan').value);
+        const trSatuan = bersihAngka(document.getElementById('tr_satuan').value);
         const trTotal = trVol * trSatuan;
         document.getElementById('tr_total_tampil').innerText = formatRp(trTotal);
         document.getElementById('tr_total').value = trTotal;
 
         // Hitung Penginapan
         const innVol = parseInt(document.getElementById('inn_vol').value) || 0;
-        const innSatuan = bersihRupiah(document.getElementById('inn_satuan').value);
+        const innSatuan = bersihAngka(document.getElementById('inn_satuan').value);
         const innTotal = innVol * innSatuan;
         document.getElementById('rumus_inn').innerText = `Total: ${innVol} Malam x Rp ${formatRp(innSatuan)}`;
         document.getElementById('inn_total_tampil').innerText = formatRp(innTotal);

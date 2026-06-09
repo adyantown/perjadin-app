@@ -18,6 +18,10 @@ function formatRupiah(angka) {
     return rupiah;
 }
 
+function formatRp(angka) {
+    return new Intl.NumberFormat('id-ID').format(angka);
+}
+
 // --- 2. LOGIKA HITUNG OTOMATIS ---
 function hitungOtomatis() {
     try {
@@ -82,5 +86,17 @@ function formatTanggalIndo(tgl) {
     } catch (error) {
         console.error('Error memformat tanggal:', error);
         return tgl; // Fallback kalau terjadi error
+    }
+}
+
+// --- 3. SESSION / AUTH HELPER ---
+async function getUserSession() {
+    try {
+        const res = await fetch('/api/auth/check');
+        if (!res.ok) throw new Error('Not authenticated');
+        return await res.json();
+    } catch (err) {
+        console.error('Session check failed', err);
+        return { loggedIn: false, role: 'user' };
     }
 }

@@ -2,7 +2,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const tbody = document.getElementById('tabelBodyRab');
 
     // Fungsi Format Rupiah
-    const formatRp = (angka) => new Intl.NumberFormat('id-ID').format(angka);
+    // formatRp sudah dipanggil dari utils.js
 
     try {
         const response = await fetch('/api/rab/all');
