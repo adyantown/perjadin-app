@@ -146,15 +146,20 @@ function renderKuitansi(data, pegawai, index, pejabat) {
                 <p class="mb-0">Telah dibayar sejumlah Rp ${totalStr}</p>
                 <p class="fw-bold">Bendahara Pengeluaran,</p>
                 <div style="height: 70px;"></div>
-                <p class="m-0 fw-bold">${pejabat.bendaharaNama}</p>
-                <p class="m-0">NIP. ${pejabat.bendaharaNip}</p>
+                <div style="width: 100%; overflow: hidden;">
+                    <p class="m-0 fw-bold" style="${pejabat.bendaharaNama.length > 28 ? 'font-size: 9pt;' : 'font-size: 11pt;'} white-space: nowrap;">${pejabat.bendaharaNama}</p>
+                    <p class="m-0" style="${pejabat.bendaharaNip.length > 28 ? 'font-size: 9pt;' : 'font-size: 11pt;'} white-space: nowrap;">NIP. ${pejabat.bendaharaNip}</p>
+                </div>
             </div>
 
             <div class="text-center" style="width: 45%;">
                 <p class="mb-0">Telah menerima jumlah uang Rp ${totalStr}</p>
                 <p class="fw-bold">Yang Menerima,</p>
                 <div style="height: 70px;"></div>
-                <p class="m-0 fw-bold">${pegawai.nama}</p>
+                <div style="width: 100%; overflow: hidden;">
+                    <p class="m-0 fw-bold" style="${pegawai.nama.length > 28 ? 'font-size: 9pt;' : 'font-size: 11pt;'} white-space: nowrap;">${pegawai.nama}</p>
+                    <p class="m-0" style="${pegawai.nip && pegawai.nip.length > 28 ? 'font-size: 9pt;' : 'font-size: 11pt;'} white-space: nowrap;">NIP. ${pegawai.nip || '-'}</p>
+                </div>
             </div>
         </div>
 
@@ -184,8 +189,10 @@ function renderKuitansi(data, pegawai, index, pejabat) {
                 <p class="mb-0">Setuju dibebankan pada mata anggaran berkenaan,</p>
                 <p class="fw-bold">Pejabat Pembuat Komitmen,</p>
                 <div style="height: 70px;"></div>
-                <p class="m-0 fw-bold text-decoration-underline">${pejabat.ppkNama}</p>
-                <p class="m-0">NIP. ${pejabat.ppkNip}</p>
+                <div style="width: 100%; overflow: hidden;">
+                    <p class="m-0 fw-bold text-decoration-underline" style="${pejabat.ppkNama.length > 28 ? 'font-size: 9pt;' : 'font-size: 11pt;'} white-space: nowrap;">${pejabat.ppkNama}</p>
+                    <p class="m-0" style="${pejabat.ppkNip.length > 28 ? 'font-size: 9pt;' : 'font-size: 11pt;'} white-space: nowrap;">NIP. ${pejabat.ppkNip}</p>
+                </div>
             </div>
 
         </div>
