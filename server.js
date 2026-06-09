@@ -80,14 +80,7 @@ const cekLogin = (req, res, next) => {
     res.redirect('/login.html?alert=belum_login');
 };
 
-// Middleware Khusus Area Terlarang (Hanya Admin)
-const hanyaAdmin = (req, res, next) => {
-    if (req.session.role === 'admin') {
-        return next(); // Silakan lewat bos!
-    }
-    // Kalau bukan admin, tolak!
-    res.status(403).json({ success: false, message: 'Akses Ditolak! Khusus Admin.' });
-};
+const { hanyaAdmin } = require('./middleware/authMiddleware');
 
 // --- ROUTES UNTUK AUTHENTICATION (LOGIN/LOGOUT) ---
 

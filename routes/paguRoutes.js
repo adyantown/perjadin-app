@@ -5,15 +5,7 @@ const paguController = require('../controllers/paguController');
 const kakController = require('../controllers/kakController');
 const { route } = require('./perjadinRoutes');
 
-// --- MIDDLEWARE LOKAL (SATPAM ADMIN SASETAN) ---
-// Mengecek apakah yang akses punya tiket 'admin' di session-nya
-const satpamAdmin = (req, res, next) => {
-    if (req.session && req.session.role === 'admin') {
-        next(); // Kalau admin, silakan lewat!
-    } else {
-        res.status(403).json({ success: false, message: 'Akses ditolak! Hanya Admin/PPK yang boleh merevisi Pagu.' });
-    }
-};
+const { hanyaAdmin } = require('../middleware/authMiddleware');
 
 // --- RUTE ---
 
@@ -24,6 +16,6 @@ router.get('/all', kakController.getAllPagu);
 
 // PUT: /api/pagu/revisi/:id
 // KHUSUS ADMIN: Kita pasang 'satpamAdmin' di tengah-tengahnya
-router.put('/revisi/:id', satpamAdmin, paguController.revisiPagu);
+router.put('/revisi/:id', hanyaAdmin, paguController.revisiPagu);
 
 module.exports = router;
