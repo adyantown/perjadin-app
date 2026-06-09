@@ -66,6 +66,23 @@ exports.getAnalitikByPegawai = (pegawaiId) => {
     return db.query(sql, [pegawaiId]);
 };
 
+exports.getRankingPegawai = () => {
+    const sql = `
+        SELECT 
+            mp.id,
+            mp.nama_pegawai,
+            mp.kategori,
+            mp.jabatan,
+            COUNT(pp.perjadin_id) AS total_perjadin,
+            COALESCE(SUM(p.total_biaya / p.jumlah_sppd), 0) AS total_anggaran
+        FROM master_pegawai mp
+        LEFT JOIN perjadin_pegawai pp ON mp.id = pp.pegawai_id
+        LEFT JOIN perjadin p ON pp.perjadin_id = p.id
+        GROUP BY mp.id, mp.nama_pegawai, mp.kategori, mp.jabatan
+        ORDER BY total_perjadin DESC, mp.nama_pegawai ASC`;
+    return db.query(sql);
+};
+
 exports.updateStatusSpj = (noSuratTugas, status) => {
     return db.query('UPDATE perjadin SET status_spj = ? WHERE no_surat_tugas = ?', [status, noSuratTugas]);
 };

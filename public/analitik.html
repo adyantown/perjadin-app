@@ -12,6 +12,51 @@
         href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
     <link rel="stylesheet" href="style/index-style.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .ranking-row {
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+        .ranking-row:hover {
+            background-color: #fff3cd !important;
+            transform: scale(1.005);
+        }
+        .ranking-row.active-row {
+            background-color: #fef3c7 !important;
+            border-left: 4px solid #f59e0b;
+        }
+        .badge-rank {
+            width: 32px;
+            height: 32px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            font-weight: 700;
+            font-size: 0.85rem;
+        }
+        .rank-gold { background: linear-gradient(135deg, #f59e0b, #d97706); color: #fff; }
+        .rank-silver { background: linear-gradient(135deg, #9ca3af, #6b7280); color: #fff; }
+        .rank-bronze { background: linear-gradient(135deg, #d97706, #92400e); color: #fff; }
+        .rank-default { background: #e5e7eb; color: #374151; }
+        .progress-bar-perjadin {
+            height: 8px;
+            border-radius: 4px;
+            background: #e5e7eb;
+            overflow: hidden;
+        }
+        .progress-bar-perjadin .fill {
+            height: 100%;
+            border-radius: 4px;
+            background: linear-gradient(90deg, #f59e0b, #ef4444);
+            transition: width 0.6s ease;
+        }
+        .filter-btn.active {
+            background-color: #bb2d3b !important;
+            border-color: #bb2d3b !important;
+            color: #fff !important;
+        }
+    </style>
 </head>
 
 <body style="background-color: #f4f6f9;">
@@ -27,41 +72,52 @@
     </nav>
 
     <div class="container pb-5">
-        <div class="card shadow-sm border-0 rounded-4 mb-4">
-            <div class="card-body p-4 text-center">
-                <h5 class="fw-bold mb-3">Pilih Pegawai untuk Dianalisis</h5>
 
-                <div class="d-flex justify-content-center gap-4 mb-3">
-                    <div class="form-check form-check-inline">
-                        <input class="form-check-input" type="radio" name="kategoriPegawai"
-                            id="katKomisioner" value="Komisioner"
-                            onchange="loadPegawaiKategori(this.value)">
-                        <label class="form-check-label fw-bold text-secondary"
-                            for="katKomisioner">Komisioner</label>
-                    </div>
-                    <div class="form-check form-check-inline">
-                        <input class="form-check-input" type="radio" name="kategoriPegawai"
-                            id="katPns" value="PNS" onchange="loadPegawaiKategori(this.value)">
-                        <label class="form-check-label fw-bold text-secondary"
-                            for="katPns">PNS</label>
-                    </div>
-                    <div class="form-check form-check-inline">
-                        <input class="form-check-input" type="radio" name="kategoriPegawai"
-                            id="katPppk" value="PPPK" onchange="loadPegawaiKategori(this.value)">
-                        <label class="form-check-label fw-bold text-secondary"
-                            for="katPppk">PPPK</label>
+        <!-- TABEL RANKING -->
+        <div class="card shadow-sm border-0 rounded-4 mb-4">
+            <div class="card-body p-4">
+                <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+                    <h5 class="fw-bold mb-0"><i class="bi bi-trophy-fill text-warning me-2"></i>Ranking Keterlibatan Perjadin</h5>
+                    <div class="d-flex gap-2 flex-wrap">
+                        <button class="btn btn-sm btn-outline-danger filter-btn active" data-filter="Semua" onclick="filterKategori(this)">Semua</button>
+                        <button class="btn btn-sm btn-outline-danger filter-btn" data-filter="Komisioner" onclick="filterKategori(this)">Komisioner</button>
+                        <button class="btn btn-sm btn-outline-danger filter-btn" data-filter="PNS" onclick="filterKategori(this)">PNS</button>
+                        <button class="btn btn-sm btn-outline-danger filter-btn" data-filter="PPPK" onclick="filterKategori(this)">PPPK</button>
                     </div>
                 </div>
-
-                <select id="selectPegawai"
-                    class="form-select form-select-lg w-75 mx-auto border-primary shadow-sm"
-                    onchange="loadDataAnalitik()">
-                    <option value="">-- Silakan Pilih Kategori Terlebih Dahulu --</option>
-                </select>
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th width="6%" class="text-center">#</th>
+                                <th width="30%">Nama Pegawai</th>
+                                <th width="15%">Kategori</th>
+                                <th width="20%">Jabatan</th>
+                                <th width="14%" class="text-center">Jumlah Perjadin</th>
+                                <th width="15%" class="text-end">Est. Anggaran</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabelRanking">
+                            <tr>
+                                <td colspan="6" class="text-center py-4 text-muted">Sedang memuat data ranking...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
 
+        <!-- DETAIL PEGAWAI (Tampil saat klik baris) -->
         <div id="wadahAnalitik" style="display: none;">
+
+            <div class="d-flex align-items-center mb-3">
+                <h5 class="fw-bold mb-0 text-secondary">
+                    <i class="bi bi-person-lines-fill me-2"></i>Detail: <span id="namaPegawaiDetail" class="text-dark"></span>
+                </h5>
+                <button class="btn btn-sm btn-outline-secondary ms-3 rounded-pill" onclick="tutupDetail()">
+                    <i class="bi bi-x-lg me-1"></i>Tutup
+                </button>
+            </div>
 
             <div class="row g-3 mb-4">
                 <div class="col-md-3">

@@ -1,76 +1,139 @@
-// Variabel global untuk menampung instansi grafik (agar bisa di-reset)
-// Variabel global untuk menampung instansi grafik
-let chartPerjadin = null;
+// public/js/analitik-handler.js
 
-// Biarkan kosong karena kita menunggu user klik radio button dulu
+let chartPerjadin = null;
+let allRankingData = []; // Semua data ranking
+let activeFilter = 'Semua';
+let activePegawaiId = null;
+
 document.addEventListener('DOMContentLoaded', () => {
-    // Tidak otomatis load semua nama lagi
+    loadRanking();
 });
 
-// 1. FUNGSI BARU: Load Pegawai Berdasarkan Kategori
-async function loadPegawaiKategori(kategori) {
-    const select = document.getElementById('selectPegawai');
-    const wadah = document.getElementById('wadahAnalitik');
-
-    // Sembunyikan dashboard laporan kalau user ganti kategori (biar datanya nggak ketukar)
-    wadah.style.display = 'none';
-    select.innerHTML = '<option value="">-- Memuat Data... --</option>';
+// 1. LOAD RANKING PEGAWAI
+async function loadRanking() {
+    const tbody = document.getElementById('tabelRanking');
+    tbody.innerHTML = '<tr><td colspan="6" class="text-center py-4 text-muted">Sedang memuat data ranking...</td></tr>';
 
     try {
-        // Tarik data API sesuai kategori yang diklik (PNS/PPPK/Komisioner)
-        const res = await fetch(`/api/pegawai/${kategori}`);
-        const data = await res.json();
+        const res = await fetch('/api/perjadin/ranking');
+        const result = await res.json();
 
-        // Urutkan nama berdasarkan abjad biar rapi
-        data.sort((a, b) => a.nama_pegawai.localeCompare(b.nama_pegawai));
-
-        select.innerHTML = `<option value="">-- Pilih Nama ${kategori} --</option>`;
-
-        if (data.length === 0) {
-            select.innerHTML = `<option value="">-- Belum ada data ${kategori} --</option>`;
-            return;
+        if (result.success) {
+            allRankingData = result.data;
+            renderRanking(allRankingData);
         }
-
-        data.forEach((p) => {
-            select.innerHTML += `<option value="${p.id}">${p.nama_pegawai}</option>`;
-        });
     } catch (e) {
-        console.error('Error load pegawai:', e);
-        select.innerHTML = '<option value="">Gagal memuat data pegawai</option>';
+        console.error('Error load ranking:', e);
+        tbody.innerHTML = '<tr><td colspan="6" class="text-center text-danger py-3">Gagal memuat data ranking.</td></tr>';
     }
 }
 
-// ... (Biarkan Fungsi No. 2, 3, 4, dan 5 tetap seperti aslinya) ...
+// 2. RENDER TABEL RANKING
+function renderRanking(data) {
+    const tbody = document.getElementById('tabelRanking');
+    tbody.innerHTML = '';
 
-// 2. Fungsi Utama saat Pegawai Dipilih
-async function loadDataAnalitik() {
-    const select = document.getElementById('selectPegawai');
-    const pegawaiId = select.value;
-    const pegawaiName = select.options[select.selectedIndex].text;
-    const wadah = document.getElementById('wadahAnalitik');
+    // Filter berdasarkan kategori aktif
+    const filtered = activeFilter === 'Semua' ? data : data.filter(d => d.kategori === activeFilter);
 
-    if (!pegawaiId) {
-        wadah.style.display = 'none';
+    if (filtered.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" class="text-center py-4 text-muted">Tidak ada data pegawai.</td></tr>';
         return;
     }
+
+    // Cari nilai maksimum untuk progress bar
+    const maxPerjadin = Math.max(...filtered.map(d => d.total_perjadin), 1);
+
+    const rp = (num) => 'Rp ' + Math.round(num).toLocaleString('id-ID');
+
+    filtered.forEach((item, index) => {
+        // Badge kategori
+        let badgeClass = 'bg-secondary';
+        if (item.kategori === 'PNS') badgeClass = 'bg-primary';
+        if (item.kategori === 'PPPK') badgeClass = 'bg-warning text-dark';
+        if (item.kategori === 'Komisioner') badgeClass = 'bg-danger';
+
+        // Ranking badge
+        let rankClass = 'rank-default';
+        if (index === 0) rankClass = 'rank-gold';
+        else if (index === 1) rankClass = 'rank-silver';
+        else if (index === 2) rankClass = 'rank-bronze';
+
+        // Progress bar width
+        const barWidth = maxPerjadin > 0 ? (item.total_perjadin / maxPerjadin) * 100 : 0;
+
+        const isActive = item.id === activePegawaiId;
+
+        const row = document.createElement('tr');
+        row.className = `ranking-row${isActive ? ' active-row' : ''}`;
+        row.onclick = () => loadDetailPegawai(item.id, item.nama_pegawai);
+        row.innerHTML = `
+            <td class="text-center">
+                <span class="badge-rank ${rankClass}">${index + 1}</span>
+            </td>
+            <td>
+                <div class="fw-bold">${item.nama_pegawai}</div>
+            </td>
+            <td><span class="badge ${badgeClass} rounded-pill" style="font-size: 0.75rem;">${item.kategori}</span></td>
+            <td><small class="text-muted">${item.jabatan || '-'}</small></td>
+            <td class="text-center">
+                <div class="fw-bold text-dark mb-1">${item.total_perjadin} <small class="text-muted fw-normal">kali</small></div>
+                <div class="progress-bar-perjadin">
+                    <div class="fill" style="width: ${barWidth}%"></div>
+                </div>
+            </td>
+            <td class="text-end text-nowrap">
+                <small class="fw-bold ${item.total_anggaran > 0 ? 'text-danger' : 'text-muted'}">${item.total_anggaran > 0 ? rp(item.total_anggaran) : '-'}</small>
+            </td>
+        `;
+        tbody.appendChild(row);
+    });
+}
+
+// 3. FILTER KATEGORI
+function filterKategori(btn) {
+    // Toggle active state
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+
+    activeFilter = btn.getAttribute('data-filter');
+    renderRanking(allRankingData);
+}
+
+// 4. LOAD DETAIL PEGAWAI (Saat klik baris ranking)
+async function loadDetailPegawai(pegawaiId, pegawaiName) {
+    activePegawaiId = pegawaiId;
+    renderRanking(allRankingData); // Re-render untuk update highlight
+
+    const wadah = document.getElementById('wadahAnalitik');
+    document.getElementById('namaPegawaiDetail').innerText = pegawaiName;
 
     try {
         const res = await fetch(`/api/perjadin/analitik/${pegawaiId}`);
         const result = await res.json();
 
         if (result.success) {
-            wadah.style.display = 'block'; // Tampilkan dashboard
+            wadah.style.display = 'block';
             kalkulasiData(result.data, pegawaiName);
             renderTabelRiwayat(result.data, pegawaiName);
             renderGrafik(result.data);
+
+            // Scroll ke detail
+            wadah.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
     } catch (e) {
         console.error('Error load analitik:', e);
-        alert('Gagal mengambil data analitik dari server.');
     }
 }
 
-// 3. Kalkulasi Angka untuk Scorecards
+// 5. TUTUP DETAIL
+function tutupDetail() {
+    document.getElementById('wadahAnalitik').style.display = 'none';
+    activePegawaiId = null;
+    renderRanking(allRankingData);
+}
+
+// 6. Kalkulasi Angka untuk Scorecards
 function kalkulasiData(data, pegawaiName) {
     let uangHarian = 0;
     let transport = 0;
@@ -137,7 +200,7 @@ function kalkulasiData(data, pegawaiName) {
     document.getElementById('cardGrandTotal').innerText = rp(grandTotal);
 }
 
-// 4. Render Tabel Jejak Langkah
+// 7. Render Tabel Jejak Langkah
 function renderTabelRiwayat(data, pegawaiName) {
     const tbody = document.getElementById('tabelRiwayat');
     tbody.innerHTML = '';
@@ -189,7 +252,7 @@ function renderTabelRiwayat(data, pegawaiName) {
     });
 }
 
-// 5. Render Grafik (Chart.js)
+// 8. Render Grafik (Chart.js)
 function renderGrafik(data) {
     const ctx = document.getElementById('grafikPerjadin').getContext('2d');
 

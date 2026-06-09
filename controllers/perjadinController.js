@@ -224,6 +224,16 @@ exports.getAnalitikPegawai = async (req, res) => {
         res.status(500).json({ success: false, message: err.message });
     }
 };
+
+// --- ENDPOINT RANKING PEGAWAI (Semua Pegawai diurutkan berdasarkan jumlah perjadin) ---
+exports.getRankingPegawai = async (req, res) => {
+    try {
+        const rows = await PerjadinModel.getRankingPegawai();
+        res.json({ success: true, data: rows });
+    } catch (err) {
+        res.status(500).json({ success: false, message: err.message });
+    }
+};
 exports.getKuitansiDetail = async (req, res) => {
     try {
         const id = req.params.id;
