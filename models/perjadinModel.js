@@ -44,8 +44,8 @@ exports.deletePivot = (perjadinId) => {
     return db.query('DELETE FROM perjadin_pegawai WHERE perjadin_id = ?', [perjadinId]);
 };
 
-exports.insertPivot = (perjadinId, pegawaiId) => {
-    return db.query('INSERT INTO perjadin_pegawai (perjadin_id, pegawai_id) VALUES (?, ?)', [perjadinId, pegawaiId]);
+exports.insertPivot = (perjadinId, pegawaiId, totalKuitansi = 0) => {
+    return db.query('INSERT INTO perjadin_pegawai (perjadin_id, pegawai_id, total_kuitansi) VALUES (?, ?, ?)', [perjadinId, pegawaiId, totalKuitansi]);
 };
 
 exports.getPegawaiByPerjadinId = (perjadinId) => {
@@ -61,7 +61,7 @@ exports.getPegawaiByPerjadinId = (perjadinId) => {
 
 exports.getAnalitikByPegawai = (pegawaiId) => {
     const sql = `
-        SELECT p.* FROM perjadin p
+        SELECT p.*, pp.total_kuitansi FROM perjadin p
         JOIN perjadin_pegawai pp ON p.id = pp.perjadin_id
         WHERE pp.pegawai_id = ?
         ORDER BY p.tgl_berangkat ASC`;
@@ -76,7 +76,7 @@ exports.getRankingPegawai = () => {
             mp.kategori,
             mp.jabatan,
             COUNT(pp.perjadin_id) AS total_perjadin,
-            COALESCE(SUM(p.total_biaya / p.jumlah_sppd), 0) AS total_anggaran
+            COALESCE(SUM(pp.total_kuitansi), 0) AS total_anggaran
         FROM master_pegawai mp
         LEFT JOIN perjadin_pegawai pp ON mp.id = pp.pegawai_id
         LEFT JOIN perjadin p ON pp.perjadin_id = p.id

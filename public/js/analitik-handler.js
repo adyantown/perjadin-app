@@ -137,24 +137,23 @@ function tutupDetail() {
 function kalkulasiData(data, pegawaiName) {
     let uangHarian = 0;
     let transport = 0;
+    let penginapan = 0;
     let grandTotal = 0;
 
     data.forEach((item) => {
-        const jmlRombongan = item.jumlah_sppd || 1;
+        // Karena detail harian & transport tidak disave per individu di pivot (hanya total kuitansi),
+        // kita lakukan estimasi kasar untuk scorecard Harian, Transport, & Penginapan, 
+        // namun Grand Total pasti 100% akurat dari database.
+        const durasi = (item.tgl_berangkat && item.tgl_pulang) 
+            ? Math.max(1, Math.ceil((new Date(item.tgl_pulang) - new Date(item.tgl_berangkat)) / (1000 * 60 * 60 * 24)) + 1)
+            : 1;
 
-        // 1. Hitung Durasi (Sama seperti rumus di Backend)
-        let durasi = 0;
-        if (item.tgl_berangkat && item.tgl_pulang) {
-            const tglB = new Date(item.tgl_berangkat);
-            const tglP = new Date(item.tgl_pulang);
-            if (!isNaN(tglB) && !isNaN(tglP)) {
-                durasi = Math.ceil((tglP - tglB) / (1000 * 60 * 60 * 24)) + 1;
-            }
-        }
-        durasi = durasi > 0 ? durasi : 1; // Minimal 1 hari
-
-        // Cek apakah pegawai ini adalah nama pertama (Ketua Rombongan)
-        let isFirstPerson = false;
+        uangHarian += (parseInt(item.uang_harian) || 0) * durasi;
+        
+        const isAngkutanUmum = (item.jenis_transportasi || '').includes('Angkutan Umum');
+        
+        // Cari index pegawai ini di data
+        let myIndex = -1;
         if (item.nama_pegawai) {
             let list = [];
             if (item.nama_pegawai.includes('|||')) {
@@ -162,34 +161,36 @@ function kalkulasiData(data, pegawaiName) {
             } else {
                 list = item.nama_pegawai.split(',').map(n => n.trim());
             }
-            if (list.length > 0 && list[0] === pegawaiName.trim()) {
-                isFirstPerson = true;
+            myIndex = list.findIndex(n => n === pegawaiName.trim());
+        }
+
+        if (isAngkutanUmum) {
+            transport += (parseInt(item.biaya_transportasi) || 0) / (item.jumlah_sppd || 1);
+        } else {
+            // Estimasi: jika namanya pertama di list, dia bayar transport
+            if (myIndex === 0) {
+                transport += parseInt(item.biaya_transportasi) || 0;
             }
         }
 
-        // 2. Hitung Hak Individu
-        // Uang Harian = Tarif utuh per orang dikali jumlah hari
-        const uangHarianIndividu = (parseInt(item.uang_harian) || 0) * durasi;
-
-        // Transport = Cek Jenis Transportasi
-        const jenisTransport = item.jenis_transportasi || 'Kendaraan/Pribadi';
-        const totalTransport = parseInt(item.biaya_transportasi) || 0;
-        
-        let transportIndividu = 0;
-        if (jenisTransport.includes('Angkutan Umum')) {
-            transportIndividu = totalTransport / jmlRombongan;
-        } else {
-            transportIndividu = isFirstPerson ? totalTransport : 0;
+        // Estimasi Penginapan
+        const pembayarHotelIndices = (item.pembayar_hotel || '0').split(',').map(s => parseInt(s.trim()));
+        if (myIndex !== -1 && pembayarHotelIndices.includes(myIndex)) {
+            let durasiHotel = 0;
+            if (item.tgl_checkin && item.tgl_checkout) {
+                const tglIn = new Date(item.tgl_checkin);
+                const tglOut = new Date(item.tgl_checkout);
+                if (!isNaN(tglIn) && !isNaN(tglOut)) {
+                    durasiHotel = Math.ceil((tglOut - tglIn) / (1000 * 60 * 60 * 24));
+                }
+            }
+            if (durasiHotel > 0) {
+                penginapan += (parseInt(item.tarif_hotel) || 0) * durasiHotel;
+            }
         }
 
-        // Grand Total Individu = Uang harian + Transport (jika ada) + (Sisa biaya / jmlRombongan)
-        const totalSemua = parseInt(item.total_biaya) || 0;
-        const biayaSisaBagiRata = (totalSemua - totalTransport) / jmlRombongan;
-        const biayaIndividu = biayaSisaBagiRata + transportIndividu;
-
-        uangHarian += uangHarianIndividu;
-        transport += transportIndividu;
-        grandTotal += biayaIndividu;
+        // Grand Total Individu AKURAT 100% diambil langsung dari tabel relasi (pivot)
+        grandTotal += parseFloat(item.total_kuitansi) || 0;
     });
 
     const rp = (num) => 'Rp ' + Math.round(num).toLocaleString('id-ID');
@@ -197,6 +198,7 @@ function kalkulasiData(data, pegawaiName) {
     document.getElementById('cardTotalJalan').innerText = data.length;
     document.getElementById('cardUangHarian').innerText = rp(uangHarian);
     document.getElementById('cardTransport').innerText = rp(transport);
+    document.getElementById('cardPenginapan').innerText = rp(penginapan);
     document.getElementById('cardGrandTotal').innerText = rp(grandTotal);
 }
 
@@ -211,34 +213,8 @@ function renderTabelRiwayat(data, pegawaiName) {
     }
 
     data.forEach((item) => {
-        const jmlRombongan = item.jumlah_sppd || 1;
-        
-        let isFirstPerson = false;
-        if (item.nama_pegawai) {
-            let list = [];
-            if (item.nama_pegawai.includes('|||')) {
-                list = item.nama_pegawai.split('|||').map(n => n.trim());
-            } else {
-                list = item.nama_pegawai.split(',').map(n => n.trim());
-            }
-            if (list.length > 0 && list[0] === pegawaiName.trim()) {
-                isFirstPerson = true;
-            }
-        }
-
-        const totalSemua = parseInt(item.total_biaya) || 0;
-        const totalTransport = parseInt(item.biaya_transportasi) || 0;
-        const jenisTransport = item.jenis_transportasi || 'Kendaraan/Pribadi';
-        
-        let transportIndividu = 0;
-        if (jenisTransport.includes('Angkutan Umum')) {
-            transportIndividu = totalTransport / jmlRombongan;
-        } else {
-            transportIndividu = isFirstPerson ? totalTransport : 0;
-        }
-
-        const biayaSisaBagiRata = (totalSemua - totalTransport) / jmlRombongan;
-        const biayaIndividu = biayaSisaBagiRata + transportIndividu;
+        // Beban Anggaran AKURAT 100% diambil dari total_kuitansi di pivot
+        const biayaIndividu = parseFloat(item.total_kuitansi) || 0;
 
         tbody.innerHTML += `
             <tr>

@@ -252,21 +252,26 @@ function hapusData(id) {
     });
 }
 
-// 6. FUNGSI EXPORT EXCEL
+// 6. FUNGSI EXPORT EXCEL (Menggunakan SheetJS)
 function exportToExcel() {
+    if (typeof XLSX === 'undefined') {
+        Swal.fire('Error!', 'Library Excel belum dimuat. Coba refresh halaman.', 'error');
+        return;
+    }
+
+    // Ambil tabel asli
     const table = document.querySelector('table');
+    // Buat clone agar tidak merusak tabel di UI
     const tableClone = table.cloneNode(true);
 
+    // Hapus elemen yang tidak perlu dicetak (kolom aksi)
     const noPrintElements = tableClone.querySelectorAll('.no-print');
     noPrintElements.forEach((el) => el.remove());
 
-    const tableHTML = tableClone.outerHTML.replace(/ /g, '%20');
-    const filename = 'Laporan_Rekap_Biaya_KPU.xls';
+    // Konversi tabel clone ke format SheetJS Workbook
+    const wb = XLSX.utils.table_to_book(tableClone, { sheet: "Rekap Biaya" });
 
-    const downloadLink = document.createElement('a');
-    document.body.appendChild(downloadLink);
-    downloadLink.href = 'data:application/vnd.ms-excel,' + tableHTML;
-    downloadLink.download = filename;
-    downloadLink.click();
-    document.body.removeChild(downloadLink);
+    // Download file Excel
+    const filename = 'Laporan_Rekap_Biaya_KPU.xlsx';
+    XLSX.writeFile(wb, filename);
 }

@@ -9,16 +9,18 @@ const cleanMoney = (val) => {
     return parseFloat(val.toString().replace(/\./g, '')) || 0;
 };
 
-const syncPegawaiPivot = async (perjadinId, pegawaiIdArray) => {
+const syncPegawaiPivot = async (perjadinId, pegawaiIdArray, kuitansiArray = []) => {
     if (!pegawaiIdArray || pegawaiIdArray.length === 0) return;
 
-    for (const rawId of pegawaiIdArray) {
+    for (let index = 0; index < pegawaiIdArray.length; index++) {
+        const rawId = pegawaiIdArray[index];
         const pegawaiId = parseInt(rawId);
         // Skip jika kosong atau bukan angka (pegawai manual luar satker)
         if (!pegawaiId || isNaN(pegawaiId)) continue;
 
         try {
-            await PerjadinModel.insertPivot(perjadinId, pegawaiId);
+            const totalKuitansi = kuitansiArray[index] || 0;
+            await PerjadinModel.insertPivot(perjadinId, pegawaiId, totalKuitansi);
         } catch (err) {
             // Silently continue if a single pivot insert fails
         }
@@ -133,6 +135,29 @@ exports.save = async (req, res) => {
             grandTotal, // 29
         ];
 
+        // 7.5. HITUNG KUITANSI INDIVIDU UNTUK PIVOT
+        const pembayarHotelIndices = pembayarHotelStr ? pembayarHotelStr.split(',').map(s => parseInt(s.trim())) : [];
+        const isAngkutanUmum = d.jenis_transportasi && d.jenis_transportasi.includes('Angkutan Umum');
+        const kuitansiPerOrang = [];
+
+        namaArray.forEach((n, index) => {
+            const uangHarianIndividu = uangHarianClean * durasi;
+            
+            let transportIndividu = 0;
+            if (isAngkutanUmum) {
+                transportIndividu = biayaTransClean / jumlahPegawai;
+            } else {
+                if (index === 0) transportIndividu = biayaTransClean;
+            }
+
+            let hotelIndividu = 0;
+            if (pembayarHotelIndices.includes(index)) {
+                hotelIndividu = tarifHotelClean * durasiHotel;
+            }
+
+            kuitansiPerOrang.push(uangHarianIndividu + transportIndividu + hotelIndividu);
+        });
+
         // 8. EKSEKUSI SQL
         if (editId && editId !== '') {
             // MODE UPDATE
@@ -145,7 +170,7 @@ exports.save = async (req, res) => {
 
             // 2️⃣ Insert ulang relasi pegawai baru (pakai ID langsung)
             try {
-                await syncPegawaiPivot(editId, pegawaiIdArray);
+                await syncPegawaiPivot(editId, pegawaiIdArray, kuitansiPerOrang);
             } catch (e) {
                 console.error('Gagal sync pivot:', e);
             }
@@ -170,7 +195,7 @@ exports.save = async (req, res) => {
 
             // Sinkronkan ke pivot (pakai ID langsung)
             try {
-                await syncPegawaiPivot(newId, pegawaiIdArray);
+                await syncPegawaiPivot(newId, pegawaiIdArray, kuitansiPerOrang);
             } catch (e) {
                 console.error('Gagal sync pivot:', e);
             }

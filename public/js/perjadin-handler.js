@@ -233,8 +233,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         const resKak = await fetch('/api/kak/all');
         const dataKak = await resKak.json();
         const selectKak = document.getElementById('selectKak');
-        if (selectKak && dataKak.success && dataKak.data) {
-            dataKak.data.forEach(kak => {
+        if (selectKak && Array.isArray(dataKak)) {
+            dataKak.forEach(kak => {
                 const opt = document.createElement('option');
                 opt.value = kak.id;
                 opt.textContent = kak.judul_kegiatan;
@@ -250,8 +250,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                 }
             });
         }
-    } catch (err) {
-        console.error('Gagal load KAK:', err);
+    } catch (error) {
+        console.error('Error load dropdown KAK:', error);
     }
 
     const urlParams = new URLSearchParams(window.location.search);
