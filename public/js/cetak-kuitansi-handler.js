@@ -8,16 +8,16 @@
 //  HELPER: Konversi angka ke terbilang (Bahasa Indonesia)
 // ═══════════════════════════════════════════════════════
 function terbilang(n) {
-    const m = ["", "Satu", "Dua", "Tiga", "Empat", "Lima", "Enam", "Tujuh", "Delapan", "Sembilan", "Sepuluh", "Sebelas"];
-    if (n < 12) return " " + m[n];
-    if (n < 20) return terbilang(n - 10) + " Belas";
-    if (n < 100) return terbilang(Math.floor(n / 10)) + " Puluh" + terbilang(n % 10);
-    if (n < 200) return " Seratus" + terbilang(n - 100);
-    if (n < 1000) return terbilang(Math.floor(n / 100)) + " Ratus" + terbilang(n % 100);
-    if (n < 2000) return " Seribu" + terbilang(n - 1000);
-    if (n < 1000000) return terbilang(Math.floor(n / 1000)) + " Ribu" + terbilang(n % 1000);
-    if (n < 1000000000) return terbilang(Math.floor(n / 1000000)) + " Juta" + terbilang(n % 1000000);
-    return "...";
+    const m = ['', 'Satu', 'Dua', 'Tiga', 'Empat', 'Lima', 'Enam', 'Tujuh', 'Delapan', 'Sembilan', 'Sepuluh', 'Sebelas'];
+    if (n < 12) return ' ' + m[n];
+    if (n < 20) return terbilang(n - 10) + ' Belas';
+    if (n < 100) return terbilang(Math.floor(n / 10)) + ' Puluh' + terbilang(n % 10);
+    if (n < 200) return ' Seratus' + terbilang(n - 100);
+    if (n < 1000) return terbilang(Math.floor(n / 100)) + ' Ratus' + terbilang(n % 100);
+    if (n < 2000) return ' Seribu' + terbilang(n - 1000);
+    if (n < 1000000) return terbilang(Math.floor(n / 1000)) + ' Ribu' + terbilang(n % 1000);
+    if (n < 1000000000) return terbilang(Math.floor(n / 1000000)) + ' Juta' + terbilang(n % 1000000);
+    return '...';
 }
 
 // ═══════════════════════════════════════════════════════
@@ -45,35 +45,42 @@ function renderKuitansi(data, pegawai, index, pejabat) {
     // 1. Uang Harian
     const uangHarian = Math.round(Number(data.uang_harian) || 0);
     const harianTotal = uangHarian * data.lama_hari;
+    const ketHarian = data.ket_harian || 'Uang Harian';
     total += harianTotal;
-    htmlRincian += buatBarisRincian(
-        noUrut++,
-        `Uang Harian (${data.lama_hari} hari x Rp ${uangHarian.toLocaleString('id-ID')})`,
-        harianTotal,
-        'Uang Harian'
-    );
+    htmlRincian += buatBarisRincian(noUrut++, `Uang Harian (${data.lama_hari} hari x Rp ${uangHarian.toLocaleString('id-ID')})`, harianTotal, ketHarian);
 
-    // 2. Transport
-    const jenisTransport = data.jenis_transportasi || 'Kendaraan/Pribadi'; // fallback
-    const uangTransport = Math.round(Number(data.uang_transport) || 0);
+    // 2. Rincian Transportasi (Render per komponen, hanya yang > 0)
+    const jenisTransport = data.jenis_transportasi || 'Kendaraan Dinas/Pribadi';
+    const isAngkutanUmum = jenisTransport.includes('Angkutan Umum');
+    const jmlPegawai = data.listPegawai ? data.listPegawai.length : 1;
 
-    if (uangTransport > 0) {
-        // Jika Angkutan Umum -> Dibagi rata ke semua pegawai
-        if (jenisTransport.includes('Angkutan Umum')) {
-            const jmlPegawai = data.listPegawai ? data.listPegawai.length : 1;
-            const transportRata = uangTransport / jmlPegawai;
-            total += transportRata;
-            htmlRincian += buatBarisRincian(noUrut++, 'Biaya Transport/Tiket', transportRata, 'Tiket Perjalanan');
-        } else {
-            // Kendaraan Dinas/Pribadi -> Hanya orang pertama yang menanggung full
-            if (index === 0) {
-                total += uangTransport;
-                htmlRincian += buatBarisRincian(noUrut++, 'Biaya Transport/Tiket', uangTransport, 'Transport Kend. Dinas/Pribadi');
+    const komponenTransport = [
+        { label: 'Biaya BBM', nilai: Math.round(Number(data.biaya_bbm) || 0), ket: data.ket_bbm || '' },
+        { label: 'Biaya Tol', nilai: Math.round(Number(data.biaya_tol) || 0), ket: data.ket_tol || '' },
+        { label: 'Biaya Transportasi', nilai: Math.round(Number(data.biaya_tiket) || 0), ket: data.ket_tiket || '' },
+        { label: 'Biaya Parkir / Retribusi', nilai: Math.round(Number(data.biaya_parkir) || 0), ket: data.ket_parkir || '' },
+    ];
+
+    komponenTransport.forEach((item) => {
+        if (item.nilai > 0) {
+            let nilaiPrint = item.nilai;
+            // Gunakan keterangan custom jika ada, jika tidak pakai label default
+            let ket = item.ket || item.label;
+
+            if (isAngkutanUmum) {
+                nilaiPrint = item.nilai / jmlPegawai;
+                ket += ' (1/' + jmlPegawai + ' orang)';
             } else {
-                htmlRincian += buatBarisRincian(noUrut++, 'Biaya Transport/Tiket', 0, 'Ikut Kend. Dinas / Ketua');
+                if (index !== 0) {
+                    nilaiPrint = 0;
+                    ket += ' (Ikut kend. ketua)';
+                }
             }
+
+            total += nilaiPrint;
+            htmlRincian += buatBarisRincian(noUrut++, item.label, nilaiPrint, ket);
         }
-    }
+    });
 
     // 3. Penginapan
     if (data.uang_penginapan > 0) {
@@ -180,7 +187,7 @@ function renderKuitansi(data, pegawai, index, pejabat) {
                     </tr>
                     <tr>
                         <td>Sisa Kurang/Lebih *)</td>
-                        <td>: (xxxxxxxxxxxxx)</td>
+                        <td>: NIHIL</td>
                     </tr>
                 </table>
             </div>
@@ -220,7 +227,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 ppkNama: '...',
                 ppkNip: '...',
                 bendaharaNama: 'Andriyanto, S.E',
-                bendaharaNip: '19841005 201101 1 004'
+                bendaharaNip: '19841005 201101 1 004',
             };
 
             // Fetch settings
@@ -234,13 +241,11 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
 
             // Render 1 kuitansi per pegawai
-            const allHTML = data.listPegawai
-                .map((pegawai, index) => renderKuitansi(data, pegawai, index, pejabat))
-                .join('');
+            const allHTML = data.listPegawai.map((pegawai, index) => renderKuitansi(data, pegawai, index, pejabat)).join('');
 
             renderArea.innerHTML = allHTML;
         }
     } catch (err) {
-        console.error("Gagal cetak:", err);
+        console.error('Gagal cetak:', err);
     }
 });

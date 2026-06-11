@@ -60,7 +60,11 @@ exports.save = async (req, res) => {
 
         // 2. MEMBERSIHKAN NOMINAL UANG
         const uangHarianClean = cleanMoney(d.uang_harian) || 0;
-        const biayaTransClean = cleanMoney(d.biaya_transportasi) || 0;
+        const biayaBbmClean = cleanMoney(d.biaya_bbm) || 0;
+        const biayaTolClean = cleanMoney(d.biaya_tol) || 0;
+        const biayaTiketClean = cleanMoney(d.biaya_tiket) || 0;
+        const biayaParkirClean = cleanMoney(d.biaya_parkir) || 0;
+        const biayaTransClean = biayaBbmClean + biayaTolClean + biayaTiketClean + biayaParkirClean;
         const tarifHotelClean = cleanMoney(d.tarif_hotel) || 0;
 
         // 3. HITUNG DURASI DINAS
@@ -96,25 +100,34 @@ exports.save = async (req, res) => {
         const params = [
             d.no_surat_tugas, // 1
             d.tgl_surat_tugas, // 2
-            d.menimbang || '', // 3 (NEW)
-            d.dasar || '', // 4 (NEW)
+            d.menimbang || '', // 3
+            d.dasar || '', // 4
             namaPegawaiAll, // 5
             golonganAll, // 6
             jabatanAll, // 7
             jumlahPegawai, // 8
             d.tujuan, // 9
             d.maksud_dinas, // 10
-            d.uraian_tugas || '', // 11 (NEW)
+            d.uraian_tugas || '', // 11
             d.tgl_berangkat, // 12
             d.tgl_pulang, // 13
             uangHarianClean, // 14
-            d.jenis_transportasi, // 15
-            biayaTransClean, // 16
-            d.nama_hotel, // 17
-            tarifHotelClean, // 18
-            fixCheckin, // 19
-            fixCheckout, // 20
-            grandTotal, // 21
+            d.ket_harian || '', // 15
+            d.jenis_transportasi, // 16
+            biayaTransClean, // 17 (total transport = bbm+tol+tiket+parkir)
+            biayaBbmClean, // 17
+            d.ket_bbm || '', // 18
+            biayaTolClean, // 19
+            d.ket_tol || '', // 20
+            biayaTiketClean, // 21
+            d.ket_tiket || '', // 22
+            biayaParkirClean, // 23
+            d.ket_parkir || '', // 24
+            d.nama_hotel, // 25
+            tarifHotelClean, // 26
+            fixCheckin, // 27
+            fixCheckout, // 28
+            grandTotal, // 29
         ];
 
         // 8. EKSEKUSI SQL

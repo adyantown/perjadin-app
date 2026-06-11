@@ -29,7 +29,10 @@ function hitungOtomatis() {
         const jumlahPegawai = rows.length;
 
         const uangHarian = bersihAngka(document.querySelector('[name="uang_harian"]').value);
-        const biayaTrans = bersihAngka(document.querySelector('[name="biaya_transportasi"]').value);
+        const biayaBbm = bersihAngka(document.querySelector('[name="biaya_bbm"]')?.value || '0');
+        const biayaTol = bersihAngka(document.querySelector('[name="biaya_tol"]')?.value || '0');
+        const biayaTiket = bersihAngka(document.querySelector('[name="biaya_tiket"]')?.value || '0');
+        const biayaParkir = bersihAngka(document.querySelector('[name="biaya_parkir"]')?.value || '0');
         const tarifHotel = bersihAngka(document.querySelector('[name="tarif_hotel"]').value);
 
         const tglB = document.querySelector('[name="tgl_berangkat"]').value;
@@ -52,8 +55,9 @@ function hitungOtomatis() {
         }
 
         const totalHarian = uangHarian * durasiPerjadin * jumlahPegawai;
+        const totalTransport = biayaBbm + biayaTol + biayaTiket + biayaParkir;
         const totalHotel = tarifHotel * malamInap;
-        const grandTotal = totalHarian + biayaTrans + totalHotel;
+        const grandTotal = totalHarian + totalTransport + totalHotel;
 
         document.getElementById('preview-total').innerText = 'Rp ' + grandTotal.toLocaleString('id-ID');
     } catch (err) {

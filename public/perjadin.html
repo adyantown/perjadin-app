@@ -129,6 +129,17 @@
                     </div>
 
                     <div class="form-group-title">III. Detail Perjalanan</div>
+
+                    <div class="p-3 mb-3 bg-light border rounded">
+                        <label class="form-label fw-bold text-danger">📋 Referensi KAK (Opsional —
+                            Auto-Fill Maksud Dinas):</label>
+                        <select id="selectKak" class="form-select">
+                            <option value="">-- Tanpa Referensi KAK --</option>
+                        </select>
+                        <div class="form-text">Pilih KAK yang sudah dibuat untuk mengisi otomatis
+                            kolom Maksud Dinas.</div>
+                    </div>
+
                     <div class="mb-3">
                         <label class="form-label fw-bold">Maksud Perjalanan Dinas</label>
                         <textarea name="maksud_dinas" class="form-control" rows="2"
@@ -159,24 +170,69 @@
                         </div>
                     </div>
 
-                    <div class="form-group-title">IV. Biaya & Akomodasi</div>
+                    <div class="form-group-title">IV. Biaya &amp; Akomodasi</div>
                     <div class="row g-3 mb-3">
+
+                        <!-- Uang Harian -->
                         <div class="col-md-6">
                             <label class="form-label fw-bold">Uang Harian (Per Orang/Hari)</label>
-                            <div class="input-group">
+                            <div class="input-group mb-1">
                                 <span class="input-group-text">Rp</span>
                                 <input type="text" inputmode="numeric" name="uang_harian"
                                     class="form-control" placeholder="0" required>
                             </div>
+                            <input type="text" name="ket_harian" class="form-control form-control-sm text-muted"
+                                placeholder="Ket: Luar Kota / Dalam Kota / Diklat">
                         </div>
+
+                        <!-- Biaya BBM -->
                         <div class="col-md-6">
-                            <label class="form-label fw-bold">Biaya Transport (Total Riil)</label>
-                            <div class="input-group">
+                            <label class="form-label fw-bold">Biaya BBM</label>
+                            <div class="input-group mb-1">
                                 <span class="input-group-text">Rp</span>
-                                <input type="text" inputmode="numeric" name="biaya_transportasi"
+                                <input type="text" inputmode="numeric" name="biaya_bbm"
                                     class="form-control" placeholder="0">
                             </div>
+                            <input type="text" name="ket_bbm" class="form-control form-control-sm text-muted"
+                                placeholder="Ket: Solar 20 Liter">
                         </div>
+
+                        <!-- Biaya Tol -->
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Biaya Tol</label>
+                            <div class="input-group mb-1">
+                                <span class="input-group-text">Rp</span>
+                                <input type="text" inputmode="numeric" name="biaya_tol"
+                                    class="form-control" placeholder="0">
+                            </div>
+                            <input type="text" name="ket_tol" class="form-control form-control-sm text-muted"
+                                placeholder="Ket: Gunung Batin - Kota Baru PP">
+                        </div>
+
+                        <!-- Biaya Transportasi -->
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Biaya Transportasi</label>
+                            <div class="input-group mb-1">
+                                <span class="input-group-text">Rp</span>
+                                <input type="text" inputmode="numeric" name="biaya_tiket"
+                                    class="form-control" placeholder="0">
+                            </div>
+                            <input type="text" name="ket_tiket" class="form-control form-control-sm text-muted"
+                                placeholder="Ket: Tiket Bus Tulang Bawang - Bandar Lampung">
+                        </div>
+
+                        <!-- Biaya Parkir -->
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Biaya Parkir / Retribusi</label>
+                            <div class="input-group mb-1">
+                                <span class="input-group-text">Rp</span>
+                                <input type="text" inputmode="numeric" name="biaya_parkir"
+                                    class="form-control" placeholder="0">
+                            </div>
+                            <input type="text" name="ket_parkir" class="form-control form-control-sm text-muted"
+                                placeholder="Ket: Parkir RSUD">
+                        </div>
+
                     </div>
 
                     <h6 class="fw-bold text-danger mt-4 border-bottom pb-2">Data Penginapan (Jika

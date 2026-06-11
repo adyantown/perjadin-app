@@ -5,9 +5,10 @@ exports.insert = (params) => {
         no_surat_tugas, tgl_surat_tugas, menimbang, dasar,
         nama_pegawai, golongan, jabatan, 
         jumlah_sppd, tujuan, maksud_dinas, uraian_tugas, tgl_berangkat, tgl_pulang, 
-        uang_harian, jenis_transportasi, biaya_transportasi, nama_hotel, 
-        tarif_hotel, tgl_checkin, tgl_checkout, total_biaya
-    ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`;
+        uang_harian, ket_harian, jenis_transportasi, biaya_transportasi,
+        biaya_bbm, ket_bbm, biaya_tol, ket_tol, biaya_tiket, ket_tiket, biaya_parkir, ket_parkir,
+        nama_hotel, tarif_hotel, tgl_checkin, tgl_checkout, total_biaya
+    ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`;
     return db.query(sql, params);
 };
 
@@ -16,8 +17,9 @@ exports.update = (id, params) => {
         no_surat_tugas=?, tgl_surat_tugas=?, menimbang=?, dasar=?,
         nama_pegawai=?, golongan=?, jabatan=?, 
         jumlah_sppd=?, tujuan=?, maksud_dinas=?, uraian_tugas=?, tgl_berangkat=?, tgl_pulang=?, 
-        uang_harian=?, jenis_transportasi=?, biaya_transportasi=?, nama_hotel=?, 
-        tarif_hotel=?, tgl_checkin=?, tgl_checkout=?, total_biaya=? 
+        uang_harian=?, ket_harian=?, jenis_transportasi=?, biaya_transportasi=?,
+        biaya_bbm=?, ket_bbm=?, biaya_tol=?, ket_tol=?, biaya_tiket=?, ket_tiket=?, biaya_parkir=?, ket_parkir=?,
+        nama_hotel=?, tarif_hotel=?, tgl_checkin=?, tgl_checkout=?, total_biaya=? 
         WHERE id=?`;
     return db.query(sql, [...params, id]);
 };
@@ -88,7 +90,6 @@ exports.updateStatusSpj = (noSuratTugas, status) => {
 };
 
 exports.getKuitansiData = (id) => {
-    // Kita panggil langsung nama kolom asli dari tabel perjadin Mas Ady
     const sql = `
         SELECT 
             id,
@@ -106,8 +107,12 @@ exports.getKuitansiData = (id) => {
             tgl_berangkat,
             tgl_pulang,
             (DATEDIFF(tgl_pulang, tgl_berangkat) + 1) AS lama_hari,
-            uang_harian, 
-            biaya_transportasi AS uang_transport, 
+            uang_harian, ket_harian,
+            biaya_transportasi AS uang_transport,
+            biaya_bbm, ket_bbm,
+            biaya_tol, ket_tol,
+            biaya_tiket, ket_tiket,
+            biaya_parkir, ket_parkir,
             tarif_hotel AS uang_penginapan
         FROM perjadin 
         WHERE id = ?

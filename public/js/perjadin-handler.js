@@ -216,6 +216,33 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
 
     // await loadSppdDropdown();
+
+    // Load dropdown KAK untuk auto-fill Maksud Dinas
+    try {
+        const resKak = await fetch('/api/kak/all');
+        const dataKak = await resKak.json();
+        const selectKak = document.getElementById('selectKak');
+        if (selectKak && dataKak.success && dataKak.data) {
+            dataKak.data.forEach(kak => {
+                const opt = document.createElement('option');
+                opt.value = kak.id;
+                opt.textContent = kak.judul_kegiatan;
+                opt.dataset.judul = kak.judul_kegiatan;
+                selectKak.appendChild(opt);
+            });
+            // Event: Auto-fill maksud_dinas saat KAK dipilih
+            selectKak.addEventListener('change', function () {
+                const selected = this.options[this.selectedIndex];
+                const maksudEl = document.querySelector('[name="maksud_dinas"]');
+                if (this.value && maksudEl) {
+                    maksudEl.value = selected.dataset.judul || '';
+                }
+            });
+        }
+    } catch (err) {
+        console.error('Gagal load KAK:', err);
+    }
+
     const urlParams = new URLSearchParams(window.location.search);
     const editId = urlParams.get('edit');
     const formatDate = (d) => (d && d !== 'null' && !d.startsWith('0000') ? d.split('T')[0] : '');
@@ -270,7 +297,15 @@ document.addEventListener('DOMContentLoaded', async () => {
                 setFlatpickrDate('tgl_pulang', formatDate(data.tgl_pulang));
 
                 setVal('uang_harian', formatRupiah(Math.round(Number(data.uang_harian) || 0).toString()));
-                setVal('biaya_transportasi', formatRupiah(Math.round(Number(data.biaya_transportasi) || 0).toString()));
+                setVal('ket_harian', data.ket_harian || '');
+                setVal('biaya_bbm', formatRupiah(Math.round(Number(data.biaya_bbm) || 0).toString()));
+                setVal('ket_bbm', data.ket_bbm || '');
+                setVal('biaya_tol', formatRupiah(Math.round(Number(data.biaya_tol) || 0).toString()));
+                setVal('ket_tol', data.ket_tol || '');
+                setVal('biaya_tiket', formatRupiah(Math.round(Number(data.biaya_tiket) || 0).toString()));
+                setVal('ket_tiket', data.ket_tiket || '');
+                setVal('biaya_parkir', formatRupiah(Math.round(Number(data.biaya_parkir) || 0).toString()));
+                setVal('ket_parkir', data.ket_parkir || '');
                 setVal('tarif_hotel', formatRupiah(Math.round(Number(data.tarif_hotel) || 0).toString()));
 
                 setVal('nama_hotel', data.nama_hotel || '');
@@ -328,7 +363,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 // --- 6. EVENT LISTENER FORMAT RUPIAH & HITUNG ---
 document.addEventListener('input', (e) => {
-    if (['uang_harian', 'biaya_transportasi', 'tarif_hotel'].includes(e.target.name)) {
+    if (['uang_harian', 'biaya_bbm', 'biaya_tol', 'biaya_tiket', 'biaya_parkir', 'tarif_hotel'].includes(e.target.name)) {
         e.target.value = formatRupiah(e.target.value);
     }
     hitungOtomatis();
