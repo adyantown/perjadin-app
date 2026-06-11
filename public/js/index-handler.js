@@ -8,27 +8,17 @@ document.addEventListener('DOMContentLoaded', () => {
             const role = data.role; // 'admin' atau 'user'
 
             if (role === 'admin') {
-                // Admin: Lihat Galeri, Sembunyikan Upload (Opsional, atau munculin dua-duanya)
+                // Admin: Munculkan semua card admin (default tersembunyi di HTML)
                 document.getElementById('cardGaleriAdmin').style.display = 'block';
                 document.getElementById('cardLogAdmin').style.display = 'block';
                 document.getElementById('cardManajemenUser').style.display = 'block';
                 document.getElementById('cardManajemenPagu').style.display = 'block';
-                document.getElementById('heroAdminSection').style.display = 'flex'; // Munculkan kotak Hero
-                loadExecutiveSummary(data.user); // Jalankan mesin penghitung (sesuaikan variabel nama user-nya)
-                // document.getElementById('cardUploadLaporan').style.display = 'none'; // Kalau admin gak perlu lapor
-            } else {
-                // User Biasa: Sembunyikan Galeri & Menu Admin Lainnya
-                document.getElementById('cardGaleriAdmin').style.display = 'none';
-                document.getElementById('cardLogAdmin').style.display = 'none';
-                document.getElementById('cardManajemenUser').style.display = 'none';
-                document.getElementById('cardManajemenPagu').style.display = 'none';
-
-                // Sembunyikan menu sensitif lainnya (Fitur yg sebelumnya kita buat)
-                const menuSetting = document.getElementById('menuSetting');
-                const menuPegawai = document.getElementById('menuPegawai');
-                if (menuSetting) menuSetting.parentElement.style.display = 'none';
-                if (menuPegawai) menuPegawai.parentElement.style.display = 'none';
+                document.getElementById('cardPegawai').style.display = 'block';
+                document.getElementById('cardSetting').style.display = 'block';
+                document.getElementById('heroAdminSection').style.display = 'flex';
+                loadExecutiveSummary(data.user);
             }
+            // User biasa: semua card admin sudah display:none di HTML, tidak perlu action
         })
         .catch((err) => console.error('Gagal cek session:', err));
 
