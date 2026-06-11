@@ -113,7 +113,9 @@ exports.getKuitansiData = (id) => {
             biaya_tol, ket_tol,
             biaya_tiket, ket_tiket,
             biaya_parkir, ket_parkir,
-            tarif_hotel AS uang_penginapan
+            nama_hotel,
+            tarif_hotel AS uang_penginapan,
+            tgl_checkin, tgl_checkout
         FROM perjadin 
         WHERE id = ?
     `;

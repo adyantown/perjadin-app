@@ -36,7 +36,7 @@
                 <div
                     class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-3">
                     <div>
-                        <h4 class="fw-bold text-danger m-0">Form Input Terpadu Perjalanan Dinas</h4>
+                        <h4 class="fw-bold m-0" style="color: var(--kpu-dark);">Form Input Terpadu Perjalanan Dinas</h4>
                         <small class="text-muted">Single Entry: Lengkapi data penugasan, rombongan,
                             dan biaya untuk
                             mencetak dokumen Perjadin.</small>
@@ -65,13 +65,13 @@
 
                     <div class="row g-3 mt-2">
                         <div class="col-12">
-                            <label class="form-label fw-bold text-danger">Menimbang (Konsideran
+                            <label class="form-label fw-bold">Menimbang (Konsideran
                                 SPT)</label>
                             <textarea name="menimbang" class="form-control"
                                 rows="2">Bahwa dalam rangka ... , maka dipandang perlu menugaskan ASN dan ... untuk melakukan Perjalanan Dinas tersebut.</textarea>
                         </div>
                         <div class="col-12">
-                            <label class="form-label fw-bold text-danger">Dasar (Landasan Hukum
+                            <label class="form-label fw-bold">Dasar (Landasan Hukum
                                 SPT)</label>
                             <textarea name="dasar" class="form-control"
                                 rows="6">1. Peraturan Menteri Keuangan Nomor 32 Tahun 2025 Tentang Standar Biaya Masukan Tahun Anggaran 2026.
@@ -79,7 +79,7 @@
 3. Keputusan Komisi Pemilihan Umum Nomor 409 Tahun 2022 Tentang Pedoman Teknis Pelaksanaan Perjalanan Dinas Dalam Negeri di Lingkungan Komisi Pemilihan Umum, Komisi Pemilihan Umum Provinsi dan Komisi Pemilihan Umum Kabupaten/Kota.</textarea>
                         </div>
                         <div class="col-12">
-                            <label class="form-label fw-bold text-danger">Uraian Tugas (Bagian
+                            <label class="form-label fw-bold">Uraian Tugas (Bagian
                                 'Untuk' di SPT)</label>
                             <textarea name="uraian_tugas" class="form-control" rows="3"
                                 placeholder="Langsung fokus pada kegiatan, tidak perlu diberi uraian 'melakukan perjalanan dinas... dalam rangka...' &#10;Contoh: Coklit Terbatas dalam pelaksanaan PPDB..."></textarea>
@@ -89,7 +89,7 @@
                     <div class="form-group-title">II. Data Pegawai Terlibat</div>
 
                     <div class="p-3 mb-3 bg-light border rounded">
-                        <label class="form-label fw-bold text-danger">⚡ Tambah Pegawai Cepat (Pilih
+                        <label class="form-label fw-bold text-primary"><i class="bi bi-lightning-fill me-1"></i>Tambah Pegawai Cepat (Pilih
                             dari Database):</label>
 
                         <div class="d-flex align-items-center mb-2">
@@ -131,7 +131,7 @@
                     <div class="form-group-title">III. Detail Perjalanan</div>
 
                     <div class="p-3 mb-3 bg-light border rounded">
-                        <label class="form-label fw-bold text-danger">📋 Referensi KAK (Opsional —
+                        <label class="form-label fw-bold text-primary"><i class="bi bi-journal-text me-1"></i>Referensi KAK (Opsional —
                             Auto-Fill Maksud Dinas):</label>
                         <select id="selectKak" class="form-select">
                             <option value="">-- Tanpa Referensi KAK --</option>
@@ -235,16 +235,16 @@
 
                     </div>
 
-                    <h6 class="fw-bold text-danger mt-4 border-bottom pb-2">Data Penginapan (Jika
+                    <h6 class="fw-bold mt-4 border-bottom pb-2" style="color: var(--kpu-dark);">Data Penginapan (Jika
                         Menginap)</h6>
                     <div class="row g-3">
                         <div class="col-md-8">
-                            <label class="form-label">Nama Hotel</label>
+                            <label class="form-label fw-bold">Nama Hotel</label>
                             <input type="text" name="nama_hotel" class="form-control"
                                 placeholder="Nama Hotel">
                         </div>
                         <div class="col-md-4">
-                            <label class="form-label">Tarif Per Malam</label>
+                            <label class="form-label fw-bold">Tarif Per Malam</label>
                             <div class="input-group">
                                 <span class="input-group-text">Rp</span>
                                 <input type="text" inputmode="numeric" name="tarif_hotel"
@@ -252,12 +252,12 @@
                             </div>
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label">Tanggal Check-in</label>
+                            <label class="form-label fw-bold">Tanggal Check-in</label>
                             <input type="text" name="tgl_checkin"
                                 class="form-control flatpickr-date">
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label">Tanggal Check-out</label>
+                            <label class="form-label fw-bold">Tanggal Check-out</label>
                             <input type="text" name="tgl_checkout"
                                 class="form-control flatpickr-date">
                         </div>

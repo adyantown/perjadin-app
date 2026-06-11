@@ -10,7 +10,7 @@ function tambahPegawai(nama = '', gol = '', jab = '', pegawaiId = '') {
         <div class="pegawai-row card mb-3 bg-light border-0 shadow-sm">
             <div class="card-body p-3">
                 <div class="d-flex justify-content-between align-items-center mb-2">
-                    <h6 class="fw-bold text-danger m-0">
+                    <h6 class="fw-bold m-0" style="color: #800000;">
                         <i class="bi bi-person-badge-fill me-1"></i> Data Pegawai
                     </h6>
                     <button type="button" class="btn btn-merah-terang btn-sm btn-remove" onclick="hapusBaris(this)" title="Hapus Baris Ini">
@@ -189,11 +189,11 @@ window.tambahPegawaiOtomatis = function () {
             // Kalau kosong, TIMPA baris pertama
             firstRow.querySelector('[name="nama_pegawai[]"]').value = p.nama_pegawai;
             firstRow.querySelector('[name="golongan[]"]').value = displayGol || '';
-            firstRow.querySelector('[name="jabatan[]"]').value = p.jabatan || '';
+            firstRow.querySelector('[name="jabatan[]"]').value = '';
             firstRow.querySelector('[name="pegawai_id[]"]').value = p.id || '';
         } else {
             // Kalau sudah ada isinya, BUAT baris baru
-            tambahPegawai(p.nama_pegawai, displayGol || '', p.jabatan || '', p.id || '');
+            tambahPegawai(p.nama_pegawai, displayGol || '', '', p.id || '');
         }
 
         dropdown.value = ''; // Reset pilihan
@@ -343,7 +343,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                         if (pivotData) {
                             // Pegawai dari database → punya ID
                             const displayGol = pivotData.pangkat ? `${pivotData.pangkat} (${pivotData.golongan})` : (golArr[i] || '');
-                            tambahPegawai(n, displayGol, pivotData.jabatan || jabArr[i] || '', pivotData.id);
+                            tambahPegawai(n, displayGol, jabArr[i] || '', pivotData.id);
                         } else {
                             // Pegawai manual → tanpa ID
                             tambahPegawai(n, golArr[i] || '', jabArr[i] || '');

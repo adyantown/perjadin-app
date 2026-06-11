@@ -86,7 +86,21 @@ function renderKuitansi(data, pegawai, index, pejabat) {
     if (data.uang_penginapan > 0) {
         const penginapan = Math.round(Number(data.uang_penginapan) || 0);
         total += penginapan;
-        htmlRincian += buatBarisRincian(noUrut++, 'Biaya Penginapan', penginapan, 'Hotel/Losmen');
+
+        // Bangun keterangan dinamis: Nama Hotel + Jumlah Malam
+        let ketHotel = 'Hotel/Losmen';
+        if (data.nama_hotel) {
+            ketHotel = data.nama_hotel;
+            if (data.tgl_checkin && data.tgl_checkout) {
+                const checkin = new Date(data.tgl_checkin);
+                const checkout = new Date(data.tgl_checkout);
+                const jumlahMalam = Math.round((checkout - checkin) / (1000 * 60 * 60 * 24));
+                if (jumlahMalam > 0) {
+                    ketHotel += ` (${jumlahMalam} Malam)`;
+                }
+            }
+        }
+        htmlRincian += buatBarisRincian(noUrut++, 'Biaya Penginapan', penginapan, ketHotel);
     }
 
     const totalStr = Math.round(total).toLocaleString('id-ID');
