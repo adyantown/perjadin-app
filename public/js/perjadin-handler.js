@@ -5,6 +5,9 @@
 function tambahPegawai(nama = '', gol = '', jab = '', pegawaiId = '') {
     const container = document.getElementById('pegawai-container');
 
+    const isFirst = document.querySelectorAll('.pegawai-row').length === 0;
+    const checkedAttr = isFirst ? 'checked' : '';
+
     // HTML Template dengan Card Bootstrap (Ini yang bikin rapi!)
     const htmlBaris = `
         <div class="pegawai-row card mb-3 bg-light border-0 shadow-sm">
@@ -30,6 +33,14 @@ function tambahPegawai(nama = '', gol = '', jab = '', pegawaiId = '') {
                     <div class="col-md-4">
                         <label class="form-label small text-muted fw-bold">Jabatan</label>
                         <input type="text" name="jabatan[]" value="${jab}" class="form-control" placeholder="Jabatan" required>
+                    </div>
+                    <div class="col-12 mt-2">
+                        <div class="form-check">
+                            <input class="form-check-input check-hotel" type="checkbox" value="1" onchange="hitungOtomatis()" ${checkedAttr}>
+                            <label class="form-check-label text-danger fw-bold" style="font-size: 0.85rem;">
+                                <i class="bi bi-building"></i> Menanggung Biaya Penginapan / Hotel (Kuitansi)
+                            </label>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -307,7 +318,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                 setVal('biaya_parkir', formatRupiah(Math.round(Number(data.biaya_parkir) || 0).toString()));
                 setVal('ket_parkir', data.ket_parkir || '');
                 setVal('tarif_hotel', formatRupiah(Math.round(Number(data.tarif_hotel) || 0).toString()));
-
+                
+                setVal('jenis_kamar', data.jenis_kamar || 'Satu Kamar Bersama');
                 setVal('nama_hotel', data.nama_hotel || '');
                 setFlatpickrDate('tgl_checkin', formatDate(data.tgl_checkin));
                 setFlatpickrDate('tgl_checkout', formatDate(data.tgl_checkout));
@@ -352,6 +364,14 @@ document.addEventListener('DOMContentLoaded', async () => {
                 } else {
                     tambahPegawai();
                 }
+
+                // Centang checkbox pembayar hotel sesuai data
+                const pembayarHotelIndices = (data.pembayar_hotel || '0').split(',').map(s => parseInt(s.trim()));
+                const checkHotels = document.querySelectorAll('.check-hotel');
+                checkHotels.forEach((cb, idx) => {
+                    cb.checked = pembayarHotelIndices.includes(idx);
+                });
+
                 setTimeout(hitungOtomatis, 500);
             })
             .catch((err) => console.error('Gagal load edit:', err));
@@ -431,10 +451,25 @@ document.getElementById('perjadinForm').onsubmit = async function (e) {
     const formData = new FormData(this);
     const searchParams = new URLSearchParams();
 
+    // Ekstrak index checkbox hotel yang dicentang
+    const rows = document.querySelectorAll('.pegawai-row');
+    const pembayarHotelIndices = [];
+    rows.forEach((row, idx) => {
+        const cb = row.querySelector('.check-hotel');
+        if (cb && cb.checked) {
+            pembayarHotelIndices.push(idx);
+        }
+    });
+
     // Loop data biar array (nama_pegawai[]) terkirim benar
     for (const pair of formData.entries()) {
-        searchParams.append(pair[0], pair[1]);
+        if (pair[0] !== 'pembayar_hotel') { // Jangan ikutkan nilai default hidden input
+            searchParams.append(pair[0], pair[1]);
+        }
     }
+    
+    // Set nilai final pembayar_hotel ke string indices (contoh: "0,2")
+    searchParams.set('pembayar_hotel', pembayarHotelIndices.join(','));
 
     try {
         const response = await fetch('/api/perjadin/save', {

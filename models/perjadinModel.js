@@ -7,8 +7,8 @@ exports.insert = (params) => {
         jumlah_sppd, tujuan, maksud_dinas, uraian_tugas, tgl_berangkat, tgl_pulang, 
         uang_harian, ket_harian, jenis_transportasi, biaya_transportasi,
         biaya_bbm, ket_bbm, biaya_tol, ket_tol, biaya_tiket, ket_tiket, biaya_parkir, ket_parkir,
-        nama_hotel, tarif_hotel, tgl_checkin, tgl_checkout, total_biaya
-    ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`;
+        nama_hotel, pembayar_hotel, tarif_hotel, tgl_checkin, tgl_checkout, total_biaya
+    ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`;
     return db.query(sql, params);
 };
 
@@ -19,7 +19,7 @@ exports.update = (id, params) => {
         jumlah_sppd=?, tujuan=?, maksud_dinas=?, uraian_tugas=?, tgl_berangkat=?, tgl_pulang=?, 
         uang_harian=?, ket_harian=?, jenis_transportasi=?, biaya_transportasi=?,
         biaya_bbm=?, ket_bbm=?, biaya_tol=?, ket_tol=?, biaya_tiket=?, ket_tiket=?, biaya_parkir=?, ket_parkir=?,
-        nama_hotel=?, tarif_hotel=?, tgl_checkin=?, tgl_checkout=?, total_biaya=? 
+        nama_hotel=?, pembayar_hotel=?, tarif_hotel=?, tgl_checkin=?, tgl_checkout=?, total_biaya=? 
         WHERE id=?`;
     return db.query(sql, [...params, id]);
 };
@@ -113,7 +113,7 @@ exports.getKuitansiData = (id) => {
             biaya_tol, ket_tol,
             biaya_tiket, ket_tiket,
             biaya_parkir, ket_parkir,
-            nama_hotel,
+            nama_hotel, pembayar_hotel,
             tarif_hotel AS uang_penginapan,
             tgl_checkin, tgl_checkout
         FROM perjadin 

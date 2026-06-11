@@ -54,9 +54,12 @@ function hitungOtomatis() {
             if (c2 >= c1) malamInap = Math.ceil((c2 - c1) / (1000 * 60 * 60 * 24));
         }
 
+        const checkedHotels = document.querySelectorAll('.check-hotel:checked');
+        const hotelMultiplier = checkedHotels.length || 0;
+        
         const totalHarian = uangHarian * durasiPerjadin * jumlahPegawai;
         const totalTransport = biayaBbm + biayaTol + biayaTiket + biayaParkir;
-        const totalHotel = tarifHotel * malamInap;
+        const totalHotel = tarifHotel * malamInap * hotelMultiplier;
         const grandTotal = totalHarian + totalTransport + totalHotel;
 
         document.getElementById('preview-total').innerText = 'Rp ' + grandTotal.toLocaleString('id-ID');

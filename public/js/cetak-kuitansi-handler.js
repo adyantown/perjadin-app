@@ -84,9 +84,8 @@ function renderKuitansi(data, pegawai, index, pejabat) {
 
     // 3. Penginapan
     if (data.uang_penginapan > 0) {
-        const penginapan = Math.round(Number(data.uang_penginapan) || 0);
-        total += penginapan;
-
+        let penginapan = Math.round(Number(data.uang_penginapan) || 0);
+        
         // Bangun keterangan dinamis: Nama Hotel + Jumlah Malam
         let ketHotel = 'Hotel/Losmen';
         if (data.nama_hotel) {
@@ -100,6 +99,15 @@ function renderKuitansi(data, pegawai, index, pejabat) {
                 }
             }
         }
+
+        // Logika Kamar Bersama vs Masing-Masing via pembayar_hotel indices
+        const pembayarIndices = (data.pembayar_hotel || '0').split(',').map(s => parseInt(s.trim()));
+        if (!pembayarIndices.includes(index)) {
+            penginapan = 0;
+            ketHotel += ' (Ikut kamar pelaksana lain)';
+        }
+
+        total += penginapan;
         htmlRincian += buatBarisRincian(noUrut++, 'Biaya Penginapan', penginapan, ketHotel);
     }
 

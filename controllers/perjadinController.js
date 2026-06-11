@@ -90,7 +90,9 @@ exports.save = async (req, res) => {
         durasiHotel = durasiHotel > 0 ? durasiHotel : 0;
 
         // 5. HITUNG TOTAL AKHIR
-        const grandTotal = uangHarianClean * durasi * jumlahPegawai + biayaTransClean + tarifHotelClean * durasiHotel;
+        const pembayarHotelStr = d.pembayar_hotel || '0';
+        const hotelMultiplier = pembayarHotelStr ? pembayarHotelStr.split(',').filter(x => x.trim() !== '').length : 0;
+        const grandTotal = uangHarianClean * durasi * jumlahPegawai + biayaTransClean + (tarifHotelClean * durasiHotel * hotelMultiplier);
 
         // 6. TANGGANI TANGGAL KOSONG (Agar jadi NULL di MySQL)
         const fixCheckin = !d.tgl_checkin || d.tgl_checkin === '' ? null : d.tgl_checkin;
@@ -124,7 +126,8 @@ exports.save = async (req, res) => {
             biayaParkirClean, // 23
             d.ket_parkir || '', // 24
             d.nama_hotel, // 25
-            tarifHotelClean, // 26
+            pembayarHotelStr, // 26
+            tarifHotelClean, // 27
             fixCheckin, // 27
             fixCheckout, // 28
             grandTotal, // 29

@@ -135,6 +135,13 @@ function renderTable(data) {
                 <td class="text-end">
                     ${item.nama_hotel || '-'}
                     ${Number(item.tarif_hotel) > 0 ? '<br>' + rp(item.tarif_hotel) : ''}
+                    ${(() => {
+                        if (item.tgl_checkin && item.tgl_checkout) {
+                            const malam = Math.round((new Date(item.tgl_checkout) - new Date(item.tgl_checkin)) / (1000*60*60*24));
+                            if (malam > 0) return '<div class="badge bg-info text-dark mt-1" style="font-size: 0.75rem;">x' + malam + ' Malam</div>';
+                        }
+                        return '';
+                    })()}
                 </td>
                 
                 <td class="text-end fw-bold bg-light text-nowrap" style="color: #bb2d3b;">
