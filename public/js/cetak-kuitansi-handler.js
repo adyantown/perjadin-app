@@ -85,7 +85,7 @@ function renderKuitansi(data, pegawai, index, pejabat) {
     // 3. Penginapan
     if (data.uang_penginapan > 0) {
         let penginapan = Math.round(Number(data.uang_penginapan) || 0);
-        
+
         // Bangun keterangan dinamis: Nama Hotel + Jumlah Malam
         let ketHotel = 'Hotel/Losmen';
         if (data.nama_hotel) {
@@ -101,7 +101,7 @@ function renderKuitansi(data, pegawai, index, pejabat) {
         }
 
         // Logika Kamar Bersama vs Masing-Masing via pembayar_hotel indices
-        const pembayarIndices = (data.pembayar_hotel || '0').split(',').map(s => parseInt(s.trim()));
+        const pembayarIndices = (data.pembayar_hotel || '0').split(',').map((s) => parseInt(s.trim()));
         if (!pembayarIndices.includes(index)) {
             penginapan = 0;
             ketHotel += ' (Ikut kamar pelaksana lain)';
@@ -117,14 +117,14 @@ function renderKuitansi(data, pegawai, index, pejabat) {
 
     return `
     <div class="kertas-kuitansi">
-        <div class="header-kpu d-flex align-items-center">
-            <img src="/img/kpu_logo.png" class="logo-kpu me-3" alt="Logo KPU">
-            <div class="teks-header w-100">
-                <h5 class="m-0 fw-bold">KOMISI PEMILIHAN UMUM</h5>
-                <h5 class="m-0 fw-bold">KABUPATEN TULANG BAWANG BARAT</h5>
-                <small>Jalan KH Ahmad Dahlan Candra Mukti Tulang Bawang Tengah<br>
+        <div class="header-kpu pb-3 mb-4 position-relative" style="border-bottom: 3px double black; min-height: 110px;">
+            <img src="/img/kpu_logo.png" class="logo-kpu position-absolute" alt="Logo KPU" style="width: 100px; height: auto; left: 0; top: 50%; transform: translateY(-50%);">
+            <div class="teks-header text-center w-100">
+                <h5 class="m-0 fw-bold" style="font-size: 16pt;">KOMISI PEMILIHAN UMUM</h5>
+                <h5 class="m-0 fw-bold" style="font-size: 16pt;">KABUPATEN TULANG BAWANG BARAT</h5>
+                <small style="font-size: 11pt;">Jalan KH. Ahmad Dahlan Candra Mukti Tulang Bawang Tengah<br>
                     Kabupaten Tulang Bawang Barat Kode Pos : 34793<br>
-                    Telp : &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Email : kab_tulangbawangbarat@kpu.go.id</small>
+                    Telp:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Email : kab_tulangbawangbarat@kpu.go.id</small>
             </div>
         </div>
 

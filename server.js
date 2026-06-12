@@ -162,6 +162,7 @@ const userRoutes = require('./routes/userRoutes');
 const paguRoutes = require('./routes/paguRoutes');
 const kakRoutes = require('./routes/kakRoutes');
 const rabRoutes = require('./routes/rabRoutes');
+const laporanRoutes = require('./routes/laporanRoutes');
 
 app.use('/api/perjadin', cekLogin, perjadinRoutes);
 app.use('/api/pegawai', cekLogin, pegawaiRoutes);
@@ -174,6 +175,7 @@ app.use('/api/users', cekLogin, hanyaAdmin, userRoutes);
 app.use('/api/pagu', cekLogin, paguRoutes);
 app.use('/api/kak', cekLogin, kakRoutes);
 app.use('/api/rab', cekLogin, rabRoutes);
+app.use('/api/laporan', cekLogin, laporanRoutes);
 
 // const PORT = process.env.PORT;
 // app.listen(PORT, () => {

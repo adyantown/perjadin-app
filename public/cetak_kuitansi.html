@@ -19,6 +19,9 @@
         <button onclick="window.print()" class="btn btn-success rounded-pill px-4 shadow">
             <i class="bi bi-printer"></i> Cetak Sekarang
         </button>
+        <button onclick="downloadPDF()" class="btn btn-danger rounded-pill px-4 shadow mx-2">
+            <i class="bi bi-file-earmark-pdf"></i> Download PDF
+        </button>
         <button onclick="window.close()" class="btn btn-tutup rounded-pill px-4">
             <i class="bi bi-x-octagon-fill"></i> Tutup
         </button>
@@ -27,7 +30,31 @@
     <div id="render_area"></div>
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script src="/js/cetak-kuitansi-handler.js"></script>
+    
+    <script>
+        function downloadPDF() {
+            // Sembunyikan tombol saat proses render agar tidak ikut masuk atau merusak layout
+            const noPrint = document.querySelectorAll('.no-print');
+            noPrint.forEach(el => el.style.display = 'none');
+
+            const element = document.getElementById('render_area');
+            const opt = {
+                margin:       0, // Gunakan margin 0 karena .kertas-kuitansi sudah punya padding 20mm
+                filename:     'Kuitansi_Perjadin.pdf',
+                image:        { type: 'jpeg', quality: 0.98 },
+                html2canvas:  { scale: 2, useCORS: true }, // Hapus windowWidth agar tidak meleset ke kiri
+                jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' },
+                pagebreak:    { mode: 'css' } // Wajib agar memotong pas di class kuitansi-page
+            };
+            
+            html2pdf().set(opt).from(element).save().then(() => {
+                // Kembalikan tombol setelah selesai
+                noPrint.forEach(el => el.style.display = '');
+            });
+        }
+    </script>
 </body>
 
 </html>

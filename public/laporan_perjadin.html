@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/png" href="img/kpu_logo.png">
+    <title>Input Laporan Kegiatan - KPU Tubaba</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <link rel="stylesheet" href="style/perjadin-style.css">
+    <link rel="stylesheet" href="style/index-style.css">
+</head>
+
+<body style="background-color: #f4f6f9;">
+
+    <nav class="navbar navbar-expand-lg navbar-dark navbar-kpu py-3 shadow-sm mb-4">
+        <div class="container">
+            <a class="navbar-brand d-flex align-items-center" href="/index.html">
+                <i class="bi bi-arrow-left-circle me-2"></i> Kembali ke Dashboard
+            </a>
+            <span class="text-white fw-bold d-none d-md-block">INPUT LAPORAN KEGIATAN DINAS</span>
+        </div>
+    </nav>
+
+    <div class="container pb-5">
+        <div class="card shadow-sm border-0 rounded-4">
+            <div class="card-body p-4">
+
+                <div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-3">
+                    <div>
+                        <h4 class="fw-bold m-0" style="color: var(--kpu-dark);">Form Penyusunan Laporan Perjadin</h4>
+                        <small class="text-muted">Isi form di bawah ini untuk menghasilkan output dokumen Laporan Perjalanan Dinas otomatis.</small>
+                    </div>
+                    <a href="/daftar_laporan_perjadin.html" class="btn btn-success text-white shadow-sm">
+                        <i class="bi bi-table me-1"></i> Daftar Laporan
+                    </a>
+                </div>
+
+                <form id="formLaporanPerjadin" enctype="multipart/form-data">
+
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-12">
+                            <label class="form-label fw-bold">Pilih Perjalanan Dinas / Nomor Surat
+                                Tugas</label>
+                            <select name="perjadin_id" class="form-select" required>
+                                <option value="">-- Pilih Surat Tugas Terkait --</option>
+                                <option value="1">84/RT.02.1-ST/1812/2025 - Menghadiri Kegiatan
+                                    Lelang BMN</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group-title">Konsep Dasar Laporan</div>
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-12">
+                            <label class="form-label fw-bold">A. Dasar Pelaksanaan</label>
+                            <textarea name="dasar_pelaksanaan" class="form-control" rows="3"
+                                placeholder="Contoh: Surat Tugas Sekretaris KPU Tulang Bawang Barat Nomor..."
+                                required></textarea>
+                        </div>
+                        <div class="col-md-12">
+                            <label class="form-label fw-bold">B. Maksud dan Tujuan</label>
+                            <textarea name="maksud_tujuan" class="form-control" rows="3"
+                                placeholder="Jelaskan maksud dan tujuan pelaksanaan dinas..."
+                                required></textarea>
+                        </div>
+                    </div>
+
+                    <div class="form-group-title">Materi & Lokasi</div>
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-12">
+                            <label class="form-label fw-bold">C. Materi</label>
+                            <textarea name="materi_kegiatan" class="form-control" rows="4"
+                                placeholder="Jelaskan rincian materi, pembahasan, atau substansi kegiatan..."
+                                required></textarea>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">D. Tempat Pelaksanaan</label>
+                            <input type="text" name="tempat_pelaksanaan" class="form-control"
+                                placeholder="Contoh: KPKNL Metro" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Waktu Pelaksanaan</label>
+                            <input type="text" name="waktu_pelaksanaan" class="form-control flatpickr-date"
+                                placeholder="Pilih Tanggal Pelaksanaan" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group-title">Hasil & Dokumentasi Eksternal</div>
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-12">
+                            <label class="form-label fw-bold">E. Hasil Pelaksanaan</label>
+                            <textarea name="hasil_pelaksanaan" class="form-control" rows="5"
+                                placeholder="Tuliskan poin-poin capaian hasil perjalanan dinas yang telah diselesaikan..."
+                                required></textarea>
+                        </div>
+                        <div class="col-md-12">
+                            <label class="form-label fw-bold">F. Dokumentasi Kegiatan (Foto /
+                                Evidence)</label>
+                            <small class="text-muted d-block mb-2">Unggah foto dokumentasi kegiatan
+                                (Maksimal 3 foto, format JPG/PNG).</small>
+                            <input type="file" name="foto_dokumentasi" class="form-control"
+                                accept="image/*" multiple>
+                        </div>
+                    </div>
+
+                    <div class="text-end border-top pt-3">
+                        <button type="reset" class="btn btn-secondary me-2"><i
+                                class="bi bi-arrow-counterclockwise"></i> Reset</button>
+                        <button type="submit" class="btn btn-primary"><i
+                                class="bi bi-save-fill"></i> Simpan Laporan</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://npmcdn.com/flatpickr/dist/l10n/id.js"></script>
+    <script src="js/laporan-handler.js"></script>
+</body>
+
+</html>
