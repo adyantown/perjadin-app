@@ -24,8 +24,8 @@ exports.saveLaporan = async (req, res) => {
         // Proses foto jika ada
         let fotoPaths = '';
         if (req.files && req.files.length > 0) {
-            // Gabungkan filename dengan koma
-            fotoPaths = req.files.map(file => `/uploads/laporan/${file.filename}`).join(',');
+            // Gabungkan URL Cloudinary (tersedia di file.path) dengan koma
+            fotoPaths = req.files.map(file => file.path).join(',');
         }
 
         const data = {
@@ -40,7 +40,7 @@ exports.saveLaporan = async (req, res) => {
         };
 
         const result = await LaporanModel.create(data);
-        logController.catatLog(req, 'Buat Laporan', `Membuat Laporan Kegiatan Perjadin ID: ${perjadin_id}`);
+        logController.catatLog(req, 'Buat Laporan', `Membuat Laporan Kegiatan: ${maksud_tujuan}`);
         res.json({ success: true, message: 'Laporan berhasil disimpan!', id: result.insertId });
 
     } catch (err) {

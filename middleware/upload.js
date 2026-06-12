@@ -35,4 +35,22 @@ const uploadSpj = multer({
     },
 });
 
-module.exports = { uploadSpj };
+// Konfigurasi Penyimpanan Foto Laporan (Cloudinary)
+const storageLaporan = new CloudinaryStorage({
+    cloudinary: cloudinary,
+    params: {
+        folder: 'laporan_perjadin',
+        allowed_formats: ['jpg', 'png', 'jpeg', 'webp'], // Khusus gambar
+        public_id: (req, file) => {
+            const unique = Date.now() + '-' + Math.round(Math.random() * 1e9);
+            return 'FOTO-' + unique;
+        },
+    },
+});
+
+const uploadLaporanFoto = multer({
+    storage: storageLaporan,
+    limits: { fileSize: 5 * 1024 * 1024 }, // Maksimal 5 MB per foto
+});
+
+module.exports = { uploadSpj, uploadLaporanFoto };
