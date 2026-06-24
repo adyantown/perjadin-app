@@ -159,7 +159,7 @@
         </table>
 
         <div class="mt-4" style="text-align: justify;">
-            <p>Dalam Pelaksanaan tugas dimaksud kepada yang bersangkutan diberikan biaya perjalanan
+            <p id="v_keterangan_biaya">Dalam Pelaksanaan tugas dimaksud kepada yang bersangkutan diberikan biaya perjalanan
                 dinas sesuai dengan ketentuan yang berlaku yang dibebankan pada DIPA APBN KPU
                 Kabupaten Tulang Bawang Barat TA 2026.</p>
             <p>Demikian Surat Tugas ini dibuat untuk dilaksanakan dengan penuh tanggung jawab.</p>
@@ -244,6 +244,14 @@
 
                     const teksUntuk = `Melaksanakan Perjalanan Dinas dalam rangka ${data.uraian_tugas || data.maksud_dinas}, ${durasiTeks} bertempat di ${data.tujuan}.`;
                     document.getElementById('v_untuk').innerText = teksUntuk;
+
+                    // Logika Sembunyikan Teks DIPA Jika Perjadin Tanpa Dana
+                    if (!data.uang_harian || parseInt(data.uang_harian) === 0) {
+                        const keteranganBiaya = document.getElementById('v_keterangan_biaya');
+                        if (keteranganBiaya) {
+                            keteranganBiaya.classList.add('d-none');
+                        }
+                    }
 
                     // 2. OLAH DATA PEGAWAI (Pecah |||)
                     const listPegawai = data.listPegawai; // Array [{nama: '...'}, ...] dari controller

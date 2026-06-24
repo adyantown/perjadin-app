@@ -99,6 +99,8 @@ function renderTable(data) {
             return val > 0 ? 'Rp ' + val.toLocaleString('id-ID') : '-';
         };
 
+        const isZeroBudget = Math.round(Number(item.uang_harian) || 0) === 0;
+        
         // ---> GUNAKAN HELPER PEMOTONG PIPA DI SINI <---
         const namaFormatted = formatPipaAman(item.nama_pegawai) || 'Tidak ada nama';
         const jabatanFormatted = formatPipaAman(item.jabatan);
@@ -126,26 +128,26 @@ function renderTable(data) {
                 </td>
                 
                 <td class="text-end text-nowrap">
-                    ${rp(item.uang_harian)}
+                    ${isZeroBudget ? '<span class="badge bg-secondary mb-1">Zero Budget</span>' : rp(item.uang_harian)}
                     ${pengali}
                 </td>
                 
-                <td class="text-end text-nowrap">${rp(item.biaya_transportasi)}</td>
+                <td class="text-end text-nowrap">${isZeroBudget ? '-' : rp(item.biaya_transportasi)}</td>
                 
                 <td class="text-end">
-                    ${item.nama_hotel || '-'}
-                    ${Number(item.tarif_hotel) > 0 ? '<br>' + rp(item.tarif_hotel) : ''}
-                    ${(() => {
+                    ${isZeroBudget ? '-' : (item.nama_hotel || '-')}
+                    ${!isZeroBudget && Number(item.tarif_hotel) > 0 ? '<br>' + rp(item.tarif_hotel) : ''}
+                    ${!isZeroBudget ? (() => {
                         if (item.tgl_checkin && item.tgl_checkout) {
                             const malam = Math.round((new Date(item.tgl_checkout) - new Date(item.tgl_checkin)) / (1000*60*60*24));
                             if (malam > 0) return '<div class="badge bg-info text-dark mt-1" style="font-size: 0.75rem;">x' + malam + ' Malam</div>';
                         }
                         return '';
-                    })()}
+                    })() : ''}
                 </td>
                 
                 <td class="text-end fw-bold bg-light text-nowrap" style="color: #bb2d3b;">
-                    ${rp(item.total_biaya)}
+                    ${isZeroBudget ? '<span class="badge bg-secondary">Zero Budget</span>' : rp(item.total_biaya)}
                 </td>
 
                 <td class="no-print align-middle text-center">

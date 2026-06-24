@@ -381,13 +381,40 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 });
 
-// --- 6. EVENT LISTENER FORMAT RUPIAH & HITUNG ---
+// --- 6. EVENT LISTENER FORMAT RUPIAH, HITUNG & TOGGLE TANPA DANA ---
 document.addEventListener('input', (e) => {
     if (['uang_harian', 'biaya_bbm', 'biaya_tol', 'biaya_tiket', 'biaya_parkir', 'tarif_hotel'].includes(e.target.name)) {
         e.target.value = formatRupiah(e.target.value);
     }
     hitungOtomatis();
 });
+
+const switchTanpaDana = document.getElementById('switchTanpaDana');
+if (switchTanpaDana) {
+    switchTanpaDana.addEventListener('change', function () {
+        const isTanpaDana = this.checked;
+        const biayaFields = document.querySelectorAll(
+            'input[name="uang_harian"], input[name="ket_harian"], ' +
+            'input[name="biaya_bbm"], input[name="ket_bbm"], ' +
+            'input[name="biaya_tol"], input[name="ket_tol"], ' +
+            'input[name="biaya_tiket"], input[name="ket_tiket"], ' +
+            'input[name="biaya_parkir"], input[name="ket_parkir"], ' +
+            'input[name="tarif_hotel"]'
+        );
+
+        biayaFields.forEach(field => {
+            field.disabled = isTanpaDana;
+            if (isTanpaDana) {
+                if (field.name.startsWith('ket_')) {
+                    field.value = '';
+                } else {
+                    field.value = '0';
+                }
+            }
+        });
+        hitungOtomatis();
+    });
+}
 
 // --- 7. SUBMIT FORM (SIMPAN) ---
 document.getElementById('perjadinForm').onsubmit = async function (e) {
