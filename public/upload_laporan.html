@@ -66,16 +66,13 @@
 </head>
 
 <body>
-    <nav class="navbar navbar-dark navbar-kpu py-3 shadow-sm mb-4">
+    <nav class="navbar navbar-expand-lg navbar-dark navbar-kpu py-3 shadow-sm mb-4">
         <div class="container">
-            <a class="navbar-brand d-flex align-items-center fw-bold" href="/index.html">
-                <img src="img/kpu_logo.png" alt="Logo KPU" height="50" class="me-3"></i>Laporan
-                Kegiatan Perjalan Dinas
+            <a class="navbar-brand d-flex align-items-center" href="/index.html">
+                <i class="bi bi-arrow-left-circle me-2"></i> Kembali ke Dashboard
             </a>
-            <a href="/index.html" class="btn btn-sm btn-outline-light rounded-pill px-3 fw-bold">
-                <i class="bi bi-house-door-fill me-1"></i> Kembali ke Dashboard
-            </a>
-
+            <span class="text-white fw-bold d-none d-md-block">UPLOAD BUKTI SPJ</span>
+        </div>
     </nav>
 
 
@@ -108,8 +105,8 @@
                                         class="bi bi-exclamation-triangle-fill"></i> Ukuran file
                                     melebihi 10MB!</small>
                             </div>
-                            <div class="d-grid">
-                                <button type="submit" class="btn btn-primary rounded-pill fw-bold"
+                            <div class="d-grid d-md-flex justify-content-md-end">
+                                <button type="submit" class="btn btn-primary rounded-pill fw-bold px-4"
                                     id="btnSubmit">
                                     <i class="bi bi-send-fill me-1"></i> Kirim untuk Diverifikasi
                                 </button>
@@ -173,7 +170,6 @@
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="js/upload-handler.js"></script>
-    <script src="/js/load-components.js"></script>
 </body>
 
 </html>
