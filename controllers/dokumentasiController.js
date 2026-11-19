@@ -70,12 +70,41 @@ exports.verifikasiSpj = async (req, res) => {
     try {
         const spjId = req.params.id;
         const { status, catatan_admin } = req.body;
+        if (!['ACC', 'Revisi'].includes(status)) {
+            return res.status(400).json({ success: false, message: 'Status verifikasi tidak valid.' });
+        }
+        if (status === 'Revisi'
+            && (typeof catatan_admin !== 'string' || !catatan_admin.trim())) {
+            return res.status(400).json({ success: false, message: 'Catatan revisi wajib diisi.' });
+        }
+
+        const spj = await DokumentasiModel.getSpjForVerification(spjId);
+        if (spj.length === 0) {
+            return res.status(404).json({ success: false, message: 'Dokumen SPJ tidak ditemukan.' });
+        }
+        if (spj[0].status === 'Revisi'
+            || spj[0].catatan_admin === DokumentasiModel.SPJ_PERJADIN_CHANGED_NOTE) {
+            return res.status(409).json({
+                success: false,
+                message: 'Dokumen ini sudah diminta untuk direvisi. Tunggu pengguna mengunggah ulang PDF SPJ sebelum verifikasi.',
+            });
+        }
 
         // Cari nomor ST untuk keperluan log
         const stResult = await DokumentasiModel.getNomorStBySpjId(spjId);
         const nomorStLog = stResult.length > 0 ? stResult[0].nomor_st : `ID ${spjId}`;
 
-        await DokumentasiModel.updateSpjStatus(spjId, status, catatan_admin);
+        const updateResult = await DokumentasiModel.updateSpjStatus(
+            spjId,
+            status,
+            status === 'Revisi' ? catatan_admin.trim() : null,
+        );
+        if (updateResult.affectedRows === 0) {
+            return res.status(409).json({
+                success: false,
+                message: 'Status SPJ berubah atau PDF perlu diunggah ulang. Muat ulang antrean sebelum memverifikasi.',
+            });
+        }
         logController.catatLog(req, 'Verifikasi SPJ', `Mengubah status SPJ ${nomorStLog} menjadi ${status}`);
         res.json({ success: true, message: `SPJ berhasil di-set menjadi: ${status}` });
     } catch (err) {

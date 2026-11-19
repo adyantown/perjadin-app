@@ -1,4 +1,6 @@
 const db = require('../config/dbPromise');
+const { promisePool } = require('../config/db');
+exports.SPJ_PERJADIN_CHANGED_NOTE = 'Data Perjadin berubah. Silakan unggah ulang PDF SPJ terbaru.';
 
 // Cari ID perjadin berdasarkan nomor surat tugas
 exports.getPerjadinIdByNomorSt = (nomorSt) => {
@@ -38,8 +40,14 @@ exports.getAllSpjWithPerjadin = () => {
 };
 
 // Update status verifikasi SPJ
-exports.updateSpjStatus = (id, status, catatanAdmin) => {
-    return db.query('UPDATE dokumen_spj SET status = ?, catatan_admin = ? WHERE id = ?', [status, catatanAdmin, id]);
+exports.updateSpjStatus = async (id, status, catatanAdmin) => {
+    const [result] = await promisePool.execute(
+        `UPDATE dokumen_spj SET status = ?, catatan_admin = ?
+        WHERE id = ? AND status = 'Menunggu Verifikasi'
+            AND (catatan_admin IS NULL OR catatan_admin <> ?)`,
+        [status, catatanAdmin, id, exports.SPJ_PERJADIN_CHANGED_NOTE],
+    );
+    return result;
 };
 
 // Hapus SPJ
@@ -56,4 +64,8 @@ exports.getNomorStBySpjId = (id) => {
         WHERE doc.id = ?
     `;
     return db.query(sql, [id]);
+};
+
+exports.getSpjForVerification = (id) => {
+    return db.query('SELECT id, file_pdf, status, catatan_admin FROM dokumen_spj WHERE id = ?', [id]);
 };

@@ -82,6 +82,7 @@ document.getElementById('formLaporanPerjadin').addEventListener('submit', async 
     e.preventDefault();
     const form = e.target;
     const formData = new FormData(form);
+    if (!validasiFotoLaporan()) return;
 
     // Tampilkan loading
     Swal.fire({
@@ -125,3 +126,25 @@ document.getElementById('formLaporanPerjadin').addEventListener('submit', async 
         Swal.fire('Gagal!', 'Terjadi kesalahan sistem atau koneksi.', 'error');
     }
 });
+
+const fotoInput = document.getElementById('foto_dokumentasi');
+const fotoError = document.getElementById('fotoError');
+const tombolSimpanLaporan = document.querySelector('#formLaporanPerjadin button[type="submit"]');
+
+fotoInput.addEventListener('change', validasiFotoLaporan);
+
+function validasiFotoLaporan() {
+    const files = Array.from(fotoInput.files || []);
+    let message = '';
+
+    if (files.length > 3) {
+        message = 'Pilih maksimal 3 foto.';
+    } else if (files.some((file) => file.size > 5 * 1024 * 1024)) {
+        message = 'Ukuran setiap foto maksimal 5 MB.';
+    }
+
+    fotoError.textContent = message;
+    fotoError.hidden = !message;
+    tombolSimpanLaporan.disabled = Boolean(message);
+    return !message;
+}

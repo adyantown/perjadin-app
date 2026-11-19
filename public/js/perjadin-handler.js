@@ -6,6 +6,8 @@ function tambahPegawai(nama = '', gol = '', jab = '', pegawaiId = '') {
     const container = document.getElementById('pegawai-container');
 
     const isFirst = document.querySelectorAll('.pegawai-row').length === 0;
+    const employeeNumber = document.querySelectorAll('.pegawai-row').length + 1;
+    const hotelCheckboxId = `check-hotel-${Date.now()}-${employeeNumber}`;
     const checkedAttr = isFirst ? 'checked' : '';
 
     // HTML Template dengan Card Bootstrap (Ini yang bikin rapi!)
@@ -14,7 +16,7 @@ function tambahPegawai(nama = '', gol = '', jab = '', pegawaiId = '') {
             <div class="card-body p-3">
                 <div class="d-flex justify-content-between align-items-center mb-2">
                     <h6 class="fw-bold m-0" style="color: #800000;">
-                        <i class="bi bi-person-badge-fill me-1"></i> Data Pegawai
+                        <i class="bi bi-person-badge-fill me-1"></i> Pegawai ${employeeNumber}
                     </h6>
                     <button type="button" class="btn btn-merah-terang btn-sm btn-remove" onclick="hapusBaris(this)" title="Hapus Baris Ini">
                         <i class="bi bi-trash"></i> Hapus
@@ -23,7 +25,7 @@ function tambahPegawai(nama = '', gol = '', jab = '', pegawaiId = '') {
                 <input type="hidden" name="pegawai_id[]" value="${pegawaiId}">
                 <div class="row g-2">
                     <div class="col-md-5">
-                        <label class="form-label small text-muted fw-bold">Nama Pegawai</label>
+                        <label class="form-label small text-muted fw-bold">Nama Pegawai <span class="text-danger">*</span></label>
                         <input type="text" name="nama_pegawai[]" value="${nama}" class="form-control" placeholder="Nama Lengkap" required>
                     </div>
                     <div class="col-md-3">
@@ -31,13 +33,13 @@ function tambahPegawai(nama = '', gol = '', jab = '', pegawaiId = '') {
                         <input type="text" name="golongan[]" value="${gol}" class="form-control" placeholder="Contoh: IV/a">
                     </div>
                     <div class="col-md-4">
-                        <label class="form-label small text-muted fw-bold">Jabatan</label>
+                        <label class="form-label small text-muted fw-bold">Jabatan <span class="text-danger">*</span></label>
                         <input type="text" name="jabatan[]" value="${jab}" class="form-control" placeholder="Jabatan" required>
                     </div>
                     <div class="col-12 mt-2">
                         <div class="form-check">
-                            <input class="form-check-input check-hotel" type="checkbox" value="1" onchange="hitungOtomatis()" ${checkedAttr}>
-                            <label class="form-check-label text-danger fw-bold" style="font-size: 0.85rem;">
+                            <input class="form-check-input check-hotel" type="checkbox" id="${hotelCheckboxId}" value="1" onchange="hitungOtomatis()" ${checkedAttr}>
+                            <label class="form-check-label text-danger fw-bold" for="${hotelCheckboxId}" style="font-size: 0.85rem;">
                                 <i class="bi bi-building"></i> Menanggung Biaya Penginapan / Hotel (Kuitansi)
                             </label>
                         </div>
@@ -61,10 +63,11 @@ function hapusBaris(btn) {
 // --- 3. UTILS: UPDATE TOMBOL HAPUS ---
 function updateTombolHapus() {
     const rows = document.querySelectorAll('.pegawai-row');
-    // Jika baris tinggal 1, sembunyikan tombol hapus biar gak kosong melompong
-    rows.forEach((row) => {
+    rows.forEach((row, index) => {
         const btn = row.querySelector('.btn-remove');
-        if (btn) btn.style.display = rows.length === 1 ? 'none' : 'block';
+        const title = row.querySelector('h6');
+        if (title) title.innerHTML = `<i class="bi bi-person-badge-fill me-1"></i> Pegawai ${index + 1}`;
+        if (btn) btn.classList.toggle('d-none', rows.length === 1);
     });
 }
 
@@ -265,21 +268,23 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         fetch(`/api/perjadin/view/${editId}`)
             .then((res) => res.json())
-            .then((data) => {
+            .then(async (data) => {
                 if (!data) return Swal.fire('Error!', 'Data tidak ditemukan!', 'error');
 
-                // GUARD: Blokir edit jika SPJ sudah diupload
                 if (data.status_spj) {
-                    Swal.fire({
-                        title: 'Data Terkunci! 🔒',
-                        text: 'Perjadin ini sudah memiliki SPJ yang diupload. Data tidak bisa diedit.',
+                    const confirmEdit = await Swal.fire({
+                        title: 'SPJ perlu diunggah ulang',
+                        text: 'Jika data Perjadin diubah, berkas SPJ yang ada akan dibatalkan dan perlu diunggah ulang.',
                         icon: 'warning',
-                        confirmButtonColor: '#d33',
-                        confirmButtonText: 'Kembali ke Daftar',
-                    }).then(() => {
-                        window.location.href = '/daftar_perjadin.html';
+                        showCancelButton: true,
+                        confirmButtonColor: '#800000',
+                        confirmButtonText: 'Lanjut edit',
+                        cancelButtonText: 'Kembali ke daftar',
                     });
-                    return;
+                    if (!confirmEdit.isConfirmed) {
+                        window.location.href = '/daftar_perjadin.html';
+                        return;
+                    }
                 }
 
                 // Helper isi form

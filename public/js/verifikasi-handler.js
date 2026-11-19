@@ -16,7 +16,7 @@ async function loadAntrean() {
         const tbody = document.getElementById('tabelVerifikasi');
 
         if (json.data.length === 0) {
-            return tbody.innerHTML = '<tr><td colspan="5" class="text-center py-5 text-muted"><i class="bi bi-emoji-smile fs-3 d-block mb-2"></i>Belum ada berkas SPJ yang masuk hari ini.</td></tr>';
+            return tbody.innerHTML = '<tr><td colspan="5" class="text-center py-5 text-muted"><i class="bi bi-emoji-smile fs-3 d-block mb-2"></i>Belum ada berkas SPJ untuk ditampilkan.</td></tr>';
         }
 
         tbody.innerHTML = '';
@@ -31,14 +31,18 @@ async function loadAntrean() {
             let iconStatus = 'bi-hourglass-split';
             if (item.status === 'ACC') { badgeClass = 'bg-success'; iconStatus = 'bi-check-circle-fill'; }
             if (item.status === 'Revisi') { badgeClass = 'bg-danger'; iconStatus = 'bi-exclamation-triangle-fill'; }
+            const perluUploadUlang = item.status === 'Revisi';
 
             // Tombol Tindakan
             let aksiBtn = `
                 <button onclick="prosesSpj(${item.id}, 'ACC')" class="btn btn-sm btn-success rounded-pill shadow-sm mb-1 px-3 fw-bold"><i class="bi bi-check-lg me-1"></i> ACC</button>
                 <button onclick="prosesSpj(${item.id}, 'Revisi')" class="btn btn-sm btn-danger rounded-pill shadow-sm mb-1 px-3 fw-bold"><i class="bi bi-x-lg me-1"></i> Revisi</button>
             `;
+            if (perluUploadUlang) {
+                aksiBtn = '<span class="small text-danger">Menunggu pengguna mengunggah PDF revisi.</span>';
+            }
             // Kalau udah ACC, tombol hilang ganti tulisan selesai
-            if (item.status === 'ACC') {
+            else if (item.status === 'ACC') {
                 aksiBtn = `<span class="text-success fw-bold"><i class="bi bi-check2-all me-1"></i> Tuntas</span>`;
             }
 
@@ -56,14 +60,15 @@ async function loadAntrean() {
                     <td>
                         <div class="fw-bold text-primary mb-1"><i class="bi bi-people-fill me-1"></i> ${formatNamaPegawai(item.nama_pegawai)}</div>
                         <div class="small text-secondary fw-medium">${item.maksud_dinas}</div>
+                        ${item.catatan_admin ? `<div class="alert alert-warning py-1 px-2 mt-2 mb-0 small"><strong>Catatan:</strong> ${item.catatan_admin}</div>` : ''}
                     </td>
                     <td class="text-center">
-                        <a href="${item.file_pdf}" target="_blank" class="btn btn-sm btn-outline-primary rounded-pill px-3 shadow-sm">
-                            <i class="bi bi-file-earmark-pdf-fill me-1"></i> Buka PDF
-                        </a>
+                        ${item.file_pdf
+                            ? `<a href="${item.file_pdf}" target="_blank" rel="noopener" class="btn btn-sm btn-outline-primary rounded-pill px-3 shadow-sm"><i class="bi bi-file-earmark-pdf-fill me-1"></i> ${perluUploadUlang ? 'PDF yang perlu diperbaiki' : 'Buka PDF'}</a>`
+                            : '<span class="small text-muted">PDF perlu diunggah ulang</span>'}
                     </td>
                     <td class="text-center">
-                        <span class="badge ${badgeClass} rounded-pill px-3 py-2"><i class="bi ${iconStatus} me-1"></i> ${item.status}</span>
+                        <span class="badge ${badgeClass} rounded-pill px-3 py-2"><i class="bi ${iconStatus} me-1"></i> ${perluUploadUlang ? 'Perlu upload ulang' : item.status}</span>
                     </td>
                     <td class="text-center">
                         <div class="d-grid gap-1 px-2">${aksiBtn}</div>

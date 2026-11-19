@@ -48,7 +48,7 @@
                 <h4 class="fw-bold text-dark mb-1"><i
                         class="bi bi-inboxes-fill text-success me-2"></i>Antrean Dokumen Masuk</h4>
                 <p class="text-muted small mb-0">Verifikasi kelengkapan bukti laporan, tiket, dan
-                    kuitansi penginapan pegawai.</p>
+                    kuitansi penginapan pegawai. Berkas yang menunggu unggah ulang tidak dapat diverifikasi.</p>
             </div>
             <button onclick="loadAntrean()"
                 class="btn btn-sm btn-light border shadow-sm rounded-pill px-3">
@@ -72,7 +72,7 @@
                         <tbody id="tabelVerifikasi">
                             <tr>
                                 <td colspan="5" class="text-center text-muted py-5">
-                                    <div class="spinner-border spinner-border-sm me-2"></div>Memuat
+                                    <div class="spinner-border spinner-border-sm me-2" role="status"></div>Memuat
                                     antrean dokumen...
                                 </td>
                             </tr>

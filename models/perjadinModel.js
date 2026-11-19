@@ -1,4 +1,6 @@
 const db = require('../config/dbPromise');
+const { promisePool } = require('../config/db');
+const DokumentasiModel = require('./dokumentasiModel');
 
 exports.insert = (params) => {
     const sql = `INSERT INTO perjadin (
@@ -12,16 +14,81 @@ exports.insert = (params) => {
     return db.query(sql, params);
 };
 
+const updateSql = `UPDATE perjadin SET
+    no_surat_tugas=?, tgl_surat_tugas=?, menimbang=?, dasar=?,
+    nama_pegawai=?, golongan=?, jabatan=?,
+    jumlah_sppd=?, tujuan=?, maksud_dinas=?, uraian_tugas=?, tgl_berangkat=?, tgl_pulang=?,
+    uang_harian=?, ket_harian=?, jenis_transportasi=?, biaya_transportasi=?,
+    biaya_bbm=?, ket_bbm=?, biaya_tol=?, ket_tol=?, biaya_tiket=?, ket_tiket=?, biaya_parkir=?, ket_parkir=?,
+    nama_hotel=?, pembayar_hotel=?, tarif_hotel=?, tgl_checkin=?, tgl_checkout=?, total_biaya=?
+    WHERE id=?`;
+
 exports.update = (id, params) => {
-    const sql = `UPDATE perjadin SET 
-        no_surat_tugas=?, tgl_surat_tugas=?, menimbang=?, dasar=?,
-        nama_pegawai=?, golongan=?, jabatan=?, 
-        jumlah_sppd=?, tujuan=?, maksud_dinas=?, uraian_tugas=?, tgl_berangkat=?, tgl_pulang=?, 
-        uang_harian=?, ket_harian=?, jenis_transportasi=?, biaya_transportasi=?,
-        biaya_bbm=?, ket_bbm=?, biaya_tol=?, ket_tol=?, biaya_tiket=?, ket_tiket=?, biaya_parkir=?, ket_parkir=?,
-        nama_hotel=?, pembayar_hotel=?, tarif_hotel=?, tgl_checkin=?, tgl_checkout=?, total_biaya=? 
-        WHERE id=?`;
-    return db.query(sql, [...params, id]);
+    return db.query(updateSql, [...params, id]);
+};
+
+exports.updateAndInvalidateSpj = async (id, params, pegawaiIdArray = [], kuitansiArray = []) => {
+    const connection = await promisePool.getConnection();
+
+    try {
+        await connection.beginTransaction();
+        const [updateResult] = await connection.execute(updateSql, [...params, id]);
+        const [existingPivotRows] = await connection.execute(
+            'SELECT pegawai_id, total_kuitansi FROM perjadin_pegawai WHERE perjadin_id = ? FOR UPDATE',
+            [id],
+        );
+        const desiredPivotRows = pegawaiIdArray
+            .map((rawId, index) => ({
+                pegawaiId: parseInt(rawId, 10),
+                totalKuitansi: Number(kuitansiArray[index] || 0),
+            }))
+            .filter((row) => row.pegawaiId > 0 && Number.isFinite(row.pegawaiId));
+        const sortPivotRows = (rows) => rows
+            .map((row) => ({
+                pegawaiId: Number(row.pegawaiId ?? row.pegawai_id),
+                totalKuitansi: Number(row.totalKuitansi ?? row.total_kuitansi),
+            }))
+            .sort((a, b) => a.pegawaiId - b.pegawaiId || a.totalKuitansi - b.totalKuitansi);
+        const pivotChanged = JSON.stringify(sortPivotRows(existingPivotRows))
+            !== JSON.stringify(sortPivotRows(desiredPivotRows));
+        const dataChanged = updateResult.changedRows > 0 || pivotChanged;
+
+        if (pivotChanged) {
+            await connection.execute('DELETE FROM perjadin_pegawai WHERE perjadin_id = ?', [id]);
+            for (const row of desiredPivotRows) {
+                await connection.execute(
+                    'INSERT INTO perjadin_pegawai (perjadin_id, pegawai_id, total_kuitansi) VALUES (?, ?, ?)',
+                    [id, row.pegawaiId, row.totalKuitansi],
+                );
+            }
+        }
+
+        const [spjRows] = await connection.execute(
+            'SELECT id FROM dokumen_spj WHERE perjadin_id = ? FOR UPDATE',
+            [id],
+        );
+
+        if (dataChanged && spjRows.length > 0) {
+            await connection.execute(
+                `UPDATE dokumen_spj
+                SET status = 'Revisi', catatan_admin = ?
+                WHERE perjadin_id = ?`,
+                [DokumentasiModel.SPJ_PERJADIN_CHANGED_NOTE, id],
+            );
+        }
+
+        if (dataChanged) {
+            await connection.execute('UPDATE perjadin SET status_spj = 0 WHERE id = ?', [id]);
+        }
+        await connection.commit();
+
+        return dataChanged && spjRows.length > 0;
+    } catch (error) {
+        await connection.rollback();
+        throw error;
+    } finally {
+        connection.release();
+    }
 };
 
 exports.getAll = () => {

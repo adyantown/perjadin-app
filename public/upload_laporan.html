@@ -82,10 +82,8 @@
                 <div class="card shadow-sm border-0 rounded-4 mb-4">
                     <div class="card-header bg-white border-0 pt-4 px-4">
                         <h5 class="fw-bold text-dark"><i
-                                class="bi bi-cloud-arrow-up-fill text-primary me-2"></i>Upload Bukti
-                            SPJ (PDF)</h5>
-                        <p class="text-muted small mb-0">Upload berkas laporan, tiket, dan kuitansi
-                            hotel yang telah di-scan menjadi 1 file PDF (Maks 10MB).</p>
+                                class="bi bi-cloud-arrow-up-fill text-primary me-2"></i>Unggah Laporan Perjalanan Dinas</h5>
+                        <p class="text-muted small mb-0">Gabungkan laporan dan seluruh bukti pendukung (misalnya tiket dan kuitansi) menjadi satu file PDF. Maksimal 10 MB. Jika data Perjadin berubah atau berkas diminta revisi, unggah PDF terbaru untuk menggantikan berkas sebelumnya.</p>
                     </div>
                     <div class="card-body p-4">
                         <form id="formUploadSpj">
@@ -99,9 +97,10 @@
                             <div class="mb-4">
                                 <label class="form-label fw-bold">File PDF SPJ</label>
                                 <input class="form-control" type="file" id="file_pdf"
-                                    name="file_pdf" accept="application/pdf" required>
-                                <small class="text-danger mt-1 d-block" id="errorSize"
-                                    style="display:none;"><i
+                                    name="file_pdf" accept="application/pdf" aria-describedby="filePdfHelp errorSize" required>
+                                <div class="form-text" id="filePdfHelp">Hanya PDF, maksimal 10 MB.</div>
+                                <small class="text-danger mt-1 d-none" id="errorSize"
+                                    role="alert"><i
                                         class="bi bi-exclamation-triangle-fill"></i> Ukuran file
                                     melebihi 10MB!</small>
                             </div>

@@ -39,16 +39,19 @@
                     </a>
                 </div>
 
+                <div class="alert alert-info">
+                    <i class="bi bi-info-circle-fill me-2"></i>
+                    Pilih Perjalanan Dinas terlebih dahulu. Dasar pelaksanaan, maksud dan tujuan, tempat, serta waktu akan terisi otomatis; periksa dan sesuaikan sebelum menyimpan.
+                </div>
+
                 <form id="formLaporanPerjadin" enctype="multipart/form-data">
 
                     <div class="row g-3 mb-4">
                         <div class="col-md-12">
                             <label class="form-label fw-bold">Pilih Perjalanan Dinas / Nomor Surat
                                 Tugas</label>
-                            <select name="perjadin_id" class="form-select" required>
+                            <select name="perjadin_id" id="perjadin_id" class="form-select" required>
                                 <option value="">-- Pilih Surat Tugas Terkait --</option>
-                                <option value="1">84/RT.02.1-ST/1812/2025 - Menghadiri Kegiatan
-                                    Lelang BMN</option>
                             </select>
                         </div>
                     </div>
@@ -100,10 +103,13 @@
                         <div class="col-md-12">
                             <label class="form-label fw-bold">F. Dokumentasi Kegiatan (Foto /
                                 Evidence)</label>
-                            <small class="text-muted d-block mb-2">Unggah foto dokumentasi kegiatan
-                                (Maksimal 3 foto, format JPG/PNG).</small>
-                            <input type="file" name="foto_dokumentasi" class="form-control"
-                                accept="image/*" multiple>
+                            <small class="text-muted d-block mb-2">Opsional. Unggah maksimal 3 foto dokumentasi kegiatan (JPG/PNG, maksimal 5 MB per foto).</small>
+                            <input type="file" id="foto_dokumentasi" name="foto_dokumentasi"
+                                class="form-control" accept=".jpg,.jpeg,.png,.webp" multiple
+                                aria-describedby="fotoHelp fotoError">
+                            <small id="fotoHelp" class="form-text">Maksimal 3 foto, 5 MB per file.</small>
+                            <small id="fotoError" class="form-text text-danger d-block"
+                                role="alert" hidden></small>
                         </div>
                     </div>
 

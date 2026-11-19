@@ -70,12 +70,13 @@ document.addEventListener('DOMContentLoaded', async () => {
 document.getElementById('file_pdf').addEventListener('change', function () {
     const btn = document.getElementById('btnSubmit');
     const errorTxt = document.getElementById('errorSize');
-    if (this.files.size > 10 * 1024 * 1024) {
+    const file = this.files && this.files[0];
+    if (file && file.size > 10 * 1024 * 1024) {
         btn.disabled = true;
-        errorTxt.style.display = 'block';
+        errorTxt.classList.remove('d-none');
     } else {
         btn.disabled = false;
-        errorTxt.style.display = 'none';
+        errorTxt.classList.add('d-none');
     }
 });
 
@@ -113,61 +114,33 @@ async function loadStatusSpj() {
             let badge = 'bg-warning text-dark';
             if (item.status === 'ACC') badge = 'bg-success';
             if (item.status === 'Revisi') badge = 'bg-danger';
+            const perluUploadUlang = item.status === 'Revisi';
+            const catatanPerubahanData = item.catatan_admin === 'Data Perjadin berubah. Silakan unggah ulang PDF SPJ terbaru.';
+            const statusText = perluUploadUlang ? 'Perlu upload ulang' : item.status;
 
-            let catatan = item.status === 'Revisi' && item.catatan_admin ? `<div class="alert alert-danger p-2 mt-2 mb-0 small"><i class="bi bi-info-circle-fill"></i> <b>Catatan Admin:</b> ${item.catatan_admin}</div>` : '';
-
-            // Tombol hapus hanya muncul jika belum ACC
-            let aksiHapus = '';
-            if (item.status !== 'ACC') {
-                aksiHapus = `<button onclick="hapusSpj(${item.id})" class="btn btn-sm btn-merah-terang rounded-pill px-3" title="Hapus SPJ"><i class="bi bi-trash me-1"></i>Hapus</button>`;
-            } else {
-                aksiHapus = `<span class="text-success small fw-bold"><i class="bi bi-check-circle-fill me-1"></i>Selesai</span>`;
-            }
+            const catatanLabel = catatanPerubahanData ? 'Pemberitahuan' : 'Catatan Admin';
+            let catatan = item.status === 'Revisi' && item.catatan_admin ? `<div class="alert alert-danger p-2 mt-2 mb-0 small"><i class="bi bi-info-circle-fill"></i> <b>${catatanLabel}:</b> ${item.catatan_admin}</div>` : '';
+            const tautanBerkas = item.file_pdf
+                ? `<div class="small mt-1"><i class="bi bi-file-earmark-pdf text-danger"></i> <a href="${item.file_pdf}" target="_blank" rel="noopener">${perluUploadUlang ? 'Lihat PDF yang perlu diperbaiki' : 'Lihat PDF'}</a></div>`
+                : '<div class="small mt-1 text-danger fw-semibold">PDF lama tidak berlaku. Silakan unggah PDF terbaru melalui formulir di atas.</div>';
+            const statusAksi = item.status === 'ACC'
+                ? '<span class="text-success small fw-bold"><i class="bi bi-check-circle-fill me-1"></i>Selesai</span>'
+                : '<span class="text-muted small">Pilih kembali surat tugas di formulir untuk mengunggah atau mengganti PDF.</span>';
 
             tbody.innerHTML += `
                 <tr>
                     <td class="px-4 py-3">
                         <div class="fw-bold text-dark">${formatNamaPegawai(item.nama_pegawai)}</div>
                         <div class="text-muted small mt-1"><i class="bi bi-briefcase"></i> ${item.maksud_dinas}</div>
-                        <div class="small mt-1"><i class="bi bi-file-earmark-pdf text-danger"></i> <a href="${item.file_pdf}" target="_blank">Lihat Berkas</a></div>
+                        ${tautanBerkas}
                         ${catatan}
                     </td>
-                    <td class="text-center"><span class="badge ${badge} rounded-pill px-3 py-2">${item.status}</span></td>
-                    <td class="text-center">${aksiHapus}</td>
+                    <td class="text-center"><span class="badge ${badge} rounded-pill px-3 py-2">${statusText}</span></td>
+                    <td class="text-center">${statusAksi}</td>
                 </tr>
             `;
         });
     } catch (err) {
         console.error(err);
-    }
-}
-
-// FUNGSI HAPUS SPJ (Hanya untuk status selain ACC)
-async function hapusSpj(id) {
-    const confirm = await Swal.fire({
-        title: 'Hapus Berkas SPJ?',
-        text: 'File yang sudah dihapus tidak bisa dikembalikan. Anda bisa upload ulang nanti.',
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#dc3545',
-        cancelButtonColor: '#6c757d',
-        confirmButtonText: '<i class="bi bi-trash me-1"></i> Ya, Hapus!',
-        cancelButtonText: 'Batal',
-        reverseButtons: true,
-    });
-
-    if (!confirm.isConfirmed) return;
-
-    try {
-        const res = await fetch(`/api/dokumentasi/delete/${id}`, { method: 'DELETE' });
-        const result = await res.json();
-        if (result.success) {
-            Swal.fire({ title: 'Terhapus!', text: 'Berkas SPJ berhasil dihapus.', icon: 'success', timer: 1500, showConfirmButton: false });
-            loadStatusSpj(); // Refresh tabel
-        } else {
-            Swal.fire('Gagal!', result.message, 'error');
-        }
-    } catch (err) {
-        Swal.fire('Error', 'Gagal menghubungi server.', 'error');
     }
 }

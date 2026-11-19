@@ -161,19 +161,12 @@ exports.save = async (req, res) => {
         // 8. EKSEKUSI SQL
         if (editId && editId !== '') {
             // MODE UPDATE
-            await PerjadinModel.update(editId, params);
-
-            // 1️⃣ Hapus relasi pegawai lama
-            try {
-                await PerjadinModel.deletePivot(editId);
-            } catch (e) {}
-
-            // 2️⃣ Insert ulang relasi pegawai baru (pakai ID langsung)
-            try {
-                await syncPegawaiPivot(editId, pegawaiIdArray, kuitansiPerOrang);
-            } catch (e) {
-                console.error('Gagal sync pivot:', e);
-            }
+            const spjWasInvalidated = await PerjadinModel.updateAndInvalidateSpj(
+                editId,
+                params,
+                pegawaiIdArray,
+                kuitansiPerOrang,
+            );
 
             // 3️⃣ Log aktivitas
             try {
@@ -181,7 +174,12 @@ exports.save = async (req, res) => {
             } catch (e) {}
 
             // 4️⃣ Response ke frontend
-            res.json({ success: true, message: 'Data Berhasil Diupdate!' });
+            res.json({
+                success: true,
+                message: spjWasInvalidated
+                    ? 'Data Perjadin berhasil diperbarui. SPJ lama dibatalkan; silakan unggah ulang PDF SPJ terbaru.'
+                    : 'Data Berhasil Diupdate!',
+            });
         } else {
             // MODE INSERT
             const result = await PerjadinModel.insert(params);

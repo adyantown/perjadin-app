@@ -16,6 +16,49 @@
     <link rel="stylesheet" href="style/index-style.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 
+    <style>
+        html {
+            scroll-behavior: smooth;
+        }
+
+        .perjadin-section-nav {
+            position: sticky;
+            top: .5rem;
+            z-index: 1020;
+            display: flex;
+            flex-wrap: wrap;
+            gap: .5rem;
+        }
+
+        .perjadin-section-nav .btn {
+            color: #800000;
+            border: 1px solid #800000;
+            background-color: #fff;
+        }
+
+        .perjadin-section-nav .btn:hover,
+        .perjadin-section-nav .btn:focus-visible {
+            color: #fff;
+            background-color: #800000;
+        }
+
+        #perjadinForm .form-group-title {
+            scroll-margin-top: 5rem;
+        }
+
+        @media (max-width: 767.98px) {
+            .perjadin-section-nav .btn {
+                flex: 1 1 calc(50% - .5rem);
+            }
+        }
+
+        @media print {
+            .perjadin-section-nav {
+                display: none !important;
+            }
+        }
+    </style>
+
 </head>
 
 <body style="background-color: #f4f6f9;">
@@ -47,18 +90,33 @@
                     </a>
                 </div>
 
+                <div class="alert alert-info mb-4">
+                    <i class="bi bi-info-circle-fill me-2"></i>
+                    Isi bagian yang diperlukan dalam satu form ini. Referensi KAK bersifat opsional;
+                    jika dipilih, judul kegiatan akan mengisi Maksud Perjalanan Dinas dan tetap bisa diedit.
+                    Jika data Perjadin diubah setelah SPJ dikirim, berkas SPJ perlu diunggah ulang.
+                </div>
+
+                <nav class="perjadin-section-nav mb-4 p-2 bg-light border rounded"
+                    aria-label="Navigasi bagian formulir">
+                    <a class="btn btn-sm btn-outline-danger" href="#section-surat-tugas">I. Surat Tugas</a>
+                    <a class="btn btn-sm btn-outline-danger" href="#section-pegawai">II. Pegawai</a>
+                    <a class="btn btn-sm btn-outline-danger" href="#section-perjalanan">III. Perjalanan</a>
+                    <a class="btn btn-sm btn-outline-danger" href="#section-biaya">IV. Biaya &amp; Akomodasi</a>
+                </nav>
+
                 <form id="perjadinForm">
                     <input type="hidden" name="id_edit" id="id_edit">
 
-                    <div class="form-group-title">I. Administrasi Surat Tugas</div>
+                    <div class="form-group-title" id="section-surat-tugas">I. Administrasi Surat Tugas</div>
                     <div class="row g-3">
                         <div class="col-md-6">
-                            <label class="form-label fw-bold">Nomor Surat Tugas</label>
+                            <label class="form-label fw-bold">Nomor Surat Tugas <span class="text-danger">*</span></label>
                             <input type="text" name="no_surat_tugas" class="form-control"
                                 placeholder="Contoh: 01/ST/1812/2026" required>
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label fw-bold">Tanggal Surat Tugas</label>
+                            <label class="form-label fw-bold">Tanggal Surat Tugas <span class="text-danger">*</span></label>
                             <input type="text" name="tgl_surat_tugas"
                                 class="form-control flatpickr-date" required>
                         </div>
@@ -87,12 +145,12 @@
                         </div>
                     </div>
 
-                    <div class="form-group-title">II. Data Pegawai Terlibat</div>
+                    <div class="form-group-title" id="section-pegawai">II. Data Pegawai Terlibat</div>
 
                     <div class="p-3 mb-3 bg-light border rounded">
                         <label class="form-label fw-bold text-primary"><i
-                                class="bi bi-lightning-fill me-1"></i>Tambah Pegawai Cepat (Pilih
-                            dari Database):</label>
+                                class="bi bi-lightning-fill me-1"></i>Tambah dari Database Pegawai</label>
+                        <div class="form-text mb-2">Pilih kategori, lalu nama pegawai. Data nama dan golongan akan terisi otomatis; jabatan dapat dilengkapi setelahnya.</div>
 
                         <div class="d-flex align-items-center mb-2">
                             <div class="form-check me-3">
@@ -123,14 +181,13 @@
 
                     <div class="mb-4">
                         <button type="button" onclick="tambahPegawai()"
-                            class="btn btn-secondary btn-sm">
-                            <i class="bi bi-plus-circle me-1"></i> Input Manual Pegawai Luar
+                            class="btn btn-outline-secondary btn-sm">
+                            <i class="bi bi-person-plus me-1"></i> Tambah Pegawai Manual
                         </button>
-                        <div class="form-text">*Gunakan tombol ini jika orang tersebut tidak ada di
-                            database Satker.</div>
+                        <div class="form-text">Gunakan untuk pegawai yang tidak ditemukan di database Satker.</div>
                     </div>
 
-                    <div class="form-group-title">III. Detail Perjalanan</div>
+                    <div class="form-group-title" id="section-perjalanan">III. Detail Perjalanan</div>
 
                     <div class="p-3 mb-3 bg-light border rounded">
                         <label class="form-label fw-bold text-primary"><i
@@ -144,13 +201,13 @@
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label fw-bold">Maksud Perjalanan Dinas</label>
+                        <label class="form-label fw-bold">Maksud Perjalanan Dinas <span class="text-danger">*</span></label>
                         <textarea name="maksud_dinas" class="form-control" rows="2"
                             placeholder="Uraian kegiatan..." required></textarea>
                     </div>
                     <div class="row g-3">
                         <div class="col-md-6">
-                            <label class="form-label fw-bold">Daerah Tujuan</label>
+                            <label class="form-label fw-bold">Daerah Tujuan <span class="text-danger">*</span></label>
                             <input type="text" name="tujuan" class="form-control" required>
                         </div>
                         <div class="col-md-6">
@@ -162,18 +219,19 @@
                             </select>
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label fw-bold">Tanggal Berangkat</label>
+                            <label class="form-label fw-bold">Tanggal Berangkat <span class="text-danger">*</span></label>
                             <input type="text" name="tgl_berangkat" id="tgl_berangkat"
                                 class="form-control flatpickr-date" required>
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label fw-bold">Tanggal Pulang</label>
+                            <label class="form-label fw-bold">Tanggal Pulang <span class="text-danger">*</span></label>
                             <input type="text" name="tgl_pulang" id="tgl_pulang"
                                 class="form-control flatpickr-date" required>
                         </div>
                     </div>
 
-                    <div class="form-group-title d-flex justify-content-between align-items-center">
+                    <div class="form-group-title d-flex justify-content-between align-items-center"
+                        id="section-biaya">
                         <span>IV. Biaya &amp; Akomodasi</span>
                         <div class="form-check form-switch fs-6 fw-normal text-danger">
                             <input class="form-check-input" type="checkbox" id="switchTanpaDana">
@@ -181,6 +239,7 @@
                                 Perjadin</label>
                         </div>
                     </div>
+                    <div class="form-text mb-3">Pilih Zero Budget jika perjalanan tidak membebankan biaya; nominal biaya akan diatur menjadi nol.</div>
                     <div class="row g-3 mb-3">
 
                         <!-- Uang Harian -->
@@ -253,6 +312,7 @@
                     <h6 class="fw-bold mt-4 border-bottom pb-2" style="color: var(--kpu-dark);">Data
                         Penginapan (Jika
                         Menginap)</h6>
+                    <p class="form-text">Isi bagian ini hanya jika ada biaya penginapan, lalu tandai pegawai yang menerima biaya hotel pada data pegawai.</p>
                     <div class="row g-3">
                         <div class="col-md-8">
                             <label class="form-label fw-bold">Nama Hotel</label>
@@ -283,8 +343,11 @@
 
                     <div
                         class="alert alert-warning mt-4 d-flex justify-content-between align-items-center">
-                        <div class="text-muted fw-bold">Estimasi Total Biaya:</div>
-                        <h3 id="preview-total" class="m-0 text-danger fw-bold">Rp 0</h3>
+                        <div>
+                            <div class="text-muted fw-bold">Estimasi Total Biaya</div>
+                            <small class="text-muted">Dihitung dari jumlah pegawai, tanggal perjalanan, dan rincian biaya.</small>
+                        </div>
+                        <h3 id="preview-total" class="m-0 text-danger fw-bold" aria-live="polite">Rp 0</h3>
                     </div>
 
                     <div class="d-grid gap-2 mt-4">
